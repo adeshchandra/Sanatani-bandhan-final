@@ -12,7 +12,8 @@ import {
   Bell,
   Check,
   Flame,
-  Shield
+  Shield,
+  HelpCircle
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -20,6 +21,7 @@ import { useWorkspaceTaxonomy } from '../../hooks/useWorkspaceTaxonomy';
 import { useNotifications } from '../../context/NotificationContext';
 import { calculatePanchang } from '../../utils/panchang';
 import { UserRole } from '../../types';
+import { NotificationPanel } from './NotificationPanel';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
@@ -30,6 +32,7 @@ interface HeaderProps {
   onOpenAssistant?: () => void;
   onOpenSahayata?: () => void;
   onOpenGodMode?: () => void;
+  onOpenGuide?: () => void;
   activeModule: string;
   onSelectModule?: (module: string) => void;
   onNavigate?: (module: string) => void;
@@ -43,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenQuickChanda,
   onOpenAssistant,
   onOpenSahayata,
+  onOpenGuide,
   activeModule,
 }) => {
   const handleQuickPay = onOpenQuickChanda || onOpenQuickPay || (() => {});
@@ -166,6 +170,16 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
+          {onOpenGuide && (
+            <button
+              type="button"
+              onClick={onOpenGuide}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>Guide</span>
+            </button>
+          )}
           {onOpenAssistant && (
             <button
               type="button"
@@ -251,7 +265,17 @@ export const Header: React.FC<HeaderProps> = ({
                 <button onClick={() => { setShowRoleDropdown(false); onOpenMySpace(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-stone-300 text-xs font-bold transition-colors">
                   <QrCode className="w-4 h-4 text-indigo-400" /> My Smart Pass
                 </button>
-                {onOpenAssistant && (
+                {onOpenGuide && (
+            <button
+              type="button"
+              onClick={onOpenGuide}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>Guide</span>
+            </button>
+          )}
+          {onOpenAssistant && (
                   <button onClick={() => { setShowRoleDropdown(false); onOpenAssistant(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-stone-300 text-xs font-bold transition-colors">
                     <Sparkles className="w-4 h-4 text-amber-500" /> Dharmic AI Assistant
                   </button>

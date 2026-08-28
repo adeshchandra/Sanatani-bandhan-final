@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Radio, Send, AlertTriangle, MapPin, Clock, Activity, Radar, Users, CheckCircle2, X, Battery, Phone, Droplet, UserSquare2, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Wifi, WifiOff, Radio, Send, AlertTriangle, MapPin, Clock, Activity, Radar, Users, CheckCircle2, X, Battery, Phone, Droplet, UserSquare2, ArrowLeft, MessageSquare, Globe, Navigation } from 'lucide-react';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { OfflineSyncManager, QueuedAction } from '../../services/OfflineSyncManager';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Custom pulsing red dot icon for victims
+const emergencyIcon = L.divIcon({
+  className: 'custom-emergency-icon',
+  html: '<div class="animate-pulse" style="width: 20px; height: 20px; background-color: #dc2626; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(220,38,38,0.8);"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
 
 export default function YatraNetDesk() {
   const { currentUser, activeWorkspace } = useAuthWorkspace();
@@ -131,7 +143,7 @@ export default function YatraNetDesk() {
     const payload = {
       senderId: currentUser?.id,
       senderName: currentUser?.name || 'Devotee',
-      senderPhoto: currentUser?.photoUrl || null,
+      senderPhoto: (currentUser as any)?.photoUrl || null,
       communityId: activeWorkspace?.id,
       situation: sosSituation,
       details: sosDetails,
@@ -175,6 +187,34 @@ export default function YatraNetDesk() {
     showToast('You are marked as responding!', 'success');
   };
 
+  const handleResolveSOS = (sosId: string) => {
+    OfflineSyncManager.addToQueue('RESOLVE_SOS', {
+      sosId,
+      resolverId: currentUser?.id,
+      resolverName: currentUser?.name || 'Devotee',
+    });
+    showToast('Emergency marked as resolved!', 'success');
+  };
+
+  const handleExternalShare = async (b: any) => {
+    const shareData = {
+      title: 'YatraNet Emergency SOS',
+      text: `🚨 URGENT: ${b.text}\nLocation: ${b.location ? `${b.location.lat}, ${b.location.lng}` : 'Unknown'}\nPlease help or share!`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback for desktop/unsupported browsers
+        const waLink = `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}`;
+        window.open(waLink, '_blank');
+      }
+    } catch (err) {
+      console.log('Error sharing', err);
+    }
+  };
+
   const handleForwardSOS = (sosId: string) => {
     OfflineSyncManager.addToQueue('FORWARD_SOS', {
       sosId,
@@ -211,6 +251,24 @@ export default function YatraNetDesk() {
             <strong>Hardware Required:</strong> Please ensure your phone's <strong>Bluetooth</strong> and <strong>Wi-Fi</strong> are turned ON for local mesh networking. 
             You do NOT need to manually pair with anyone or select a network.
           </p>
+        </div>
+      )}
+
+      {/* Cloud Gateway Indicator */}
+      {isOnline && (
+        <div className="bg-emerald-50 text-emerald-900 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm border border-emerald-200">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Globe className="w-5 h-5 shrink-0 text-emerald-600" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+            </div>
+            <p>
+              <strong>Cloud Gateway Active:</strong> Your device has internet and is automatically routing local alerts to the global organization network.
+            </p>
+          </div>
+          <span className="px-2 py-1 bg-emerald-200 text-emerald-800 rounded-lg whitespace-nowrap">
+            {nearbyNodes.length} offline nodes linked
+          </span>
         </div>
       )}
 
@@ -491,26 +549,79 @@ export default function YatraNetDesk() {
                         </div>
                       </div>
 
+                      {b.location && (
+                        <div className="h-48 w-full rounded-xl overflow-hidden border-2 border-red-200 z-0 relative isolate">
+                          <MapContainer 
+                            center={[b.location.lat, b.location.lng]} 
+                            zoom={16} 
+                            style={{ height: '100%', width: '100%' }}
+                            zoomControl={false}
+                          >
+                            <TileLayer
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <Circle center={[b.location.lat, b.location.lng]} radius={b.location.accuracy} pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.2, weight: 1 }} />
+                            <Marker position={[b.location.lat, b.location.lng]} icon={emergencyIcon} />
+                          </MapContainer>
+                          <div className="absolute bottom-2 right-2 z-[1000]">
+                             <a href={`https://www.google.com/maps/dir/?api=1&destination=${b.location.lat},${b.location.lng}`} target="_blank" rel="noopener noreferrer" className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5">
+                               <Navigation className="w-3 h-3" /> Navigate
+                             </a>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Triage & Forwarding Actions */}
-                      {b.sosStatus === 'RESPONDED' ? (
-                        <div className="bg-emerald-100 text-emerald-800 text-xs font-bold p-2.5 rounded-xl border border-emerald-200 flex items-center justify-between">
-                          <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Help is on the way</span>
-                          <span>Responded by {b.responderName}</span>
+                      {b.sosStatus === 'RESOLVED' ? (
+                        <div className="bg-stone-100 text-stone-600 text-xs font-bold p-2.5 rounded-xl border border-stone-200 flex items-center justify-between">
+                          <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Emergency Resolved</span>
+                          <span>by {b.resolverName}</span>
+                        </div>
+                      ) : b.sosStatus === 'RESPONDED' ? (
+                        <div className="space-y-2">
+                          <div className="bg-emerald-100 text-emerald-800 text-xs font-bold p-2.5 rounded-xl border border-emerald-200 flex items-center justify-between">
+                            <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Help is on the way</span>
+                            <span>Responded by {b.responderName}</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleExternalShare(b)}
+                              className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Phone className="w-4 h-4" /> Share Externally
+                            </button>
+                            {(isMe || b.responderId === currentUser?.id) && (
+                              <button 
+                                onClick={() => handleResolveSOS(b.id)}
+                                className="flex-1 py-2 bg-stone-200 hover:bg-stone-300 text-stone-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                              >
+                                Mark Resolved
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ) : (
-                        <div className="flex gap-2">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => handleRespondSOS(b.id)}
+                              disabled={isMe}
+                              className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                            >
+                              <UserSquare2 className="w-4 h-4" /> I am Responding
+                            </button>
+                            <button 
+                              onClick={() => handleForwardSOS(b.id)}
+                              className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                            >
+                              <Radio className="w-4 h-4" /> Boost / Relay {b.forwardCount > 0 && `(${b.forwardCount})`}
+                            </button>
+                          </div>
                           <button 
-                            onClick={() => handleRespondSOS(b.id)}
-                            disabled={isMe}
-                            className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                            onClick={() => handleExternalShare(b)}
+                            className="w-full py-2 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
                           >
-                            <UserSquare2 className="w-4 h-4" /> I am Responding
-                          </button>
-                          <button 
-                            onClick={() => handleForwardSOS(b.id)}
-                            className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Radio className="w-4 h-4" /> Boost / Relay {b.forwardCount > 0 && `(${b.forwardCount})`}
+                            <Phone className="w-4 h-4" /> Share to WhatsApp / SMS
                           </button>
                         </div>
                       )}

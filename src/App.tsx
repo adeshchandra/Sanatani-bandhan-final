@@ -4,6 +4,7 @@ import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthWorkspaceProvider } from './context/AuthWorkspaceContext';
 import { DataProvider } from './context/DataContext';
+import { GlobalSOSListener } from './components/common/GlobalSOSListener';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { AppInitializer } from './context/AppInitializer';
 import { startDemoBackgroundService } from './lib/dbUtils';
@@ -12,6 +13,7 @@ import { Sidebar } from './components/common/Sidebar';
 import { Footer } from './components/common/Footer';
 import { QuickChandaModal } from './components/common/QuickChandaModal';
 import { MySpaceModal } from './components/common/MySpaceModal';
+import { QuickGuideModal } from './components/common/QuickGuideModal';
 import { GlobalTelemetryModal } from './components/common/GlobalTelemetryModal';
 import { DharmicQueryAssistant } from './components/common/DharmicQueryAssistant';
 import { TawkToWidget } from './components/common/TawkToWidget';
@@ -69,6 +71,7 @@ const SanataniVivahDesk = lazy(() => import('./components/domain4/SanataniVivahD
 // Domain 6: Enterprise Control & Multi-Workspace
 const WorkspaceSelectorDesk = lazy(() => import('./components/domain6/WorkspaceSelectorDesk').then(m => ({ default: m.WorkspaceSelectorDesk })));
 const MasterSettingsDesk = lazy(() => import('./components/domain6/MasterSettingsDesk').then(m => ({ default: m.MasterSettingsDesk })));
+const CrisisCommandCenter = lazy(() => import('./components/domain6/CrisisCommandCenter').then(m => ({ default: m.CrisisCommandCenter })));
 const UserRolesDesk = lazy(() => import('./components/domain6/UserRolesDesk').then(m => ({ default: m.UserRolesDesk })));
 const AuditLogDesk = lazy(() => import('./components/domain6/AuditLogDesk').then(m => ({ default: m.AuditLogDesk })));
 const GodModeBackend = lazy(() => import('./components/common/GodModeBackend').then(m => ({ default: m.GodModeBackend })));
@@ -76,6 +79,11 @@ const GodModeBackend = lazy(() => import('./components/common/GodModeBackend').t
 // Public / Devotee Portal
 const DevoteePortal = lazy(() => import('./components/devotee/DevoteePortal').then(m => ({ default: m.DevoteePortal })));
 const MemberAppShell = lazy(() => import('./components/devotee/MemberAppShell').then(m => ({ default: m.default })));
+
+const YatraNetDesk = lazy(() => import('./components/domain7/YatraNetDesk').then(m => ({ default: m.YatraNetDesk })));
+const DharamshalaDesk = lazy(() => import('./components/domain4/DharamshalaDesk').then(m => ({ default: m.DharamshalaDesk })));
+const SevadarRosterDesk = lazy(() => import('./components/domain6/SevadarRosterDesk').then(m => ({ default: m.SevadarRosterDesk })));
+
 
 
 const RestrictedAccess: React.FC = () => (
@@ -94,6 +102,14 @@ const AppContent: React.FC = () => {
   const { checkPermission, activeWorkspace, currentRole, viewMode } = useAuthWorkspace();
   const { showToast } = useToast();
   const [activeModule, setActiveModule] = useState<string>('dashboard');
+
+  React.useEffect(() => {
+    const handleNavigate = (e: any) => {
+      if (e.detail) setActiveModule(e.detail);
+    };
+    window.addEventListener('navigate_module', handleNavigate);
+    return () => window.removeEventListener('navigate_module', handleNavigate);
+  }, []);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isQuickChandaOpen, setIsQuickChandaOpen] = useState<boolean>(false);
   const [isMySpaceOpen, setIsMySpaceOpen] = useState<boolean>(false);
@@ -101,6 +117,7 @@ const AppContent: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
 
   const [isSahayataOpen, setIsSahayataOpen] = useState<boolean>(false);
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
 
   if (viewMode === 'MEMBER') {
     return (
@@ -232,20 +249,27 @@ const AppContent: React.FC = () => {
         return checkPermission(['trustee']) ? <WorkspaceSelectorDesk /> : <RestrictedAccess />;
       case 'user-roles-rbac':
       case 'trusteeGovernance':
-      case 'sevadarRoster':
+
         return checkPermission(['trustee', 'manager']) ? <UserRolesDesk /> : <RestrictedAccess />;
       case 'security-audit-log':
       case 'legalVault':
         return checkPermission(['trustee']) ? <AuditLogDesk /> : <RestrictedAccess />;
 
 
-      case 'ashramKutir':
       case 'dharamshala':
+        return <DharamshalaDesk />;
+      case 'sevadarRoster':
+        return checkPermission(['manager', 'head_admin', 'superadmin', 'master_admin']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
+      case 'ashramKutir':
+
       case 'matrimony':
       case 'panchayatPolls':
       case 'socialWall':
       case 'masterSettings':
         return checkPermission(['trustee']) ? <MasterSettingsDesk /> : <RestrictedAccess />;
+
+      case 'crisis-command':
+        return checkPermission(['trustee', 'manager']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
 
       case 'spiritualSettings':
       case 'platformBroadcast':
@@ -283,6 +307,7 @@ const AppContent: React.FC = () => {
         onOpenTelemetry={() => setIsTelemetryOpen(true)}
         onOpenAssistant={() => setIsAssistantOpen(true)}
         onOpenSahayata={() => setIsSahayataOpen(true)}
+        onOpenGuide={() => setIsGuideOpen(true)}
       />
 
       <div className="flex grow overflow-hidden">
@@ -456,6 +481,7 @@ export default function App() {
               <NotificationProvider>
                 <DataProvider>
                   <AppRouter />
+                  <GlobalSOSListener />
                 </DataProvider>
               </NotificationProvider>
             </AuthWorkspaceProvider>

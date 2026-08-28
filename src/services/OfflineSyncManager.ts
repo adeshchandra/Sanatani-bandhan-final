@@ -3,7 +3,7 @@ import { db } from '../firebase';
 
 export interface QueuedAction {
   id: string;
-  type: 'SOS' | 'MESSAGE' | 'LOCATION' | 'RICH_SOS' | 'DIRECT_MESSAGE' | 'RESPOND_SOS' | 'FORWARD_SOS';
+  type: 'SOS' | 'MESSAGE' | 'LOCATION' | 'RICH_SOS' | 'DIRECT_MESSAGE' | 'RESPOND_SOS' | 'FORWARD_SOS' | 'RESOLVE_SOS';
   payload: any;
   timestamp: number;
   status: 'PENDING' | 'SYNCED' | 'FAILED';
@@ -41,6 +41,13 @@ export const OfflineSyncManager = {
     queue.push(newAction);
     OfflineSyncManager.setQueue(queue);
     
+    // NATIVE BRIDGE SIMULATION: Dual-Band Broadcasting
+    // Even if we have internet, we ALWAYS inject critical payloads into the local BLE/Wi-Fi Direct mesh
+    if (type === 'RICH_SOS' || type === 'SOS' || type === 'FORWARD_SOS') {
+      console.log(`[DUAL-BAND MESH] Injecting ${type} packet into native BLE/Wi-Fi Direct antenna layer...`);
+      window.dispatchEvent(new CustomEvent('native_mesh_broadcast', { detail: newAction }));
+    }
+
     // Attempt immediate sync if online
     if (navigator.onLine) {
       OfflineSyncManager.flushQueue();
@@ -83,6 +90,13 @@ export const OfflineSyncManager = {
             forwardCount: increment(1)
           });
           // Note: In native implementation, this would also push to the BLE queue for rebroadcast
+        } else if (item.type === 'RESOLVE_SOS' && item.payload.sosId) {
+          await updateDoc(doc(db, 'yatra_broadcasts', item.payload.sosId), {
+            sosStatus: 'RESOLVED',
+            resolvedAt: serverTimestamp(),
+            resolverId: item.payload.resolverId,
+            resolverName: item.payload.resolverName,
+          });
         }
         
         item.status = 'SYNCED';

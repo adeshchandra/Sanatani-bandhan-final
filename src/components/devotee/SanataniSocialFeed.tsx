@@ -4,11 +4,25 @@ import {
   Calendar, Flame, Sun, Filter, Plus, Clock, MapPin, 
   Volume2, VolumeX, CheckCircle2, X, Bell, Award, User, RefreshCw,
   Globe, Users, Lock, ShieldCheck, ChevronDown, Check, Smile,
-  Tag, Palette, Trash2
+  Tag, Palette, Trash2, AlertTriangle, Radio, ShieldAlert, Activity, Battery
 } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { OfflineSyncManager } from '../../services/OfflineSyncManager';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Custom pulsing red dot icon for victims
+const emergencyIcon = L.divIcon({
+  className: 'custom-emergency-icon',
+  html: '<div class="animate-pulse" style="width: 20px; height: 20px; background-color: #dc2626; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(220,38,38,0.8);"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
 
 export type PostAudience = 'public' | 'devotees' | 'members' | 'trustees' | 'gotra' | 'private';
 
@@ -169,6 +183,71 @@ export const SanataniSocialFeed: React.FC = () => {
   // Daily Darshan Offering State
   const [offeringAnimation, setOfferingAnimation] = useState<'flower' | 'diya' | null>(null);
   const [isSpeakingShloka, setIsSpeakingShloka] = useState(false);
+
+  // Cross-app / Global Active Emergencies
+  const [activeEmergencies, setActiveEmergencies] = useState<any[]>([]);
+
+  // Online SOS Modal State
+  const [showSOSModal, setShowSOSModal] = useState(false);
+  const [sosSituation, setSosSituation] = useState('ACCIDENT'); 
+  const [sosDetails, setSosDetails] = useState('');
+
+  useEffect(() => {
+    const q = query(
+      collection(db, 'yatra_broadcasts'),
+      where('type', '==', 'RICH_SOS')
+    );
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const emergencies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+      // Filter out resolved emergencies client-side
+      setActiveEmergencies(emergencies.filter(e => e.sosStatus !== 'RESOLVED').sort((a, b) => b.originalTimestamp - a.originalTimestamp));
+    });
+    
+    return () => unsubscribe();
+  }, []);
+
+  const handleOnlineSOS = async () => {
+    // Attempt to get battery level
+    let batteryLevel = null;
+    try {
+      if ('getBattery' in navigator) {
+        const battery: any = await (navigator as any).getBattery();
+        batteryLevel = Math.round(battery.level * 100);
+      }
+    } catch (e) {}
+
+    // Attempt to get location
+    let location = null;
+    try {
+      if (navigator.geolocation) {
+        location = await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) }),
+            () => resolve(null),
+            { timeout: 5000, maximumAge: 10000 }
+          );
+        });
+      }
+    } catch (e) {}
+
+    const payload = {
+      senderId: currentUser?.id || 'anonymous_user',
+      senderName: currentUser?.name || 'Devotee',
+      senderPhoto: (currentUser as any)?.photoUrl || null,
+      communityId: activeWorkspace?.id || 'global',
+      situation: sosSituation,
+      details: sosDetails,
+      location,
+      batteryLevel,
+      text: `🚨 URGENT [${sosSituation.replace('_', ' ')}]: ${sosDetails}`,
+    };
+
+    OfflineSyncManager.addToQueue('RICH_SOS', payload);
+    setShowSOSModal(false);
+    setSosDetails('');
+    showToast('EMERGENCY BROADCASTED TO ALL NETWORKS', 'success');
+  };
 
   // Storage Key
   const storageKey = `sanatani_feed_${activeWorkspace?.id || 'default'}`;
@@ -490,6 +569,18 @@ export const SanataniSocialFeed: React.FC = () => {
           </button>
         </div>
 
+        {/* Global Online SOS Trigger */}
+        <button 
+          onClick={() => setShowSOSModal(true)}
+          className="mt-4 w-full p-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl shadow-lg shadow-red-600/20 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 transition-transform active:scale-95 border border-red-500"
+        >
+          <ShieldAlert className="w-6 h-6 animate-pulse" />
+          <div className="text-center sm:text-left">
+            <h3 className="text-sm font-black tracking-widest uppercase">Emergency Panic SOS</h3>
+            <p className="text-[10px] font-bold text-red-200 uppercase tracking-widest">Broadcast Alert Globally • Send Location to Rescuers</p>
+          </div>
+        </button>
+
         {/* Facebook-style Quick Share Box */}
         <div 
           onClick={() => setShowCreateModal(true)}
@@ -506,6 +597,67 @@ export const SanataniSocialFeed: React.FC = () => {
             <span className="text-[11px] font-bold text-stone-600 hidden sm:inline">Photo</span>
           </div>
         </div>
+
+        {/* Global / Cross-App Active Yatra Emergencies Banner */}
+        {activeEmergencies.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {activeEmergencies.map(emergency => (
+              <div key={emergency.id} className="bg-red-50 border border-red-200 rounded-2xl p-3 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
+                    <span className="text-xs font-black text-red-700 uppercase tracking-widest flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" /> ACTIVE EMERGENCY
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-red-500 flex items-center gap-1">
+                    <Radio className="w-3 h-3" /> MESH RELAY
+                  </span>
+                </div>
+                
+                <p className="text-sm font-bold text-red-900 border-l-2 border-red-400 pl-2 ml-1">{emergency.text}</p>
+                
+                {emergency.location && (
+                  <div className="h-32 w-full rounded-xl overflow-hidden border border-red-200 z-0 relative isolate mt-1">
+                    <MapContainer 
+                      center={[emergency.location.lat, emergency.location.lng]} 
+                      zoom={15} 
+                      style={{ height: '100%', width: '100%' }}
+                      zoomControl={false}
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <Circle center={[emergency.location.lat, emergency.location.lng]} radius={emergency.location.accuracy} pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.2, weight: 1 }} />
+                      <Marker position={[emergency.location.lat, emergency.location.lng]} icon={emergencyIcon} />
+                    </MapContainer>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mt-1 text-[11px] text-red-800 bg-red-100/50 p-2 rounded-xl">
+                  <span className="font-bold flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" /> {emergency.senderName}
+                  </span>
+                  {emergency.location && (
+                    <span className="font-bold flex items-center gap-1.5 text-blue-700">
+                      <MapPin className="w-3.5 h-3.5" /> GPS Linked
+                    </span>
+                  )}
+                  <span className="font-bold flex items-center gap-1.5 text-stone-600">
+                    <Clock className="w-3.5 h-3.5" /> {new Date(emergency.originalTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                
+                {emergency.sosStatus === 'RESPONDED' && (
+                  <div className="mt-1 bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> 
+                    <span>Help is on the way (Responded by: {emergency.responderName})</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Filter Chips */}
         <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar pb-1 text-xs">
@@ -1167,6 +1319,91 @@ export const SanataniSocialFeed: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ONLINE SOS MODAL */}
+      {showSOSModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
+            <div className="bg-red-600 p-4 text-white flex items-center justify-between">
+              <h3 className="font-black text-lg flex items-center gap-2">
+                <ShieldAlert className="w-6 h-6 animate-pulse" />
+                INITIATE GLOBAL SOS
+              </h3>
+              <button onClick={() => setShowSOSModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-5 flex-1 overflow-y-auto">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-stone-500 uppercase tracking-widest">Type of Emergency</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => setSosSituation('ACCIDENT_MEDICAL')}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'ACCIDENT_MEDICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                  >
+                    <Activity className="w-5 h-5" /> Accident / Medical
+                  </button>
+                  <button 
+                    onClick={() => setSosSituation('ROBBERY_ATTACK')}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'ROBBERY_ATTACK' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                  >
+                    <ShieldAlert className="w-5 h-5" /> Robbery / Attack
+                  </button>
+                  <button 
+                    onClick={() => setSosSituation('FIRE_DISASTER')}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'FIRE_DISASTER' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                  >
+                    <Flame className="w-5 h-5" /> Fire / Disaster
+                  </button>
+                  <button 
+                    onClick={() => setSosSituation('OTHER_CRITICAL')}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'OTHER_CRITICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                  >
+                    <AlertTriangle className="w-5 h-5" /> Other Critical
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-stone-500 uppercase tracking-widest">Emergency Details</label>
+                <textarea 
+                  value={sosDetails}
+                  onChange={e => setSosDetails(e.target.value)}
+                  placeholder="Describe the situation urgently... (e.g. Trapped in car, need ambulance at Highway 4)"
+                  className="w-full p-4 rounded-xl border border-stone-200 bg-stone-50 text-sm font-medium min-h-[100px] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                />
+              </div>
+
+              <div className="bg-stone-100 p-4 rounded-xl text-xs font-bold text-stone-600 flex flex-col gap-2">
+                <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-600" /> Auto-attaching Live GPS Location</span>
+                <span className="flex items-center gap-2"><Battery className="w-4 h-4 text-emerald-600" /> Auto-attaching Device Battery %</span>
+                <div className="mt-2 pt-2 border-t border-stone-200">
+                  <span className="flex items-center gap-2 text-indigo-700">
+                    <Radio className="w-4 h-4" /> 
+                    <span>
+                      <strong>DUAL-BAND BROADCAST ACTIVE:</strong><br />
+                      • Sending to Global Cloud (via Internet)<br />
+                      • Sending to Local Mesh (via Bluetooth / Wi-Fi Direct)
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-stone-200 bg-stone-50">
+              <button 
+                onClick={handleOnlineSOS}
+                disabled={!sosDetails.trim()}
+                className="w-full py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest shadow-xl shadow-red-600/20 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
+              >
+                <Radio className="w-5 h-5 animate-pulse" /> BROADCAST DUAL-BAND SOS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

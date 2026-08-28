@@ -44,6 +44,7 @@ import {
   Search,
   X,
   ChevronRight,
+  ShieldAlert,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -118,6 +119,7 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'sevadarRoster', name: 'Sevadar Shift Roster', domain: 6, domainTitle: 'Governance & Security', icon: UserCheck },
   { id: 'masterSettings', name: 'Organization Settings & Logos', domain: 6, domainTitle: 'Governance & Security', icon: Settings },
   { id: 'spiritualSettings', name: 'Sampradaya & Kuladevata Config', domain: 6, domainTitle: 'Governance & Security', icon: Compass },
+  { id: 'crisis-command', name: 'Crisis Command Center', domain: 6, domainTitle: 'Governance & Security', icon: ShieldAlert },
 ];
 
 function BuildingIcon({ className }: { className?: string }) {
@@ -139,6 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { activeWorkspace, currentRole, checkPermission } = useAuthWorkspace();
   const taxonomy = useWorkspaceTaxonomy();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredModules = useMemo(() => {
@@ -255,7 +258,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeModule === item.id;
-                  let displayLabel = item.name;
+                  let displayLabel = t(item.id) !== item.id ? t(item.id) : item.name;
 
                   // Dynamic Taxonomy morphing for Devotees directory based on workspace
                   if (item.id === 'devotees') {
