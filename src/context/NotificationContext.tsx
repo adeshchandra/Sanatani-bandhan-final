@@ -46,11 +46,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   };
 
   const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    setNotifications(prev => prev.map((n, idx) => n.id === id ? { ...n, isRead: true } : n));
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    setNotifications(prev => prev.map((n, idx) => ({ ...n, isRead: true })));
   };
 
   const clearAll = () => {

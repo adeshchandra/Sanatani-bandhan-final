@@ -170,12 +170,12 @@ export const CrisisCommandCenter: React.FC = () => {
                 style={{ height: '100%', width: '100%' }}
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {incidents.map(inc => {
+                {incidents.map((inc, idx) => {
                   if (!inc.location) return null;
                   const isResolved = inc.sosStatus === 'RESOLVED';
                   return (
                     <Marker 
-                      key={inc.id} 
+                      key={`${inc.id}-${idx}`} 
                       position={[inc.location.lat, inc.location.lng]} 
                       icon={isResolved ? greenIcon : redIcon}
                     >
@@ -234,7 +234,7 @@ export const CrisisCommandCenter: React.FC = () => {
               <Radio className="w-5 h-5 text-indigo-600" /> Master Incident Log
             </h3>
             <div className="flex bg-slate-100 p-1 rounded-xl">
-              {['ALL', 'ACTIVE', 'RESOLVED'].map(f => (
+              {['ALL', 'ACTIVE', 'RESOLVED'].map((f, idx) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f as any)}
@@ -250,10 +250,10 @@ export const CrisisCommandCenter: React.FC = () => {
             {displayedIncidents.length === 0 ? (
               <div className="text-center text-slate-400 p-8 text-sm font-medium">No incidents match this filter.</div>
             ) : (
-              displayedIncidents.map(inc => {
+              displayedIncidents.map((inc, idx) => {
                 const isResolved = inc.sosStatus === 'RESOLVED';
                 return (
-                  <div key={inc.id} className={`p-4 rounded-2xl border-l-4 shadow-sm ${isResolved ? 'border-l-emerald-500 bg-emerald-50/30 border border-emerald-100' : 'border-l-red-500 bg-red-50 border border-red-100'}`}>
+                  <div key={`${inc.id}-${idx}`} className={`p-4 rounded-2xl border-l-4 shadow-sm ${isResolved ? 'border-l-emerald-500 bg-emerald-50/30 border border-emerald-100' : 'border-l-red-500 bg-red-50 border border-red-100'}`}>
                     <div className="flex justify-between items-start mb-2">
                       <span className={`text-[10px] font-black tracking-widest uppercase px-2 py-1 rounded-md ${isResolved ? 'bg-emerald-100 text-emerald-700' : 'bg-red-200 text-red-800 animate-pulse'}`}>
                         {isResolved ? 'RESOLVED' : 'ACTIVE CRITICAL'}

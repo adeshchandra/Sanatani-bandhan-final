@@ -7,6 +7,11 @@ import {
 } from 'lucide-react';
 import jsQR from 'jsqr'; 
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
+import { useData } from '../../context/DataContext';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../../lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+
 import { WorkspaceConfig, WorkspaceType } from '../../types';
 
 // Simplified translation dictionary for demo
@@ -238,43 +243,40 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
   const handleSmartLogin = async (e?: React.FormEvent, forceId: string | null = null, forcePin: string | null = null, isQR = false) => {
     if (e) e.preventDefault();
     clearErrors();
-
     const identTrim = (forceId || loginIdentity).trim();
     const credTrim = (forcePin || loginCredential).trim();
-
     if (!identTrim || !credTrim) return setError("Please provide your login details.");
-
     setLoading(true);
 
     try {
-      // Mock Authentication Flow
-      await new Promise(res => setTimeout(res, 1000));
-      
-      if (identTrim.toLowerCase() === 'admin' && credTrim === '1008') {
-        loginAsRole('head_admin');
-        showToast("Welcome to Sanatani Bandhan", "success");
-        onSuccess();
-      } else if (identTrim.toLowerCase() === 'trustee' && credTrim === '1008') {
-        loginAsRole('trustee');
-        showToast("Welcome to Sanatani Bandhan", "success");
-        onSuccess();
-      } else if (identTrim.toLowerCase().startsWith('user')) {
-        loginAsRole('devotee', 'Devotee ' + identTrim);
-        showToast("Welcome Devotee", "success");
-        onSuccess();
-      } else {
-        // Try context pin login
-        const ok = loginWithPin(credTrim, []);
-        if (ok) {
-           showToast("Login Successful", "success");
-           onSuccess();
+      // Map legacy demo credentials to Firebase-friendly email formats
+      let email = identTrim;
+      if (email.toLowerCase() === 'admin') email = 'admin@sanatan.org';
+      else if (email.toLowerCase() === 'trustee') email = 'trustee@sanatan.org';
+      else if (!email.includes('@')) email = `${email}@sanatan.org`;
+
+      let password = credTrim;
+      if (password.length < 6) password = password.padEnd(6, '0'); // Firebase requires >= 6 chars
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err: any) {
+        // Auto-register for prototype convenience if not found
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+          const userCred = await createUserWithEmailAndPassword(auth, email, password);
+          let role = 'devotee';
+          if (email.startsWith('admin')) role = 'head_admin';
+          if (email.startsWith('trustee')) role = 'trustee';
+          await setDoc(doc(db, 'users', userCred.user.uid), { email, role });
         } else {
-           throw new Error("Invalid credentials. Try admin / 1008 or trustee / 1008.");
+          throw err;
         }
       }
-
+      
+      showToast("Secure Login Successful", "success");
+      onSuccess();
     } catch (err: any) {
-      handleError(err);
+      setError(err.message || "Failed to login securely.");
     } finally {
       setLoading(false);
     }
@@ -499,7 +501,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
                 <div>
                   <label className="block text-[10px] font-black text-stone-500 uppercase tracking-widest mb-2">{t('reg_org_type')}</label>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {['Mandir', 'Goshala', 'Sangha', 'Ashram', 'Gurukul', 'Satsang', 'Yoga', 'Trust', 'Vidyalaya', 'Purohit'].map(type => (
+                    {['Mandir', 'Goshala', 'Sangha', 'Ashram', 'Gurukul', 'Satsang', 'Yoga', 'Trust', 'Vidyalaya', 'Purohit'].map((type, idx) => (
                       <label key={type} className={`flex items-center justify-center py-2.5 px-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-pointer border transition-all ${regData.type === type ? 'bg-white border-amber-500 text-amber-600 shadow-sm ring-2 ring-amber-50' : 'bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100'}`}>
                         <input type="radio" name="type" value={type} checked={regData.type === type} onChange={e => setRegData({...regData, type: e.target.value as WorkspaceType})} className="hidden" />
                         {type}

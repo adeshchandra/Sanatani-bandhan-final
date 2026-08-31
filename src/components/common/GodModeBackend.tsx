@@ -315,12 +315,12 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
 
               {/* Shard Selection Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
-                {workspaces.map((ws) => {
+                {workspaces.map((ws, idx) => {
                   const isCurrentActive = ws.id === activeWorkspace.id;
                   const isCurrentlyInspected = ws.id === selectedInspectWs;
                   return (
                     <div
-                      key={ws.id}
+                      key={`${ws.id}-${idx}`}
                       className={`p-3 rounded-xl border transition-all flex flex-col justify-between ${
                         isCurrentlyInspected
                           ? 'bg-amber-500/10 border-amber-500/60 text-amber-100'
@@ -443,7 +443,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                 Global RBAC Role Switching (Instant Permission Override)
               </h4>
               <div className="flex flex-wrap gap-2">
-                {(['superadmin', 'head_admin', 'manager', 'accountant', 'purohit', 'volunteer', 'devotee'] as UserRole[]).map((r) => (
+                {(['superadmin', 'head_admin', 'manager', 'accountant', 'purohit', 'volunteer', 'devotee'] as UserRole[]).map((r, idx) => (
                   <button
                     key={r}
                     type="button"

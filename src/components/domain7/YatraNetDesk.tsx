@@ -70,7 +70,7 @@ export default function YatraNetDesk() {
     );
 
     const unsub = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const docs = snapshot.docs.map((d, idx) => ({ id: d.id, ...d.data() }));
       setBroadcasts(docs);
       
       // Trigger alerts for new SOS messages (if they were created recently and not by current user)
@@ -238,7 +238,7 @@ export default function YatraNetDesk() {
   const nearbyNodes = Array.from(new Set(
     broadcasts
       .filter(b => b.senderName && b.senderId !== currentUser?.id)
-      .map(b => b.senderName)
+      .map((b, idx) => b.senderName)
   ));
 
   return (
@@ -304,10 +304,10 @@ export default function YatraNetDesk() {
                   (b.senderName === activeChatNode && b.recipientName === currentUser?.name)
                 ))
                 .reverse()
-                .map(msg => {
+                .map((msg, idx) => {
                   const isMe = msg.senderName === currentUser?.name;
                   return (
-                    <div key={msg.id} className={`flex flex-col max-w-[80%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
+                    <div key={`${msg.id}-${idx}`} className={`flex flex-col max-w-[80%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
                       <div className={`p-3 rounded-2xl text-sm font-bold shadow-sm ${
                         isMe ? 'bg-emerald-600 text-white rounded-br-sm' : 'bg-white border border-stone-200 text-stone-700 rounded-bl-sm'
                       }`}>
@@ -489,14 +489,14 @@ export default function YatraNetDesk() {
           </div>
         ) : (
           <div className="space-y-3">
-            {broadcasts.map((b) => {
+            {broadcasts.map((b, idx) => {
               const isSOS = b.type === 'SOS' || b.type === 'RICH_SOS';
               const isLocation = b.type === 'LOCATION';
               const isMe = b.senderId === currentUser?.id;
               
               return (
                 <div 
-                  key={b.id} 
+                  key={`${b.id}-${idx}`} 
                   className={`p-4 rounded-2xl border shadow-sm flex flex-col gap-3 transition-all ${
                     isSOS 
                       ? 'bg-red-50 border-red-200 animate-in fade-in zoom-in' 
@@ -644,8 +644,8 @@ export default function YatraNetDesk() {
             <span className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Auto-syncs on connection</span>
           </div>
           <div className="p-2 space-y-2">
-            {queue.map((item) => (
-              <div key={item.id} className="p-3 bg-white/60 rounded-xl flex items-center justify-between">
+            {queue.map((item, idx) => (
+              <div key={`${item.id}-${idx}`} className="p-3 bg-white/60 rounded-xl flex items-center justify-between">
                 <div>
                   <span className="text-xs font-black text-stone-900">{item.type}</span>
                   <p className="text-[10px] font-bold text-stone-500 line-clamp-1">{item.payload.text}</p>

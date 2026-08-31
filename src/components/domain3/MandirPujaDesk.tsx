@@ -27,7 +27,7 @@ export const MandirPujaDesk: React.FC = () => {
   const { showToast } = useToast();
 
   const { residentPujas } = useData();
-  const schedules = residentPujas.map(p => ({
+  const schedules = residentPujas.map((p, idx) => ({
     id: p.id,
     name: p.ritualName || p.pujaName || 'Aarti',
     time: p.time || p.timings || 'N/A',
@@ -121,8 +121,8 @@ export const MandirPujaDesk: React.FC = () => {
         </div>
 
         <div className="space-y-6">
-          {longFormRituals.map((ritual) => (
-            <div key={ritual.id} className="bg-stone-950 rounded-2xl p-5 border border-stone-800 shadow-inner">
+          {longFormRituals.map((ritual, idx) => (
+            <div key={`${ritual.id}-${idx}`} className="bg-stone-950 rounded-2xl p-5 border border-stone-800 shadow-inner">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                 <div>
                   <h4 className="text-base font-bold text-stone-100">{ritual.service}</h4>
@@ -196,9 +196,9 @@ export const MandirPujaDesk: React.FC = () => {
 
       {/* Aarti Schedule Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {schedules.map((aarti) => (
+        {schedules.map((aarti, idx) => (
           <div
-            key={aarti.id}
+            key={`${aarti.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>

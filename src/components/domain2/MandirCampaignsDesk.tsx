@@ -52,12 +52,12 @@ export const MandirCampaignsDesk: React.FC = () => {
 
       {/* Campaign Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {campaigns.map((camp) => {
+        {campaigns.map((camp, idx) => {
           const pct = Math.min(100, Math.round((camp.collectedAmount / camp.targetAmount) * 100));
 
           return (
             <div
-              key={camp.id}
+              key={`${camp.id}-${idx}`}
               className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl space-y-5 flex flex-col justify-between"
             >
               <div>

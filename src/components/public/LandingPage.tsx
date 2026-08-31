@@ -289,7 +289,7 @@ export const LandingPage: React.FC<{
              <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200/60 shadow-xl relative">
                 <div className="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-[#FF9933]/10 rounded-full blur-xl pointer-events-none"></div>
                 <div className="space-y-4">
-                   {[1,2,3].map(i => (
+                   {[1,2,3].map((i, idx) => (
                      <div key={i} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
                         <div className="w-10 h-10 bg-slate-100 rounded-lg animate-pulse"></div>
                         <div className="flex-1 space-y-2">

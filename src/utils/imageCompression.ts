@@ -1,3 +1,5 @@
+import { storage } from '../lib/firebase';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 /**
  * Crash-Proof Client-Side Canvas Compression
  * Strictly uses document.createElement('img') to prevent mobile WebView crashes.
@@ -56,7 +58,12 @@ export const compressImageFile = (
         ctx.drawImage(img, 0, 0, width, height);
 
         const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(compressedDataUrl);
+        const fileName = file.name.replace(/[^a-zA-Z0-9]/g, '_') + '_' + Date.now();
+        const fileRef = ref(storage, `uploads/${fileName}.jpg`);
+        uploadString(fileRef, compressedDataUrl, 'data_url')
+          .then(() => getDownloadURL(fileRef))
+          .then(downloadUrl => resolve(downloadUrl))
+          .catch(err => reject(new Error('Firebase Storage upload failed: ' + err.message)));
       };
 
       img.onerror = () => {

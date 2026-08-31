@@ -40,7 +40,7 @@ export const DemoSelectionModal: React.FC<DemoSelectionModalProps> = ({ isOpen, 
 
         <div className="p-6 overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {ORG_TYPES.map((type) => (
+            {ORG_TYPES.map((type, idx) => (
               <button
                 key={type}
                 onClick={() => setSelected(type)}

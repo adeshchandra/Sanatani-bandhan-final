@@ -80,7 +80,7 @@ const GodModeBackend = lazy(() => import('./components/common/GodModeBackend').t
 const DevoteePortal = lazy(() => import('./components/devotee/DevoteePortal').then(m => ({ default: m.DevoteePortal })));
 const MemberAppShell = lazy(() => import('./components/devotee/MemberAppShell').then(m => ({ default: m.default })));
 
-const YatraNetDesk = lazy(() => import('./components/domain7/YatraNetDesk').then(m => ({ default: m.YatraNetDesk })));
+const YatraNetDesk = lazy(() => import('./components/domain7/YatraNetDesk').then(m => ({ default: m.default })));
 const DharamshalaDesk = lazy(() => import('./components/domain4/DharamshalaDesk').then(m => ({ default: m.DharamshalaDesk })));
 const SevadarRosterDesk = lazy(() => import('./components/domain6/SevadarRosterDesk').then(m => ({ default: m.SevadarRosterDesk })));
 
@@ -111,6 +111,7 @@ const AppContent: React.FC = () => {
     return () => window.removeEventListener('navigate_module', handleNavigate);
   }, []);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isQuickChandaOpen, setIsQuickChandaOpen] = useState<boolean>(false);
   const [isMySpaceOpen, setIsMySpaceOpen] = useState<boolean>(false);
   const [isTelemetryOpen, setIsTelemetryOpen] = useState<boolean>(false);
@@ -159,7 +160,7 @@ const AppContent: React.FC = () => {
         return <RakthaSevaDesk />;
       case 'bulkImport':
       case 'universal-csv':
-        return <BulkImportDesk />;
+        return checkPermission(['manager', 'trustee']) ? <BulkImportDesk /> : <RestrictedAccess />;
 
       // Domain 2
       case 'treasury':
@@ -167,16 +168,16 @@ const AppContent: React.FC = () => {
         return checkPermission(['accountant', 'manager', 'trustee']) ? <TreasuryLedgerDesk onOpenQuickPay={() => setIsQuickChandaOpen(true)} /> : <RestrictedAccess />;
       case 'taxReceipts':
       case 'tax-receipt-80g':
-        return <TaxReceiptDesk />;
+        return checkPermission(['accountant', 'manager', 'trustee']) ? <TaxReceiptDesk /> : <RestrictedAccess />;
       case 'campaigns':
       case 'mandir-campaigns':
-        return <MandirCampaignsDesk />;
+        return checkPermission(['manager', 'trustee']) ? <MandirCampaignsDesk /> : <RestrictedAccess />;
       case 'karmaLedger':
       case 'karma-ledger':
         return <KarmaLedgerDesk />;
       case 'assets':
       case 'asset-register':
-        return <AssetInventoryDesk />;
+        return checkPermission(['manager', 'trustee']) ? <AssetInventoryDesk /> : <RestrictedAccess />;
       case 'inventory':
       case 'store-inventory':
         return checkPermission(['accountant', 'manager', 'trustee', 'volunteer']) ? <InventoryDesk /> : <RestrictedAccess />;
@@ -184,19 +185,19 @@ const AppContent: React.FC = () => {
       // Domain 3
       case 'poojaBooking':
       case 'pooja-booking':
-        return <PoojaBookingDesk />;
+        return checkPermission(['purohit', 'manager', 'trustee']) ? <PoojaBookingDesk /> : <RestrictedAccess />;
       case 'mandirPuja':
       case 'aarti-roster':
-        return <MandirPujaDesk />;
+        return checkPermission(['purohit', 'manager', 'trustee']) ? <MandirPujaDesk /> : <RestrictedAccess />;
       case 'purohitDesk':
       case 'purohit-desk':
-        return <PurohitDesk />;
+        return checkPermission(['purohit', 'manager', 'trustee']) ? <PurohitDesk /> : <RestrictedAccess />;
       case 'purohitMarket':
       case 'purohit-marketplace':
-        return <PurohitMarketDesk />;
+        return checkPermission(['purohit', 'manager', 'trustee']) ? <PurohitMarketDesk /> : <RestrictedAccess />;
       case 'pitruShradh':
       case 'pitru-shradh':
-        return <PitruShradhDesk />;
+        return checkPermission(['purohit', 'manager', 'trustee']) ? <PitruShradhDesk /> : <RestrictedAccess />;
       case 'panchang':
       case 'panchang-muhurat':
         return <PanchangMuhuratDesk />;
@@ -208,6 +209,9 @@ const AppContent: React.FC = () => {
       case 'annadanam':
       case 'annadanam-kitchen':
         return <AnnadanamKitchenDesk />;
+      case 'dharamshala':
+      case 'dharamshala-yatri-bhavan':
+        return <DharamshalaDesk />;
       case 'gurukul':
       case 'gurukul-education':
       case 'gurukulAcademy':
@@ -215,19 +219,19 @@ const AppContent: React.FC = () => {
       case 'satsang':
       case 'sanghaDrills':
       case 'sevaTrust':
-      case 'granthLibrary':
         return <VedicSevaShikshaDesk />;
+      case 'granthLibrary':
+      case 'sanskrit-library':
+      case 'shlokaFeed':
+        return <SanskritLibraryDesk />;
 
       // Domain 5
       case 'sandeshBroadcast':
       case 'whatsapp-broadcaster':
-        return <WhatsAppBroadcasterDesk />;
+        return checkPermission(['manager', 'trustee']) ? <WhatsAppBroadcasterDesk /> : <RestrictedAccess />;
       case 'utsavPanjika':
       case 'events-utsav':
         return <VedicCalendarEventsDesk />;
-      case 'shlokaFeed':
-      case 'sanskrit-library':
-        return <SanskritLibraryDesk />;
       case 'dharmicAssistant':
       case 'dharmic-assistant':
       case 'dharmaMarketing':
@@ -240,34 +244,31 @@ const AppContent: React.FC = () => {
 
       // Domain 7
       case 'sadhana-karma':
+      case 'personal-sadhana':
         return <PersonalSadhanaDesk />;
       case 'sanatani-vivah':
+      case 'matrimony':
         return <SanataniVivahDesk />;
+      case 'yatraNet':
+      case 'yatra-net':
+        return <YatraNetDesk />;
 
       // Domain 6
       case 'workspace-hub':
         return checkPermission(['trustee']) ? <WorkspaceSelectorDesk /> : <RestrictedAccess />;
       case 'user-roles-rbac':
       case 'trusteeGovernance':
-
         return checkPermission(['trustee', 'manager']) ? <UserRolesDesk /> : <RestrictedAccess />;
       case 'security-audit-log':
       case 'legalVault':
-        return checkPermission(['trustee']) ? <AuditLogDesk /> : <RestrictedAccess />;
-
-
-      case 'dharamshala':
-        return <DharamshalaDesk />;
+      case 'auditLog':
+        return checkPermission(['trustee', 'manager']) ? <AuditLogDesk /> : <RestrictedAccess />;
       case 'sevadarRoster':
-        return checkPermission(['manager', 'head_admin', 'superadmin', 'master_admin']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
-      case 'ashramKutir':
-
-      case 'matrimony':
+        return checkPermission(['trustee', 'manager']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
+      case 'masterSettings':
       case 'panchayatPolls':
       case 'socialWall':
-      case 'masterSettings':
         return checkPermission(['trustee']) ? <MasterSettingsDesk /> : <RestrictedAccess />;
-
       case 'crisis-command':
         return checkPermission(['trustee', 'manager']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
 
@@ -302,6 +303,8 @@ const AppContent: React.FC = () => {
         activeModule={activeModule}
         onNavigate={(mod) => setActiveModule(mod)}
         onOpenSidebar={() => setIsSidebarOpen(true)}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebarCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         onOpenQuickChanda={() => setIsQuickChandaOpen(true)}
         onOpenMySpace={() => setIsMySpaceOpen(true)}
         onOpenTelemetry={() => setIsTelemetryOpen(true)}
@@ -317,6 +320,8 @@ const AppContent: React.FC = () => {
           onSelectModule={(mod) => setActiveModule(mod)}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
 
         {/* Main Content Area */}
@@ -371,7 +376,7 @@ const AppContent: React.FC = () => {
       <TawkToWidget />
 
       {/* Demo Sandbox Watermark */}
-      {useAuthWorkspace().activeWorkspace?.id?.startsWith('DEMO_') && (
+      {activeWorkspace?.id?.startsWith('DEMO_') && (
         <div className="fixed bottom-4 left-4 z-[9998] bg-amber-500 text-stone-900 px-3 py-1.5 rounded-lg shadow-lg font-bold text-xs flex items-center gap-2 animate-pulse">
           <span className="w-2 h-2 rounded-full bg-stone-900"></span>
           TESTING MODE (EPHEMERAL DATA)

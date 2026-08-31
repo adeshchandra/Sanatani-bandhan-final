@@ -82,7 +82,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
 
         {/* Filter Tabs */}
         <div className={`flex items-center px-4 sm:px-5 pt-2 border-b ${borderItem}`}>
-          {(['All', 'Alerts', 'Tasks', 'System'] as TabType[]).map((tab) => (
+          {(['All', 'Alerts', 'Tasks', 'System'] as TabType[]).map((tab, idx) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -130,9 +130,9 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
             </div>
           ) : (
             <div className="flex flex-col">
-              {filteredNotifications.map(notification => (
+              {filteredNotifications.map((notification, idx) => (
                 <div 
-                  key={notification.id}
+                  key={`${notification.id}-${idx}`}
                   onClick={() => markAsRead(notification.id)}
                   className={`p-4 sm:p-5 border-b cursor-pointer transition-colors ${borderItem} ${bgItemHover} ${!notification.isRead ? bgUnread : ''}`}
                 >

@@ -42,7 +42,7 @@ export default function SanataniVivahDesk() {
     // For this vision, treating it as a global/community shared pool
     const profilesRef = collection(db, `communities/${activeWorkspace.id}/vivah_profiles`);
     const unsub = onSnapshot(profilesRef, (snap) => {
-      const list = snap.docs.map(d => d.data());
+      const list = snap.docs.map((d, idx) => d.data());
       setProfiles(list.filter(p => p.status === 'ACTIVE'));
       
       const mine = list.find(p => p.uid === currentUser?.id);
@@ -222,8 +222,8 @@ export default function SanataniVivahDesk() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {profiles.filter(p => p.uid !== currentUser?.id).map(profile => (
-                <div key={profile.uid} className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-xl transition-all group">
+              {profiles.filter(p => p.uid !== currentUser?.id).map((profile, idx) => (
+                <div key={`${profile.uid}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col hover:shadow-xl transition-all group">
                   <div className="h-48 bg-gray-100 relative overflow-hidden">
                     {profile.photoUrl ? (
                       <img src={profile.photoUrl} alt={profile.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>

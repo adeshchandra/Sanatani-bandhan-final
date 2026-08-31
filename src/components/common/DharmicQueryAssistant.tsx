@@ -406,7 +406,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
       const history = messages
         .filter((m) => m.query || m.result?.summary)
         .slice(-4)
-        .map((m) => ({
+        .map((m, idx) => ({
           role: m.sender === 'user' ? 'user' : 'assistant',
           text: m.query || m.result?.summary || '',
         }));
@@ -692,9 +692,9 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
 
           {/* Messages Scroll Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-900/60">
-            {messages.map((msg) => (
+            {messages.map((msg, idx) => (
               <div
-                key={msg.id}
+                key={`${msg.id}-${idx}`}
                 className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
               >
                 {msg.sender === 'user' ? (
@@ -746,7 +746,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                           type="button"
                           onClick={() =>
                             handleCopy(
-                              `${msg.result?.title}\n\n${msg.result?.shloka ? `॥ ${msg.result.shloka} ॥\n\nMeaning: ${msg.result.shlokaMeaning}\nSource: ${msg.result.scriptureSource}\n\n` : ''}${msg.result?.summary}\n\nRecommendations:\n${(msg.result?.guidancePoints || []).map((p) => `• ${p}`).join('\n')}`,
+                              `${msg.result?.title}\n\n${msg.result?.shloka ? `॥ ${msg.result.shloka} ॥\n\nMeaning: ${msg.result.shlokaMeaning}\nSource: ${msg.result.scriptureSource}\n\n` : ''}${msg.result?.summary}\n\nRecommendations:\n${(msg.result?.guidancePoints || []).map((p, idx) => `• ${p}`).join('\n')}`,
                               msg.id
                             )
                           }
@@ -958,9 +958,9 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                 { key: 'devotee', label: 'Devotee' },
                 { key: 'manager', label: 'Manager' },
                 { key: 'admin', label: 'Trustee' },
-              ].map((f) => (
+              ].map((f, idx) => (
                 <button
-                  key={f.key}
+                  key={`${f.key}-${idx}`}
                   onClick={() => setNonAiCategory(f.key as any)}
                   className={`px-2.5 py-1 rounded-lg text-[11px] transition-all cursor-pointer ${
                     nonAiCategory === f.key
@@ -992,11 +992,11 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
 
           {/* Scrollable SOPs */}
           <div className="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar pr-1">
-            {filteredOfflineSops.map((sop) => {
+            {filteredOfflineSops.map((sop, idx) => {
               const isExpanded = expandedSopId === sop.id;
               return (
                 <div
-                  key={sop.id}
+                  key={`${sop.id}-${idx}`}
                   className={`rounded-xl border transition-all overflow-hidden ${
                     isExpanded
                       ? 'bg-slate-900 border-indigo-500/40 shadow-lg'

@@ -55,7 +55,7 @@ export const InventoryDesk: React.FC = () => {
 
     // Table Data
     const tableColumn = ["Item Name", "Category", "Current Stock", "Min Reorder", "Status", "Cost/Unit", "Supplier"];
-    const tableRows = filteredInventory.map(item => {
+    const tableRows = filteredInventory.map((item, idx) => {
       const isLow = item.currentStock <= item.minReorderLevel;
       return [
         item.itemName,
@@ -169,12 +169,12 @@ export const InventoryDesk: React.FC = () => {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {filteredInventory.map((item) => {
+        {filteredInventory.map((item, idx) => {
           const isLow = item.currentStock <= item.minReorderLevel;
 
           return (
             <div
-              key={item.id}
+              key={`${item.id}-${idx}`}
               className={`bg-stone-900/90 border rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4 transition-all ${
                 isLow ? 'border-amber-500/60 bg-amber-950/10' : 'border-stone-800'
               }`}

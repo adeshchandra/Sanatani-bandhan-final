@@ -133,7 +133,7 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
 
           <div className="flex flex-wrap gap-1.5 pt-1">
             <span className="text-[10px] text-stone-400 py-1">Quick Merge Tags:</span>
-            {['{{FullName}}', '{{Gotra}}', '{{Occasion}}', '{{MandirName}}', '{{PIN}}'].map((tag) => (
+            {['{{FullName}}', '{{Gotra}}', '{{Occasion}}', '{{MandirName}}', '{{PIN}}'].map((tag, idx) => (
               <button
                 key={tag}
                 type="button"

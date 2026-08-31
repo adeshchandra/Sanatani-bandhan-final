@@ -28,7 +28,7 @@ export const BulkImportDesk: React.FC = () => {
     reader.onload = (evt) => {
       const text = evt.target?.result as string;
       if (text) {
-        const existingPhones = devotees.map((d) => d.phone);
+        const existingPhones = devotees.map((d, idx) => d.phone);
         const { rows, duplicates, valid } = parseDevoteeCSV(text, existingPhones);
         setParsedRows(rows);
         setDuplicateCount(duplicates);

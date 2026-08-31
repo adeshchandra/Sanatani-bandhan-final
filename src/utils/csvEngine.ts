@@ -37,9 +37,9 @@ export function exportToCSV(
     const rows = arg3;
     csvContent = [
       headers.join(','),
-      ...rows.map((row) =>
+      ...rows.map((row, idx) =>
         row
-          .map((val) => {
+          .map((val, idx) => {
             let s = val === null || val === undefined ? '' : String(val);
             if (s.includes(',') || s.includes('"') || s.includes('\n')) {
               s = `"${s.replace(/"/g, '""')}"`;
@@ -55,9 +55,9 @@ export function exportToCSV(
     const headers = Object.keys(records[0]);
     csvContent = [
       headers.join(','),
-      ...records.map((row) =>
+      ...records.map((row, idx) =>
         headers
-          .map((header) => {
+          .map((header, idx) => {
             let val = row[header] ?? '';
             if (typeof val === 'string') {
               val = `"${val.replace(/"/g, '""')}"`;
@@ -104,15 +104,15 @@ export const parseDevoteeCSV = (
 ): { rows: IngestedDevoteeRow[]; duplicates: number; valid: number } => {
   const lines = csvText
     .split(/\r?\n/)
-    .map((line) => line.trim())
+    .map((line, idx) => line.trim())
     .filter((line) => line.length > 0);
 
   if (lines.length < 2) {
     return { rows: [], duplicates: 0, valid: 0 };
   }
 
-  const headers = lines[0].split(',').map((h) => h.replace(/^["']|["']$/g, '').trim());
-  const existingCleanPhones = new Set(existingPhones.map((p) => p.replace(/\D/g, '')));
+  const headers = lines[0].split(',').map((h, idx) => h.replace(/^["']|["']$/g, '').trim());
+  const existingCleanPhones = new Set(existingPhones.map((p, idx) => p.replace(/\D/g, '')));
   const seenBatchPhones = new Set<string>();
 
   const rows: IngestedDevoteeRow[] = [];
@@ -166,12 +166,12 @@ export const parseDevoteeCSV = (
 export const parseCSVText = (csvText: string): Record<string, string>[] => {
   const lines = csvText
     .split(/\r?\n/)
-    .map((line) => line.trim())
+    .map((line, idx) => line.trim())
     .filter((line) => line.length > 0);
 
   if (lines.length < 2) return [];
 
-  const headers = lines[0].split(',').map((h) => h.replace(/^["']|["']$/g, '').trim());
+  const headers = lines[0].split(',').map((h, idx) => h.replace(/^["']|["']$/g, '').trim());
   const records: Record<string, string>[] = [];
 
   for (let i = 1; i < lines.length; i++) {
@@ -197,7 +197,7 @@ export const bulkIngestDevotees = (
   existingMembers: DevoteeMember[],
   workspaceId: string
 ): { created: DevoteeMember[]; duplicatesSkipped: number } => {
-  const existingPhones = new Set(existingMembers.map((m) => m.phone.replace(/\D/g, '')));
+  const existingPhones = new Set(existingMembers.map((m, idx) => m.phone.replace(/\D/g, '')));
   const created: DevoteeMember[] = [];
   let duplicatesSkipped = 0;
 

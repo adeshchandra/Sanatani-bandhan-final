@@ -7,6 +7,8 @@ import {
   Sparkles,
   Calendar,
   ArrowUpRight,
+  Cake,
+  CalendarDays,
   Receipt,
   FileSpreadsheet,
   QrCode,
@@ -53,6 +55,33 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
 
   const taxonomy = useWorkspaceTaxonomy();
   const panchang = calculatePanchang();
+
+  // Upcoming Birthdays Logic
+  const today = new Date();
+  const upcomingBirthdays = devotees.filter(d => {
+    if (!d.birthDate) return false;
+    const bDate = new Date(d.birthDate);
+    // Set to current year to compare
+    bDate.setFullYear(today.getFullYear());
+    // If it already passed this year, check next year
+    if (bDate < today && (today.getTime() - bDate.getTime()) > 24 * 60 * 60 * 1000) {
+      bDate.setFullYear(today.getFullYear() + 1);
+    }
+    const diffTime = Math.abs(bDate.getTime() - today.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 14; // within next 14 days
+  }).sort((a, b) => {
+    const dateA = new Date(a.birthDate!);
+    dateA.setFullYear(today.getFullYear());
+    if (dateA < today) dateA.setFullYear(today.getFullYear() + 1);
+    
+    const dateB = new Date(b.birthDate!);
+    dateB.setFullYear(today.getFullYear());
+    if (dateB < today) dateB.setFullYear(today.getFullYear() + 1);
+    
+    return dateA.getTime() - dateB.getTime();
+  });
+
 
   // Metrics
   const totalIncome = treasury
@@ -386,8 +415,8 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                 </button>
               </div>
               <div className="divide-y divide-slate-100">
-                {treasury.slice(0, 5).map((tx) => (
-                  <div key={tx.id} className="py-2.5 flex items-center justify-between gap-2">
+                {treasury.slice(0, 5).map((tx, idx) => (
+                  <div key={`${tx.id}-${idx}`} className="py-2.5 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <div
                         className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${

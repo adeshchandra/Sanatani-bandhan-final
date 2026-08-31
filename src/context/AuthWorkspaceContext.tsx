@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useInitialData } from './AppInitializer';
 import { set } from 'idb-keyval';
+import { auth, db } from "../lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import { DevoteeMember, UserRole, WorkspaceConfig, WorkspaceType } from '../types';
 
 export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
@@ -250,6 +253,33 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     return initialData.sanatani_current_devotee || null;
   });
 
+  
+  // FIREBASE AUTH SYNC
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setCurrentRole(data.role || 'devotee');
+            setIsAuthenticated(true);
+            setViewMode(data.role === 'devotee' ? 'MEMBER' : 'ADMIN');
+          } else {
+            setIsAuthenticated(true);
+          }
+        } catch(e) {
+          console.error("Error fetching user role", e);
+        }
+      } else {
+        setIsAuthenticated(false);
+        setCurrentRole('devotee');
+        setCurrentDevotee(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     // Determine if authenticated based on whether we loaded a saved role or devotee
     // If the data was freshly loaded and role exists (which we default to head_admin for demo)
@@ -302,7 +332,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateWorkspaceType = (newType: WorkspaceType) => {
     setWorkspaces((prev) =>
-      prev.map((w) => {
+      prev.map((w, idx) => {
         if (w.id === activeWorkspaceId) {
           return { ...w, type: newType };
         }
@@ -313,7 +343,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const updateWorkspaceDetails = (updates: Partial<WorkspaceConfig>) => {
     setWorkspaces((prev) =>
-      prev.map((w) => (w.id === activeWorkspaceId ? { ...w, ...updates } : w))
+      prev.map((w, idx) => (w.id === activeWorkspaceId ? { ...w, ...updates } : w))
     );
   };
 
@@ -383,7 +413,8 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await signOut(auth); } catch(e) {}
     setCurrentRole('devotee');
     setCurrentDevotee(null);
     setIsAuthenticated(false);
@@ -400,7 +431,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     setWorkspaces((prev) => {
       const existing = prev.find((w) => w.id === newWorkspace.id);
       if (existing) {
-        return prev.map((w) => (w.id === newWorkspace.id ? newWorkspace : w));
+        return prev.map((w, idx) => (w.id === newWorkspace.id ? newWorkspace : w));
       }
       const updated = [...prev, newWorkspace];
       set('sanatani_workspaces', updated);

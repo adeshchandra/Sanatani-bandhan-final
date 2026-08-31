@@ -119,7 +119,7 @@ export const GlobalTelemetryModal: React.FC<GlobalTelemetryModalProps> = ({
           <div className="px-4 py-2.5 border-b border-stone-800 bg-stone-900/50 flex items-center gap-2 overflow-x-auto text-xs">
             <Filter className="w-3.5 h-3.5 text-stone-400 shrink-0" />
             <span className="text-stone-400 text-[11px] font-medium">Filter by Schema:</span>
-            {['all', 'purchase', 'generate_lead', 'sign_up', 'share', 'view_item'].map((evt) => (
+            {['all', 'purchase', 'generate_lead', 'sign_up', 'share', 'view_item'].map((evt, idx) => (
               <button
                 key={evt}
                 type="button"
@@ -146,9 +146,9 @@ export const GlobalTelemetryModal: React.FC<GlobalTelemetryModalProps> = ({
                 </p>
               </div>
             ) : (
-              filteredLogs.map((log) => (
+              filteredLogs.map((log, idx) => (
                 <div
-                  key={log.id}
+                  key={`${log.id}-${idx}`}
                   className="bg-stone-950/60 border border-stone-800 rounded-xl p-3 text-xs font-mono transition-all hover:border-stone-700"
                 >
                   <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-stone-800/80">

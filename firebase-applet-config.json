@@ -1,12 +1,12 @@
 {
-  "projectId": "sanatani-bandhan",
-  "appId": "1:1065009072830:web:5bc4df01e082724356acef",
-  "apiKey": "AIzaSyB_YSQlVXWElv7XmuJ917Oe5OXFjj8KB64",
-  "authDomain": "sanatani-bandhan.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
-  "storageBucket": "sanatani-bandhan.firebasestorage.app",
-  "messagingSenderId": "1065009072830",
-  "measurementId": "G-XZ5TYS2XS9",
-  "oAuthClientId": "",
+  "projectId": "scenic-well-ndw77",
+  "appId": "1:172310751809:web:7235a6037a46364ae1f4c0",
+  "apiKey": "AIzaSyAZ84ldd0KqHA3-GE6dgTiYLD3BYAWXsuw",
+  "authDomain": "scenic-well-ndw77.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-sanatanibandhanr-b854c292-1fcf-4250-ac0a-3c8b7b289f68",
+  "storageBucket": "scenic-well-ndw77.firebasestorage.app",
+  "messagingSenderId": "172310751809",
+  "measurementId": "",
+  "oAuthClientId": "172310751809-mpbkbkv488setlle46ki75fkqq9niisk.apps.googleusercontent.com",
   "recaptchaSiteKey": ""
 }

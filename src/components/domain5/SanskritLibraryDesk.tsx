@@ -144,9 +144,9 @@ export const SanskritLibraryDesk: React.FC = () => {
 
       {/* Shastras Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredShastras.map((s) => (
+        {filteredShastras.map((s, idx) => (
           <div
-            key={s.id}
+            key={`${s.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 hover:border-amber-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4 transition-all"
           >
             <div>

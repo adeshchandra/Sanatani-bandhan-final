@@ -1,3 +1,4 @@
+import autoTable from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import { get } from 'idb-keyval';
 import QRCode from 'qrcode';
@@ -168,7 +169,7 @@ export const generateTaxReceiptPDF = async (
   const docRef = generateCryptoDocRef('TAX80G');
   const qrData = JSON.stringify({
     txId: tx.id,
-    receiptNo: tx.taxReceiptNumber || `SB-TAX-${tx.id.slice(-6)}`,
+    receiptNo: tx.taxReceiptNumber || `SB-TAX-${String(tx.id || '').slice(-6)}`,
     amount: tx.amount,
     date: tx.date,
     donor: tx.devoteeName,
@@ -217,7 +218,7 @@ export const generateTaxReceiptPDF = async (
   doc.text(`Date of Issue: ${tx.date}`, 140, 65);
 
   doc.text(`Payment Mode: ${tx.paymentMode}`, 20, 72);
-  doc.text(`Ref/UTR No: ${tx.referenceNo || 'UPI-' + tx.id.slice(-8)}`, 140, 72);
+  doc.text(`Ref/UTR No: ${tx.referenceNo || 'UPI-' + String(tx.id || '').slice(-8)}`, 140, 72);
 
   // Donor Table Box
   doc.setDrawColor(229, 231, 235);
@@ -371,4 +372,176 @@ export const generatePoojaSankalpPDF = async (
   doc.text('Made with ❤️ by TrackIQ Academy • Universal Community Management', 74, 200, { align: 'center' });
 
   doc.save(`Sankalp_${booking.id}.pdf`);
+};
+
+
+
+export const generateDonationHistoryPDF = async (
+  devotee: DevoteeMember,
+  donations: TreasuryTransaction[],
+  workspace: WorkspaceConfig
+) => {
+  const doc = new jsPDF();
+  const logo = await getActiveWorkspaceLogo(workspace.id);
+
+  if (logo) {
+    try {
+      doc.addImage(logo, 'PNG', 14, 10, 20, 20);
+    } catch (e) { }
+  }
+
+  doc.setFontSize(20);
+  doc.setTextColor(30, 41, 59);
+  doc.text(workspace.name || 'Sanatani Bandhan', logo ? 40 : 14, 20);
+  doc.setFontSize(10);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Donation History Statement', logo ? 40 : 14, 26);
+
+  doc.setFontSize(11);
+  doc.setTextColor(30, 41, 59);
+  doc.text(`Devotee Name: ${devotee.fullName}`, 14, 45);
+  doc.text(`Devotee ID: ${devotee.id}`, 14, 52);
+  if (devotee.phone) doc.text(`Phone: ${devotee.phone}`, 14, 59);
+  if (devotee.gotra) doc.text(`Gotra: ${devotee.gotra}`, 14, 66);
+
+  const total = donations.reduce((sum, d) => sum + d.amount, 0);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Total Donations: Rs. ${total.toLocaleString()}`, 14, 76);
+
+  autoTable(doc, {
+    startY: 85,
+    head: [['Date', 'Receipt No.', 'Category', 'Mode', 'Amount']],
+    body: donations.map((d, idx) => [
+      new Date(d.date).toLocaleDateString(),
+      d.id,
+      d.category || 'General',
+      d.paymentMode || 'Cash',
+      `Rs. ${d.amount.toLocaleString()}`
+    ]),
+    theme: 'grid',
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [44, 62, 80], textColor: 255 },
+  });
+
+  doc.save(`${devotee.fullName.replace(/\s+/g, '_')}_Donation_History.pdf`);
+};
+
+export const generateAnnualDonationSummaryPDF = async (
+  devotee: DevoteeMember,
+  donations: TreasuryTransaction[],
+  workspace: WorkspaceConfig
+) => {
+  const doc = new jsPDF();
+  const logo = await getActiveWorkspaceLogo(workspace.id);
+
+  if (logo) {
+    try {
+      doc.addImage(logo, 'PNG', 14, 10, 20, 20);
+    } catch (e) { }
+  }
+
+  doc.setFontSize(20);
+  doc.setTextColor(30, 41, 59);
+  doc.text(workspace.name || 'Sanatani Bandhan', logo ? 40 : 14, 20);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Annual Donation Summary (Printable Overview)', logo ? 40 : 14, 26);
+
+  doc.setFontSize(11);
+  doc.setTextColor(30, 41, 59);
+  doc.text(`Devotee Name: ${devotee.fullName}`, 14, 45);
+  doc.text(`Devotee ID: ${devotee.id}`, 14, 52);
+  if (devotee.phone) doc.text(`Phone: ${devotee.phone}`, 14, 59);
+  if (devotee.gotra) doc.text(`Gotra: ${devotee.gotra}`, 14, 66);
+
+  const donationsByYear: Record<string, { count: number, total: number }> = {};
+  donations.forEach(d => {
+    const year = new Date(d.date).getFullYear().toString();
+    if (!donationsByYear[year]) {
+      donationsByYear[year] = { count: 0, total: 0 };
+    }
+    donationsByYear[year].count += 1;
+    donationsByYear[year].total += d.amount;
+  });
+
+  const years = Object.keys(donationsByYear).sort((a, b) => parseInt(b) - parseInt(a));
+  const totalLifetime = donations.reduce((sum, d) => sum + d.amount, 0);
+  
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Lifetime Contribution: Rs. ${totalLifetime.toLocaleString()}`, 14, 76);
+
+  autoTable(doc, {
+    startY: 85,
+    head: [['Financial Year', 'Total Receipts', 'Annual Contribution (Rs.)']],
+    body: years.map((year, idx) => [
+      year,
+      donationsByYear[year].count.toString(),
+      `Rs. ${donationsByYear[year].total.toLocaleString()}`
+    ]),
+    theme: 'striped',
+    styles: { fontSize: 11, cellPadding: 5 },
+    headStyles: { fillColor: [44, 62, 80], textColor: 255 },
+    columnStyles: {
+      0: { fontStyle: 'bold' },
+      2: { fontStyle: 'bold', halign: 'right' },
+      1: { halign: 'center' }
+    }
+  });
+
+  doc.autoPrint();
+  window.open(doc.output('bloburl'), '_blank');
+};
+
+export const generateTreasuryLedgerPDF = async (
+  transactions: TreasuryTransaction[],
+  workspace: WorkspaceConfig,
+  reportTitle: string = 'Treasury & Expense Ledger Statement'
+) => {
+  const doc = new jsPDF();
+  const logo = await getActiveWorkspaceLogo(workspace.id);
+  if (logo) {
+    try {
+      doc.addImage(logo, 'PNG', 14, 10, 20, 20);
+    } catch (e) { }
+  }
+
+  doc.setFontSize(20);
+  doc.setTextColor(30, 41, 59);
+  doc.text(workspace.name || 'Sanatani Bandhan', logo ? 40 : 14, 20);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100, 116, 139);
+  doc.text(reportTitle, logo ? 40 : 14, 26);
+  
+  const totalIncome = transactions.filter((t: any) => t.type === 'Income').reduce((sum: number, t: any) => sum + t.amount, 0);
+  const totalExpense = transactions.filter((t: any) => t.type === 'Expense').reduce((sum: number, t: any) => sum + t.amount, 0);
+
+  doc.setFontSize(11);
+  doc.setTextColor(30, 41, 59);
+  doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 14, 45);
+  doc.text(`Total Income: Rs. ${totalIncome.toLocaleString()}`, 14, 52);
+  doc.text(`Total Expense: Rs. ${totalExpense.toLocaleString()}`, 14, 59);
+  doc.text(`Net Balance: Rs. ${(totalIncome - totalExpense).toLocaleString()}`, 14, 66);
+
+  autoTable(doc, {
+    startY: 75,
+    head: [['Date', 'Ref ID', 'Type', 'Category', 'Mode', 'Entity/Payee', 'Amount']],
+    body: transactions.map((t: any) => [
+      new Date(t.date).toLocaleDateString(),
+      t.id,
+      t.type,
+      t.category,
+      t.paymentMode,
+      t.devoteeName || t.vendorName || '',
+      `Rs. ${t.amount.toLocaleString()}`
+    ]),
+    theme: 'striped',
+    styles: { fontSize: 8 },
+    headStyles: { fillColor: [44, 62, 80], textColor: 255 },
+  });
+
+  doc.save(`Treasury_Ledger_${new Date().toISOString().slice(0, 10)}.pdf`);
 };

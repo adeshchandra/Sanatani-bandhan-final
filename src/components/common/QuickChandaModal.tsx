@@ -7,17 +7,22 @@ import { compressExpenseMemo } from '../../utils/imageCompression';
 import { useToast } from '../../context/ToastContext';
 import { usePlanGate } from '../../hooks/usePlanGate';
 import { UpsellModal } from './UpsellModal';
+import { MemberSearchSelect } from './MemberSearchSelect';
 import { generateUPIQRCode } from '../../utils/qrUtils';
 import { printThermalReceipt } from '../../utils/printUtils';
 
 interface QuickChandaModalProps {
   isOpen: boolean;
   onClose: () => void;
+  prefilledDevoteeId?: string;
+  prefilledDevoteeName?: string;
 }
 
 export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
   isOpen,
   onClose,
+  prefilledDevoteeId,
+  prefilledDevoteeName,
 }) => {
   const { activeWorkspace } = useAuthWorkspace();
   const { checkGate, showUpsell, upsellModule, closeUpsell } = usePlanGate();
@@ -27,6 +32,24 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
 
   const [devoteeName, setDevoteeName] = useState('');
   const [selectedDevoteeId, setSelectedDevoteeId] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (prefilledDevoteeId && prefilledDevoteeName) {
+        setSelectedDevoteeId(prefilledDevoteeId);
+        setDevoteeName(prefilledDevoteeName);
+      } else {
+        setSelectedDevoteeId('');
+        setDevoteeName('');
+      }
+      setAmount(1100);
+      setCategory('Chanda / Pranami');
+      setPaymentMode('UPI / QR');
+      setReferenceNo('');
+      setPurpose('');
+      setMemoImageBase64('');
+    }
+  }, [isOpen, prefilledDevoteeId, prefilledDevoteeName]);
   const [amount, setAmount] = useState<number | ''>(1100);
   const [category, setCategory] = useState('Chanda / Pranami');
   const [paymentMode, setPaymentMode] = useState<'UPI / QR' | 'Cash' | 'Bank Transfer' | 'Cheque'>('UPI / QR');
@@ -64,7 +87,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
       setIsCompressing(true);
       const compressed = await compressExpenseMemo(file);
       setMemoImageBase64(compressed);
-      showToast('Receipt memo compressed (<600px)', 'info');
+      showToast('Receipt securely uploaded to Cloud Storage', 'info');
     } catch (err: any) {
       showToast('Failed to compress receipt image', 'error');
     } finally {
@@ -160,7 +183,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
                 Preset Sacred Amounts (₹)
               </label>
               <div className="grid grid-cols-5 gap-2">
-                {[501, 1100, 2100, 5100, 11000].map((preset) => (
+                {[501, 1100, 2100, 5100, 11000].map((preset, idx) => (
                   <button
                     key={preset}
                     type="button"
@@ -205,8 +228,8 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
                   className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:border-amber-500"
                 >
                   <option value="">-- Choose from Enrolled Members or Enter Below --</option>
-                  {devotees.map((d) => (
-                    <option key={d.id} value={d.id}>
+                  {devotees.map((d, idx) => (
+                    <option key={`${d.id}-${idx}`} value={d.id}>
                       {d.fullName} ({d.gotra} • {d.phone})
                     </option>
                   ))}

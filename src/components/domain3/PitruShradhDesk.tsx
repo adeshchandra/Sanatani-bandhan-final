@@ -24,7 +24,7 @@ export const PitruShradhDesk: React.FC = () => {
   const { showToast } = useToast();
 
   const { pitruRecords, addPitruRecord } = useData();
-  const records = pitruRecords.map(r => ({
+  const records = pitruRecords.map((r, idx) => ({
     id: r.id,
     ancestorName: r.ancestorName,
     relationship: r.relationship || r.relation || 'N/A',
@@ -149,9 +149,9 @@ export const PitruShradhDesk: React.FC = () => {
 
       {/* Records Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {records.map((r) => (
+        {records.map((r, idx) => (
           <div
-            key={r.id}
+            key={`${r.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>

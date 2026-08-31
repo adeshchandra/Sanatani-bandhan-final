@@ -199,7 +199,7 @@ export const SanataniSocialFeed: React.FC = () => {
     );
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const emergencies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as any[];
+      const emergencies = snapshot.docs.map((doc, idx) => ({ id: doc.id, ...doc.data() })) as any[];
       // Filter out resolved emergencies client-side
       setActiveEmergencies(emergencies.filter(e => e.sosStatus !== 'RESOLVED').sort((a, b) => b.originalTimestamp - a.originalTimestamp));
     });
@@ -366,7 +366,7 @@ export const SanataniSocialFeed: React.FC = () => {
 
   // Handle Pranam Reaction
   const handlePranam = (postId: string) => {
-    setPosts(prev => prev.map(p => {
+    setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
         const newStatus = !p.hasPranamed;
         return {
@@ -384,7 +384,7 @@ export const SanataniSocialFeed: React.FC = () => {
     setOfferingAnimation('flower');
     setTimeout(() => setOfferingAnimation(null), 1200);
 
-    setPosts(prev => prev.map(p => {
+    setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
         return { ...p, flowersOffered: p.flowersOffered + 1 };
       }
@@ -398,7 +398,7 @@ export const SanataniSocialFeed: React.FC = () => {
     setOfferingAnimation('diya');
     setTimeout(() => setOfferingAnimation(null), 1200);
 
-    setPosts(prev => prev.map(p => {
+    setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
         return { ...p, flowersOffered: p.flowersOffered + 1, diyasLit: p.diyasLit + 1 };
       }
@@ -441,7 +441,7 @@ export const SanataniSocialFeed: React.FC = () => {
       timestamp: 'Just now'
     };
 
-    setPosts(prev => prev.map(p => {
+    setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
         return {
           ...p,
@@ -460,7 +460,7 @@ export const SanataniSocialFeed: React.FC = () => {
     if (navigator.share) {
       navigator.share({
         title: post.title || 'Sanatani Social Feed',
-        text: `${post.authorName}: ${post.content.slice(0, 100)}...`,
+        text: `${post.authorName || 'Devotee'}: ${(post.content || '').slice(0, 100)}...`,
         url: window.location.href
       }).catch(() => {});
     } else {
@@ -504,7 +504,7 @@ export const SanataniSocialFeed: React.FC = () => {
       diyasLit: 1,
       comments: [],
       createdAt: 'Just now',
-      tags: newPostTag ? newPostTag.split(',').map(t => t.trim()).filter(Boolean) : [finalCategoryName.replace(/\s+/g, '')]
+      tags: newPostTag ? newPostTag.split(',').map((t, idx) => t.trim()).filter(Boolean) : [finalCategoryName.replace(/\s+/g, '')]
     };
 
     setPosts([newPost, ...posts]);
@@ -526,7 +526,7 @@ export const SanataniSocialFeed: React.FC = () => {
   };
 
   // Get unique dynamic category filters from posts
-  const dynamicCategories = Array.from(new Set(posts.map(p => p.category))).filter(
+  const dynamicCategories = Array.from(new Set(posts.map((p, idx) => p.category))).filter(
     cat => !STANDARD_CATEGORIES.some(sc => sc.key === cat)
   );
 
@@ -601,8 +601,8 @@ export const SanataniSocialFeed: React.FC = () => {
         {/* Global / Cross-App Active Yatra Emergencies Banner */}
         {activeEmergencies.length > 0 && (
           <div className="mt-3 space-y-2">
-            {activeEmergencies.map(emergency => (
-              <div key={emergency.id} className="bg-red-50 border border-red-200 rounded-2xl p-3 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in">
+            {activeEmergencies.map((emergency, idx) => (
+              <div key={`${emergency.id}-${idx}`} className="bg-red-50 border border-red-200 rounded-2xl p-3 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
@@ -672,9 +672,9 @@ export const SanataniSocialFeed: React.FC = () => {
             {safeTranslate('filter_all', 'All Posts', 'সকল', 'सभी')}
           </button>
 
-          {STANDARD_CATEGORIES.filter(c => c.key !== 'other').map(f => (
+          {STANDARD_CATEGORIES.filter(c => c.key !== 'other').map((f, idx) => (
             <button
-              key={f.key}
+              key={`${f.key}-${idx}`}
               onClick={() => setSelectedFilter(f.key)}
               className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap transition-all ${
                 selectedFilter === f.key
@@ -687,7 +687,7 @@ export const SanataniSocialFeed: React.FC = () => {
           ))}
 
           {/* Dynamic User Custom Categories */}
-          {dynamicCategories.map(cat => (
+          {dynamicCategories.map((cat, idx) => (
             <button
               key={cat}
               onClick={() => setSelectedFilter(cat)}
@@ -718,11 +718,11 @@ export const SanataniSocialFeed: React.FC = () => {
             </button>
           </div>
         ) : (
-          filteredPosts.map(post => {
+          filteredPosts.map((post, idx) => {
             const audienceInfo = AUDIENCE_OPTIONS.find(a => a.key === post.audience) || AUDIENCE_OPTIONS[0];
             return (
               <div 
-                key={post.id} 
+                key={`${post.id}-${idx}`} 
                 className="bg-white rounded-2xl border border-stone-200/90 shadow-xs overflow-hidden transition-all hover:border-amber-300"
               >
                 {/* Post Header */}
@@ -842,7 +842,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   {/* Post Tags */}
                   {post.tags && post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-3">
-                      {post.tags.map(tag => (
+                      {post.tags.map((tag, idx) => (
                         <span key={tag} className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">
                           #{tag}
                         </span>
@@ -948,8 +948,8 @@ export const SanataniSocialFeed: React.FC = () => {
                           No comments yet. Write the first devotional reflection!
                         </p>
                       ) : (
-                        post.comments.map(c => (
-                          <div key={c.id} className="bg-white p-2.5 rounded-xl border border-stone-200/80 text-xs">
+                        post.comments.map((c, idx) => (
+                          <div key={`${c.id}-${idx}`} className="bg-white p-2.5 rounded-xl border border-stone-200/80 text-xs">
                             <div className="flex items-center justify-between mb-1">
                               <span className="font-bold text-stone-900">{c.authorName}</span>
                               <span className="text-[10px] text-stone-400">{c.timestamp}</span>
@@ -1039,8 +1039,8 @@ export const SanataniSocialFeed: React.FC = () => {
                     onChange={(e) => setNewPostCategory(e.target.value)}
                     className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200 focus:outline-none cursor-pointer"
                   >
-                    {STANDARD_CATEGORIES.map(c => (
-                      <option key={c.key} value={c.key}>
+                    {STANDARD_CATEGORIES.map((c, idx) => (
+                      <option key={`${c.key}-${idx}`} value={c.key}>
                         {c.label}
                       </option>
                     ))}
@@ -1070,7 +1070,7 @@ export const SanataniSocialFeed: React.FC = () => {
                         className="w-11 h-10 bg-white border border-amber-300 rounded-xl text-lg text-center cursor-pointer shadow-xs focus:ring-2 focus:ring-amber-500"
                         title="Pick icon emoji"
                       >
-                        {CUSTOM_EMOJIS.map(em => (
+                        {CUSTOM_EMOJIS.map((em, idx) => (
                           <option key={em} value={em}>{em}</option>
                         ))}
                       </select>
@@ -1242,11 +1242,11 @@ export const SanataniSocialFeed: React.FC = () => {
                 Who can see your post on Sanatani Social Feed?
               </p>
 
-              {AUDIENCE_OPTIONS.map(opt => {
+              {AUDIENCE_OPTIONS.map((opt, idx) => {
                 const isSelected = newPostAudience === opt.key;
                 return (
                   <div
-                    key={opt.key}
+                    key={`${opt.key}-${idx}`}
                     onClick={() => {
                       setNewPostAudience(opt.key);
                       setShowAudienceModal(false);
@@ -1300,7 +1300,7 @@ export const SanataniSocialFeed: React.FC = () => {
               >
                 Clear feeling
               </button>
-              {FEELING_OPTIONS.map(f => (
+              {FEELING_OPTIONS.map((f, idx) => (
                 <button
                   key={f}
                   onClick={() => {

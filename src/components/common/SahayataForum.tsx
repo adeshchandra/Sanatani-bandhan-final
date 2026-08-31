@@ -261,7 +261,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
         </div>
 
         <div className="flex gap-2 mt-6 overflow-x-auto custom-scrollbar pb-2">
-          {CATEGORIES.map(cat => (
+          {CATEGORIES.map((cat, idx) => (
             <button 
               key={cat}
               onClick={() => setActiveFilter(cat)}
@@ -286,9 +286,9 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               <p className="text-slate-400 text-sm">Try adjusting your search or filters.</p>
             </div>
           ) : (
-            filteredThreads.map(thread => (
+            filteredThreads.map((thread, idx) => (
               <div 
-                key={thread.id} 
+                key={`${thread.id}-${idx}`} 
                 onClick={() => setSelectedThread(thread)}
                 className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-[#FF9933]/50 hover:shadow-md transition-all cursor-pointer group"
               >
@@ -402,9 +402,9 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
             {/* Replies */}
             <div className="space-y-4 mb-8">
               <h3 className="text-lg font-black text-slate-900 mb-4">{replies.length} Replies</h3>
-              {replies.map(reply => (
+              {replies.map((reply, idx) => (
                 <div 
-                  key={reply.id} 
+                  key={`${reply.id}-${idx}`} 
                   className={`bg-white rounded-2xl p-6 shadow-sm border ${
                     reply.isOfficialTrackIQ ? 'border-indigo-300 bg-indigo-50/30' : 
                     reply.isAcceptedAnswer ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200'
@@ -510,7 +510,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                 onChange={e => setNewCategory(e.target.value)}
                 className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#FF9933] bg-white font-medium"
               >
-                {CATEGORIES.filter(c => c !== 'All' && c !== 'My Posts').map(cat => (
+                {CATEGORIES.filter(c => c !== 'All' && c !== 'My Posts').map((cat, idx) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
               </select>

@@ -21,7 +21,7 @@ export const VedicSevaShikshaDesk: React.FC = () => {
   const { showToast } = useToast();
 
   const { gurukulStudents, addGurukulStudent } = useData();
-  const students = gurukulStudents.map(s => ({
+  const students = gurukulStudents.map((s, idx) => ({
     id: s.id,
     name: s.studentName,
     vedaShakha: s.courseLevel,
@@ -141,9 +141,9 @@ export const VedicSevaShikshaDesk: React.FC = () => {
 
       {/* Vidyarthi Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {students.map((st) => (
+        {students.map((st, idx) => (
           <div
-            key={st.id}
+            key={`${st.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>

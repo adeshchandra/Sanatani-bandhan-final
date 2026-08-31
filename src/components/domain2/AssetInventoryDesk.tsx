@@ -85,9 +85,9 @@ export const AssetInventoryDesk: React.FC = () => {
 
       {/* Asset Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredAssets.map((asset) => (
+        {filteredAssets.map((asset, idx) => (
           <div
-            key={asset.id}
+            key={`${asset.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>

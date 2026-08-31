@@ -91,7 +91,7 @@ export const KarmaLedgerDesk: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-stone-800">
               {sortedDevotees.map((d, idx) => (
-                <tr key={d.id} className="hover:bg-stone-800/40 transition-colors">
+                <tr key={`${d.id}-${idx}`} className="hover:bg-stone-800/40 transition-colors">
                   <td className="p-3">
                     <div
                       className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs ${

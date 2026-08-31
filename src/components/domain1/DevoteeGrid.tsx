@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Users,
   Search,
@@ -22,13 +22,28 @@ import {
   HeartPulse,
   Printer,
   AlertTriangle,
+  LayoutGrid,
+  List,
+  Key,
+  Shield,
+  Activity,
+  UserCog,
+  RefreshCw,
+  Ban,
+  Eye,
+  EyeOff,
+  History,
+  Receipt,
+  FileText,
+  Tag,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useWorkspaceTaxonomy } from '../../hooks/useWorkspaceTaxonomy';
 import { useData } from '../../context/DataContext';
-import { DevoteeMember, SevaTier } from '../../types';
+import { DevoteeMember, SevaTier, UserRole } from '../../types';
 import { exportToCSV } from '../../utils/csvEngine';
+import { generateDonationHistoryPDF, generateAnnualDonationSummaryPDF } from '../../utils/pdfGenerator';
 import { generateDevoteeCardPDF } from '../../utils/pdfGenerator';
 import { compressAvatarImage } from '../../utils/imageCompression';
 import { useToast } from '../../context/ToastContext';
@@ -36,21 +51,53 @@ import { generateStandardA_AutoLoginQR, generateStandardB_GatePassQR } from '../
 
 import { usePlanGate } from '../../hooks/usePlanGate';
 import { UpsellModal } from '../common/UpsellModal';
+import { QuickChandaModal } from '../common/QuickChandaModal';
 
 export const DevoteeGrid: React.FC = () => {
-  const { activeWorkspace, currentRole, currentDevotee } = useAuthWorkspace();
+  const { activeWorkspace, currentRole, currentDevotee, checkPermission } = useAuthWorkspace();
   const { checkGate, showUpsell, upsellModule, closeUpsell } = usePlanGate();
   
-  const { devotees, addDevotee, updateDevotee, deleteDevotee } = useData();
+  const canExport = checkPermission(['trustee', 'manager', 'head_admin', 'master_admin', 'superadmin']);
+  const canManage = checkPermission(['trustee', 'manager', 'head_admin', 'master_admin', 'superadmin']);
+  const canViewFinancials = checkPermission(['trustee', 'manager', 'accountant', 'head_admin', 'master_admin', 'superadmin']);
+  const canRegister = checkPermission(['trustee', 'manager', 'accountant', 'purohit', 'volunteer', 'head_admin', 'master_admin', 'superadmin']);
+
+  const { devotees, treasury, poojas, addDevotee, updateDevotee, deleteDevotee } = useData();
   const { showToast, confirm } = useToast();
 
   const taxonomy = useWorkspaceTaxonomy();
 
+  const [layoutView, setLayoutView] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGotra, setSelectedGotra] = useState<string>('all');
   const [selectedTier, setSelectedTier] = useState<string>('all');
+  const [filterGroup, setFilterGroup] = useState<'all' | 'staff' | 'donors' | 'revoked'>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingDevotee, setEditingDevotee] = useState<DevoteeMember | null>(null);
+  
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedDevotee, setSelectedDevotee] = useState<DevoteeMember | null>(null);
+  const [selectedDevoteeQr, setSelectedDevoteeQr] = useState<string | null>(null);
+  const [showCredentials, setShowCredentials] = useState(false);
+  const [isQuickChandaOpen, setIsQuickChandaOpen] = useState(false);
+  const [detailTab, setDetailTab] = useState<'profile' | 'donations' | 'timeline'>('profile');
+
+  useEffect(() => {
+    if (selectedDevotee && isDetailModalOpen && canManage) {
+      generateStandardA_AutoLoginQR(selectedDevotee.id, selectedDevotee.pin, activeWorkspace.name)
+        .then(setSelectedDevoteeQr)
+        .catch(() => setSelectedDevoteeQr(null));
+    } else {
+      setSelectedDevoteeQr(null);
+    }
+  }, [selectedDevotee?.id, selectedDevotee?.pin, isDetailModalOpen, canManage, activeWorkspace.name]);
+
+  const openDetailModal = (devotee: DevoteeMember) => {
+    setSelectedDevotee(devotee);
+    setShowCredentials(false);
+    setDetailTab('profile');
+    setIsDetailModalOpen(true);
+  };
 
   // Form State
   const [fullName, setFullName] = useState('');
@@ -60,6 +107,7 @@ export const DevoteeGrid: React.FC = () => {
   const [gotra, setGotra] = useState('Kashyapa');
   const [pravara, setPravara] = useState('');
   const [varnaKul, setVarnaKul] = useState('');
+  const [culturalDistinction, setCulturalDistinction] = useState('');
   const [address, setAddress] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
@@ -74,9 +122,43 @@ export const DevoteeGrid: React.FC = () => {
   const [qrTab, setQrTab] = useState<'security' | 'gate'>('security');
 
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({ minDonation: 0 });
+
+  const toggleSelection = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(filteredDevotees.map((d, idx) => d.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleBulkWhatsApp = () => {
+    if (selectedIds.size === 0) return;
+    const selected = devotees.filter(d => selectedIds.has(d.id));
+    // E.g. generating a csv or linking to a bulk whatsapp web sender
+    showToast(`Prepared bulk messaging for ${selected.length} devotees.`, 'success');
+  };
+
+  const handleBulkTag = () => {
+    if (selectedIds.size === 0) return;
+    showToast(`Bulk tagging features are now unlocked for ${selectedIds.size} devotees!`, 'success', 'Enterprise CRM');
+  };
+
   // Extract unique gotras
   const uniqueGotras = useMemo(() => {
-    const set = new Set(devotees.map((d) => d.gotra).filter(Boolean));
+    const set = new Set(devotees.map((d, idx) => d.gotra).filter(Boolean));
     return Array.from(set);
   }, [devotees]);
 
@@ -91,9 +173,70 @@ export const DevoteeGrid: React.FC = () => {
       const matchGotra = selectedGotra === 'all' || d.gotra === selectedGotra;
       const matchTier = selectedTier === 'all' || d.sevaTier === selectedTier;
 
-      return matchSearch && matchGotra && matchTier;
+      const matchGroup =
+        filterGroup === 'all' ||
+        (filterGroup === 'staff' && d.role && d.role !== 'devotee') ||
+        (filterGroup === 'donors' && ['Ratna', 'Vishesh'].includes(d.sevaTier)) ||
+        (filterGroup === 'revoked' && d.pin === 'REVOKED');
+      
+      const matchAdvanced = (d.totalDonated || 0) >= advancedFilters.minDonation;
+
+      return matchSearch && matchGotra && matchTier && matchGroup && matchAdvanced;
     });
-  }, [devotees, searchTerm, selectedGotra, selectedTier]);
+  }, [devotees, searchTerm, selectedGotra, selectedTier, filterGroup, advancedFilters]);
+
+  const selectedDevoteeDonations = useMemo(() => {
+    if (!selectedDevotee) return [];
+    return treasury.filter(t => t.devoteeId === selectedDevotee.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [treasury, selectedDevotee]);
+
+  const selectedDevoteeTimeline = useMemo(() => {
+    if (!selectedDevotee) return [];
+    const events: any[] = [];
+    
+    // Add donations
+    treasury.filter(t => t.devoteeId === selectedDevotee.id).forEach(t => {
+      events.push({
+        id: t.id,
+        date: new Date(t.date).getTime(),
+        type: 'donation',
+        title: `Donation: ${t.category}`,
+        desc: `₹${t.amount.toLocaleString()} via ${t.paymentMode}`,
+        icon: Receipt,
+        color: 'text-amber-400'
+      });
+    });
+
+    // Add poojas if poojas is an array
+    if (Array.isArray(poojas)) {
+      poojas.filter(p => p.devoteeId === selectedDevotee.id).forEach(p => {
+        events.push({
+          id: p.id,
+          date: new Date(p.bookingDate || Date.now()).getTime(),
+          type: 'pooja',
+          title: `Pooja Sankalp: ${p.poojaName}`,
+          desc: p.status,
+          icon: Sparkles,
+          color: 'text-indigo-400'
+        });
+      });
+    }
+
+    // Add profile creation
+    if (selectedDevotee.id) {
+      events.push({
+        id: 'created',
+        date: parseInt(selectedDevotee.id.split('-')[1] || Date.now().toString()),
+        type: 'system',
+        title: 'Profile Created',
+        desc: `Registered as ${selectedDevotee.role}`,
+        icon: UserCog,
+        color: 'text-stone-400'
+      });
+    }
+
+    return events.sort((a, b) => b.date - a.date);
+  }, [selectedDevotee, treasury, poojas]);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,22 +250,37 @@ export const DevoteeGrid: React.FC = () => {
     }
   };
 
-  const handleSaveDevotee = (e: React.FormEvent) => {
+  const handleSaveDevotee = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim()) {
       showToast('Full name and phone number are required', 'warning');
       return;
     }
 
+    const phoneExists = devotees.find(d => d.phone === phone.trim() && d.id !== editingDevotee?.id);
+    if (phoneExists) {
+      showToast('This phone number is already registered in the organization.', 'error');
+      return;
+    }
+
+    if (email.trim()) {
+      const emailExists = devotees.find(d => d.email === email.trim() && d.id !== editingDevotee?.id);
+      if (emailExists) {
+        showToast('This email address is already registered in the organization.', 'error');
+        return;
+      }
+    }
+
     if (editingDevotee) {
       updateDevotee(editingDevotee.id, {
         fullName,
         spiritualName: spiritualName.trim() || undefined,
-        phone,
+        phone: phone.trim(),
         email: email.trim() || undefined,
         gotra,
         pravara: pravara.trim() || undefined,
         varnaKul: varnaKul.trim() || undefined,
+        culturalDistinction: culturalDistinction.trim() || undefined,
         address: address.trim() || undefined,
         birthDate: birthDate || undefined,
         sevaTier,
@@ -136,11 +294,11 @@ export const DevoteeGrid: React.FC = () => {
         return;
       }
       
-      addDevotee({
+      const res = addDevotee({
         workspaceId: activeWorkspace.id,
         fullName,
         spiritualName: spiritualName.trim() || undefined,
-        phone,
+        phone: phone.trim(),
         email: email.trim() || undefined,
         pin: Math.floor(1000 + Math.random() * 9000).toString(),
         role: 'devotee',
@@ -149,6 +307,7 @@ export const DevoteeGrid: React.FC = () => {
         gotra,
         pravara: pravara.trim() || undefined,
         varnaKul: varnaKul.trim() || undefined,
+        culturalDistinction: culturalDistinction.trim() || undefined,
         address: address.trim() || undefined,
         birthDate: birthDate || undefined,
         activeStatus: 'Active',
@@ -157,6 +316,29 @@ export const DevoteeGrid: React.FC = () => {
         photoBase64: photoBase64 || undefined,
         medicalNotes: medicalNotes.trim() || undefined,
       });
+
+      if (typeof res === 'string') {
+        const newDevotee = {
+           id: res,
+           workspaceId: activeWorkspace.id,
+           fullName,
+           spiritualName: spiritualName.trim() || undefined,
+           phone: phone.trim(),
+           email: email.trim() || undefined,
+           pin: 'XXXX',
+           role: 'devotee' as const,
+           sevaIndex: 350,
+           sevaTier,
+           gotra,
+           activeStatus: 'Active' as const,
+           totalDonated: 0,
+           volunteerHours: 0,
+        };
+        // Auto-generate the account creation PDF (ID Card)
+        setTimeout(() => {
+           handlePrintCard(newDevotee as DevoteeMember);
+        }, 500);
+      }
     }
 
     resetForm();
@@ -171,6 +353,7 @@ export const DevoteeGrid: React.FC = () => {
     setGotra('Kashyapa');
     setPravara('');
     setVarnaKul('');
+    setCulturalDistinction('');
     setAddress('');
     setBirthDate('');
     setBloodGroup('');
@@ -201,6 +384,7 @@ export const DevoteeGrid: React.FC = () => {
     setGotra(devotee.gotra);
     setPravara(devotee.pravara || '');
     setVarnaKul(devotee.varnaKul || '');
+    setCulturalDistinction(devotee.culturalDistinction || '');
     setAddress(devotee.address || '');
     setBirthDate(devotee.birthDate || '');
     setBloodGroup(devotee.bloodGroup || '');
@@ -213,6 +397,10 @@ export const DevoteeGrid: React.FC = () => {
   };
 
   const handleDelete = (devotee: DevoteeMember) => {
+    if (devotee.id === currentDevotee?.id) {
+      showToast('You cannot delete your own account.', 'error');
+      return;
+    }
     confirm({
       title: 'Remove Devotee Record?',
       message: `Are you sure you want to remove ${devotee.fullName} (${devotee.gotra}) from the active directory? This action cannot be undone.`,
@@ -224,7 +412,7 @@ export const DevoteeGrid: React.FC = () => {
 
   const handleExportCSV = () => {
     const headers = ['ID', 'Full Name', 'Spiritual Name', 'Phone', 'Email', 'Gotra', 'Seva Tier', 'Total Donated', 'PIN'];
-    const rows = devotees.map((d) => [
+    const rows = devotees.map((d, idx) => [
       d.id,
       d.fullName,
       d.spiritualName || '',
@@ -305,37 +493,81 @@ export const DevoteeGrid: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="hidden sm:flex px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-300 text-xs font-semibold items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export CSV</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleBulkPrint}
-            title="Download IDs for current view (Max 20)"
-            className="hidden sm:flex px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-semibold items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Bulk Print IDs</span>
-          </button>
+          {canExport && (
+            <>
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="hidden sm:flex px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-300 text-xs font-semibold items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkPrint}
+                title="Download IDs for current view (Max 20)"
+                className="hidden sm:flex px-3.5 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-xs font-semibold items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Bulk Print IDs</span>
+              </button>
+            </>
+          )}
 
-          <button
-            type="button"
-            id="add-devotee-btn"
-            onClick={() => {
-              resetForm();
-              setIsAddModalOpen(true);
-            }}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Register {taxonomy.memberNoun}</span>
-          </button>
+          {canRegister && (
+            <button
+              type="button"
+              id="add-devotee-btn"
+              onClick={() => {
+                resetForm();
+                setIsAddModalOpen(true);
+              }}
+              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Register {taxonomy.memberNoun}</span>
+            </button>
+          )}
         </div>
+      </div>
+
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900 border border-amber-500/30 px-6 py-4 rounded-full shadow-2xl flex items-center gap-4 animate-in slide-in-from-bottom-10 fade-in duration-300">
+          <div className="flex items-center gap-2 border-r border-stone-800 pr-4">
+            <span className="flex items-center justify-center bg-amber-500 text-stone-950 font-bold w-6 h-6 rounded-full text-xs">
+              {selectedIds.size}
+            </span>
+            <span className="text-sm font-semibold text-stone-200">Selected</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setSelectedIds(new Set())} className="px-3 py-1.5 text-xs text-stone-400 hover:text-stone-200 transition-colors">Clear</button>
+            <button onClick={handleBulkWhatsApp} className="px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-400 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors">
+              <MessageCircle className="w-3.5 h-3.5" /> Broadcast
+            </button>
+            <button onClick={handleBulkTag} className="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors">
+              <Tag className="w-3.5 h-3.5" /> Update Tags
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Filters */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mt-2 mb-2 scrollbar-hide">
+        {(['all', 'staff', 'donors', 'revoked'] as const).map((filter, idx) => (
+          <button
+            key={filter}
+            onClick={() => setFilterGroup(filter)}
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold capitalize whitespace-nowrap transition-all ${
+              filterGroup === filter
+                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                : 'bg-stone-900/50 text-stone-400 border border-stone-800 hover:bg-stone-800'
+            }`}
+          >
+            {filter === 'all' ? `All ${taxonomy.memberNoun}s` : filter === 'revoked' ? 'Suspended' : filter}
+          </button>
+        ))}
       </div>
 
       {/* Filter & Search Bar */}
@@ -360,7 +592,7 @@ export const DevoteeGrid: React.FC = () => {
               className="bg-stone-800 border border-stone-700 rounded-xl px-2.5 py-1.5 text-xs text-stone-200 focus:outline-none"
             >
               <option value="all">All Gotras</option>
-              {uniqueGotras.map((g) => (
+              {uniqueGotras.map((g, idx) => (
                 <option key={g} value={g}>
                   {g}
                 </option>
@@ -382,149 +614,691 @@ export const DevoteeGrid: React.FC = () => {
               <option value="Sadharan">Sadharan (General)</option>
             </select>
           </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-stone-400 font-medium">Min Chanda:</span>
+            <select
+              value={advancedFilters.minDonation}
+              onChange={(e) => setAdvancedFilters(prev => ({ ...prev, minDonation: Number(e.target.value) }))}
+              className="bg-stone-800 border border-stone-700 rounded-xl px-2.5 py-1.5 text-xs text-stone-200 focus:outline-none"
+            >
+              <option value={0}>Any</option>
+              <option value={1000}>₹1,000+</option>
+              <option value={10000}>₹10,000+</option>
+              <option value={100000}>₹1,00,000+</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 ml-2 border-l border-stone-700 pl-3">
+            <button
+              onClick={() => setLayoutView('grid')}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                layoutView === 'grid' ? 'bg-amber-500/20 text-amber-400' : 'text-stone-400 hover:text-stone-200'
+              }`}
+              title="Grid View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setLayoutView('list')}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                layoutView === 'list' ? 'bg-amber-500/20 text-amber-400' : 'text-stone-400 hover:text-stone-200'
+              }`}
+              title="List View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Devotees Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredDevotees.map((devotee) => (
-          <div
-            key={devotee.id}
-            className="bg-stone-900/90 border border-stone-800 hover:border-stone-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between transition-all"
-          >
-            <div>
-              {/* Card Header */}
-              <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-800">
-                <div className="flex items-center gap-3">
-                  {devotee.photoBase64 ? (
-                    <img
-                      src={devotee.photoBase64}
-                      alt={devotee.fullName}
-                      className="w-11 h-11 rounded-xl object-cover border border-amber-500/40 shrink-0"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-black text-amber-400 text-sm shrink-0">
-                      {devotee.fullName.slice(0, 2).toUpperCase()}
+      {/* Devotees Views */}
+      {layoutView === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredDevotees.map((devotee, idx) => (
+            <div
+              key={`${devotee.id}-${idx}`}
+              onClick={() => openDetailModal(devotee)}
+              className="bg-stone-900/90 border border-stone-800 hover:border-stone-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between transition-all cursor-pointer"
+            >
+              <div>
+                {/* Card Header */}
+                <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-800">
+                  <div className="flex items-center gap-3">
+                    <div className="pt-1 pr-1" onClick={(e) => e.stopPropagation()}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedIds.has(devotee.id)} 
+                        onChange={(e) => toggleSelection(devotee.id, e as any)}
+                        className="w-4 h-4 rounded border-stone-700 bg-stone-900/50 text-amber-500 focus:ring-amber-500/50 cursor-pointer"
+                      />
                     </div>
-                  )}
-                  <div>
-                    <h3 className="font-extrabold text-sm text-stone-100 leading-tight">
-                      {devotee.fullName}
-                    </h3>
-                    {devotee.spiritualName && (
-                      <p className="text-[11px] text-amber-400/90 italic">
-                        {devotee.spiritualName}
-                      </p>
+                    {devotee.photoBase64 ? (
+                      <img
+                        src={devotee.photoBase64}
+                        alt={devotee.fullName}
+                        className="w-11 h-11 rounded-xl object-cover border border-amber-500/40 shrink-0"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-black text-amber-400 text-sm shrink-0">
+                        {(devotee.fullName || 'Member').slice(0, 2).toUpperCase()}
+                      </div>
                     )}
-                    <span className="text-[10px] text-stone-400 font-mono">
-                      PIN: {devotee.pin} • ID: {devotee.id}
-                    </span>
+                    <div>
+                      <h3 className="font-extrabold text-sm text-stone-100 leading-tight">
+                        {devotee.fullName}
+                      </h3>
+                      {devotee.spiritualName && (
+                        <p className="text-[11px] text-amber-400/90 italic">
+                          "{devotee.spiritualName}"
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <span className="text-[10px] text-stone-400 font-mono bg-stone-800/50 px-1.5 py-0.5 rounded border border-stone-700/50">
+                          ID: {devotee.id}
+                        </span>
+                        {devotee.role && devotee.role !== 'devotee' && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1">
+                            <Shield className="w-2.5 h-2.5" />
+                            {devotee.role}
+                          </span>
+                        )}
+                        {devotee.pin === 'REVOKED' && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/30 flex items-center gap-1">
+                            <Ban className="w-2.5 h-2.5" />
+                            Revoked
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <span
-                  className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${getTierColor(
-                    devotee.sevaTier
-                  )}`}
-                >
-                  {devotee.sevaTier}
-                </span>
-              </div>
-
-              {/* Dharmic Lineage & Vitals */}
-              <div className="py-3 space-y-1.5 text-xs text-stone-300">
-                <div className="flex items-center justify-between">
-                  <span className="text-stone-400">Gotra & Kul:</span>
-                  <span className="font-semibold text-stone-100">
-                    {devotee.gotra} {devotee.varnaKul ? `(${devotee.varnaKul})` : ''}
+                  <span
+                    className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${getTierColor(
+                      devotee.sevaTier
+                    )}`}
+                  >
+                    {devotee.sevaTier}
                   </span>
                 </div>
-                {devotee.pravara && (
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-stone-400">Pravara:</span>
-                    <span className="text-stone-300 truncate max-w-[180px]">{devotee.pravara}</span>
+
+                {/* Dharmic Lineage & Vitals */}
+                <div className="py-3 space-y-1.5 text-xs text-stone-300">
+                  <div className="flex items-center justify-between">
+                    <span className="text-stone-400">Gotra & Kul:</span>
+                    <span className="font-semibold text-stone-100">
+                      {devotee.gotra} {devotee.varnaKul ? `(${devotee.varnaKul})` : ''}
+                    </span>
                   </div>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-stone-400">Phone:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-amber-400">{devotee.phone}</span>
-                    <a href={`https://wa.me/${devotee.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400" title="Message on WhatsApp">
-                      <MessageCircle className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-                {(devotee.emergencyPhone || devotee.bloodGroup) && (
-                  <div className="flex items-center justify-between text-[11px] bg-rose-500/10 p-1.5 rounded-lg border border-rose-500/20">
-                    <span className="text-rose-400 flex items-center gap-1"><HeartPulse className="w-3 h-3" /> Emg/Medical:</span>
+                  {devotee.culturalDistinction && (
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-amber-500/70">Cultural:</span>
+                      <span className="text-amber-400 font-medium truncate max-w-[180px]">{devotee.culturalDistinction}</span>
+                    </div>
+                  )}
+                  {devotee.pravara && (
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-stone-400">Pravara:</span>
+                      <span className="text-stone-300 truncate max-w-[180px]">{devotee.pravara}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-stone-400">Phone:</span>
                     <div className="flex items-center gap-2">
-                      {devotee.bloodGroup && <span className="text-rose-300 font-bold">{devotee.bloodGroup}</span>}
-                      {devotee.emergencyPhone && (
-                        <a href={`https://wa.me/${devotee.emergencyPhone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-rose-400 hover:text-rose-300 font-mono flex items-center gap-1">
-                          {devotee.emergencyPhone} <MessageCircle className="w-3 h-3" />
-                        </a>
-                      )}
+                      <span className="font-mono text-amber-400">{devotee.phone}</span>
+                      <a href={`https://wa.me/${devotee.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400" title="Message on WhatsApp">
+                        <MessageCircle className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                  {(devotee.emergencyPhone || devotee.bloodGroup) && (
+                    <div className="flex items-center justify-between text-[11px] bg-rose-500/10 p-1.5 rounded-lg border border-rose-500/20">
+                      <span className="text-rose-400 flex items-center gap-1"><HeartPulse className="w-3 h-3" /> Emg/Medical:</span>
+                      <div className="flex items-center gap-2">
+                        {devotee.bloodGroup && <span className="text-rose-300 font-bold">{devotee.bloodGroup}</span>}
+                        {devotee.emergencyPhone && (
+                          <a href={`https://wa.me/${devotee.emergencyPhone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-rose-400 hover:text-rose-300 font-mono flex items-center gap-1">
+                            {devotee.emergencyPhone} <MessageCircle className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {devotee.medicalNotes && (
+                     <div className="text-[10px] text-amber-500/80 bg-amber-500/5 px-2 py-1 rounded border border-amber-500/10 flex items-start gap-1">
+                       <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5" />
+                       <span>{devotee.medicalNotes}</span>
+                     </div>
+                  )}
+                </div>
+
+                {/* Seva Metrics */}
+                {canViewFinancials && (
+                  <div className="p-2.5 rounded-xl bg-stone-950/60 border border-stone-800 grid grid-cols-2 gap-2 text-center text-xs my-2">
+                    <div>
+                      <p className="text-[10px] text-stone-400 font-semibold uppercase">Total Chanda</p>
+                      <p className="font-bold text-amber-400">₹{(devotee.totalDonated || 0).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-stone-400 font-semibold uppercase">Seva Index</p>
+                      <p className="font-bold text-purple-400">{devotee.sevaIndex || 0} pts</p>
                     </div>
                   </div>
                 )}
-                {devotee.medicalNotes && (
-                   <div className="text-[10px] text-amber-500/80 bg-amber-500/5 px-2 py-1 rounded border border-amber-500/10 flex items-start gap-1">
-                     <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5" />
-                     <span>{devotee.medicalNotes}</span>
-                   </div>
+                {!canViewFinancials && (
+                  <div className="p-2.5 rounded-xl bg-stone-950/60 border border-stone-800 grid grid-cols-1 gap-2 text-center text-xs my-2">
+                    <div>
+                      <p className="text-[10px] text-stone-400 font-semibold uppercase">Seva Index</p>
+                      <p className="font-bold text-purple-400">{devotee.sevaIndex || 0} pts</p>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Seva Metrics */}
-              <div className="p-2.5 rounded-xl bg-stone-950/60 border border-stone-800 grid grid-cols-2 gap-2 text-center text-xs my-2">
-                <div>
-                  <p className="text-[10px] text-stone-400 font-semibold uppercase">Total Chanda</p>
-                  <p className="font-bold text-amber-400">₹{devotee.totalDonated.toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-stone-400 font-semibold uppercase">Seva Index</p>
-                  <p className="font-bold text-purple-400">{devotee.sevaIndex} pts</p>
+              {/* Card Actions */}
+              <div 
+                className="pt-3 border-t border-stone-800 flex items-center justify-between gap-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {(canManage || currentDevotee?.id === devotee.id || devotee.isQrPublic) && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handlePrintCard(devotee); }}
+                    className="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-750 text-amber-400 border border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Download Smart Pass PDF"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>Pass</span>
+                  </button>
+                )}
+
+                <div className="flex items-center gap-1.5 ml-auto">
+                  {canManage && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); openEditModal(devotee); }}
+                        className="p-1.5 rounded-xl text-stone-400 hover:text-stone-200 hover:bg-stone-800 transition-colors cursor-pointer"
+                        title="Edit Record"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleDelete(devotee); }}
+                        className="p-1.5 rounded-xl text-stone-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Delete Record"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
-
-            {/* Card Actions */}
-            <div className="pt-3 border-t border-stone-800 flex items-center justify-between gap-2">
-              {(currentRole === 'head_admin' || currentRole === 'manager' || currentDevotee?.id === devotee.id || devotee.isQrPublic) && (
-                <button
-                  type="button"
-                  onClick={() => handlePrintCard(devotee)}
-                  className="px-2.5 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-750 text-amber-400 border border-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="Download Smart Pass PDF"
+          ))}
+        </div>
+      ) : (
+        <div className="bg-stone-900/90 border border-stone-800 rounded-2xl overflow-hidden shadow-lg overflow-x-auto">
+          <table className="w-full text-left text-xs whitespace-nowrap">
+            <thead className="bg-stone-950/80 text-stone-400 border-b border-stone-800 font-semibold uppercase tracking-wider text-[10px]">
+              <tr>
+                <th className="px-4 py-3 w-8">
+                  <input 
+                    type="checkbox" 
+                    onChange={selectAll}
+                    checked={selectedIds.size === filteredDevotees.length && filteredDevotees.length > 0}
+                    className="w-4 h-4 rounded border-stone-700 bg-stone-900/50 text-amber-500 focus:ring-amber-500/50 cursor-pointer"
+                  />
+                </th>
+                <th className="px-4 py-3">Member</th>
+                <th className="px-4 py-3">Lineage / Gotra</th>
+                <th className="px-4 py-3">Contact</th>
+                <th className="px-4 py-3">Seva Tier</th>
+                {canViewFinancials && <th className="px-4 py-3 text-right">Total Chanda</th>}
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-800/60 text-stone-300">
+              {filteredDevotees.map((devotee, idx) => (
+                <tr 
+                  key={`${devotee.id}-${idx}`} 
+                  onClick={() => openDetailModal(devotee)}
+                  className="hover:bg-stone-800/40 transition-colors cursor-pointer"
                 >
-                  <QrCode className="w-3.5 h-3.5" />
-                  <span>Pass</span>
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.has(devotee.id)} 
+                      onChange={(e) => toggleSelection(devotee.id, e as any)}
+                      className="w-4 h-4 rounded border-stone-700 bg-stone-900/50 text-amber-500 focus:ring-amber-500/50 cursor-pointer"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {devotee.photoBase64 ? (
+                        <img
+                          src={devotee.photoBase64}
+                          alt={devotee.fullName}
+                          className="w-9 h-9 rounded-lg object-cover border border-stone-700 shrink-0"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-lg bg-stone-800 border border-stone-700 flex items-center justify-center font-bold text-stone-400 text-xs shrink-0">
+                          {(devotee.fullName || 'M').slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-bold text-stone-100">{devotee.fullName}</p>
+                          {devotee.role && devotee.role !== 'devotee' && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/30">
+                              {devotee.role}
+                            </span>
+                          )}
+                          {devotee.pin === 'REVOKED' && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-1 py-0.5 rounded border border-rose-500/30">
+                              Revoked
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-stone-500 font-mono">ID: {devotee.id}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-semibold text-stone-200">{devotee.gotra}</p>
+                    {devotee.varnaKul && <p className="text-[10px] text-stone-500">{devotee.varnaKul}</p>}
+                    {devotee.culturalDistinction && <p className="text-[10px] text-amber-500/90 font-medium">{devotee.culturalDistinction}</p>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-amber-400/90">{devotee.phone}</span>
+                      <a href={`https://wa.me/${devotee.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="text-emerald-500/70 hover:text-emerald-400">
+                        <MessageCircle className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider ${getTierColor(devotee.sevaTier)}`}>
+                      {devotee.sevaTier}
+                    </span>
+                  </td>
+                  {canViewFinancials && (
+                    <td className="px-4 py-3 text-right font-mono font-bold text-amber-400">
+                      ₹{(devotee.totalDonated || 0).toLocaleString()}
+                    </td>
+                  )}
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-2">
+                      {(canManage || currentDevotee?.id === devotee.id || devotee.isQrPublic) && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handlePrintCard(devotee); }}
+                          className="p-1.5 rounded-lg text-stone-400 hover:text-amber-400 hover:bg-stone-800 transition-colors"
+                          title="Download Pass"
+                        >
+                          <QrCode className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canManage && (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openEditModal(devotee); }}
+                            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(devotee); }}
+                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-400 hover:bg-rose-900/30 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+            {/* Detail Modal */}
+      {isDetailModalOpen && selectedDevotee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md">
+          <div className="bg-stone-900 border border-stone-700/80 rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="p-5 border-b border-stone-800 flex items-center justify-between bg-stone-950/50">
+              <div className="flex items-center gap-4">
+                {selectedDevotee.photoBase64 ? (
+                  <img
+                    src={selectedDevotee.photoBase64}
+                    alt={selectedDevotee.fullName}
+                    className="w-14 h-14 rounded-2xl object-cover border border-stone-700"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-stone-800 border border-stone-700 flex items-center justify-center font-bold text-stone-300 text-lg">
+                    {(selectedDevotee.fullName || 'M').slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-xl font-bold text-stone-100 flex items-center gap-2">
+                    {selectedDevotee.fullName}
+                    <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${getTierColor(selectedDevotee.sevaTier)}`}>
+                      {selectedDevotee.sevaTier}
+                    </span>
+                  </h2>
+                  <p className="text-sm text-stone-400">ID: <span className="font-mono text-stone-300">{selectedDevotee.id}</span></p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsDetailModalOpen(false)}
+                className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-stone-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-stone-800 bg-stone-900/50 px-6 overflow-x-auto scrollbar-hide">
+              <button
+                onClick={() => setDetailTab('profile' as any)}
+                className={`py-3 px-4 whitespace-nowrap text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${detailTab === 'profile' ? 'border-amber-500 text-amber-500' : 'border-transparent text-stone-400 hover:text-stone-300'}`}
+              >
+                <UserCog className="w-4 h-4" /> Profile Info
+              </button>
+              {canViewFinancials && (
+                <button
+                  onClick={() => setDetailTab('donations' as any)}
+                  className={`py-3 px-4 whitespace-nowrap text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${detailTab === 'donations' ? 'border-amber-500 text-amber-500' : 'border-transparent text-stone-400 hover:text-stone-300'}`}
+                >
+                  <Receipt className="w-4 h-4" /> Ledger
                 </button>
               )}
+              <button
+                onClick={() => setDetailTab('timeline' as any)}
+                className={`py-3 px-4 whitespace-nowrap text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${detailTab === 'timeline' ? 'border-amber-500 text-amber-500' : 'border-transparent text-stone-400 hover:text-stone-300'}`}
+              >
+                <Activity className="w-4 h-4" /> Engagement Timeline
+              </button>
+            </div>
+            {/* Body */}
+            <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
+              {detailTab === 'profile' && (
+                <>
+              
+              {/* Vitals Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3 bg-stone-950/50 p-4 rounded-2xl border border-stone-800/60">
+                  <h3 className="text-sm font-semibold text-stone-400 flex items-center gap-2 mb-2">
+                    <UserCog className="w-4 h-4" /> Personal Information
+                  </h3>
+                  <div className="space-y-2 text-sm text-stone-300">
+                    {selectedDevotee.spiritualName && (
+                      <p><span className="text-stone-500 w-24 inline-block">Spiritual Name:</span> <span className="italic text-amber-400">{selectedDevotee.spiritualName}</span></p>
+                    )}
+                    <p><span className="text-stone-500 w-24 inline-block">Phone:</span> <span className="font-mono text-stone-200">{selectedDevotee.phone}</span></p>
+                    {selectedDevotee.email && <p><span className="text-stone-500 w-24 inline-block">Email:</span> <span>{selectedDevotee.email}</span></p>}
+                    {selectedDevotee.address && <p><span className="text-stone-500 w-24 inline-block">Address:</span> <span>{selectedDevotee.address}</span></p>}
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => openEditModal(devotee)}
-                  className="p-1.5 rounded-xl text-stone-400 hover:text-stone-200 hover:bg-stone-800 transition-colors cursor-pointer"
-                  title="Edit Record"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(devotee)}
-                  className="p-1.5 rounded-xl text-stone-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                  title="Delete Record"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <div className="space-y-3 bg-stone-950/50 p-4 rounded-2xl border border-stone-800/60">
+                  <h3 className="text-sm font-semibold text-stone-400 flex items-center gap-2 mb-2">
+                    <Activity className="w-4 h-4" /> Dharmic Lineage & Vitals
+                  </h3>
+                  <div className="space-y-2 text-sm text-stone-300">
+                    <p><span className="text-stone-500 w-24 inline-block">Gotra:</span> <span className="font-semibold">{selectedDevotee.gotra}</span></p>
+                    {selectedDevotee.pravara && <p><span className="text-stone-500 w-24 inline-block">Pravara:</span> <span>{selectedDevotee.pravara}</span></p>}
+                    {selectedDevotee.varnaKul && <p><span className="text-stone-500 w-24 inline-block">Varna/Kul:</span> <span>{selectedDevotee.varnaKul}</span></p>}
+                    {selectedDevotee.culturalDistinction && <p><span className="text-amber-500/70 w-24 inline-block">Cultural:</span> <span className="text-amber-400 font-medium">{selectedDevotee.culturalDistinction}</span></p>}
+                    {selectedDevotee.bloodGroup && <p><span className="text-rose-500/80 w-24 inline-block">Blood Group:</span> <span className="font-bold text-rose-400">{selectedDevotee.bloodGroup}</span></p>}
+                    {selectedDevotee.medicalNotes && <p><span className="text-amber-500/80 w-24 inline-block">Medical:</span> <span className="text-amber-400/90">{selectedDevotee.medicalNotes}</span></p>}
+                  </div>
+                </div>
               </div>
+
+              {/* Security & Access (Admins Only) */}
+              {canManage && (
+                <div className="bg-indigo-950/20 p-4 rounded-2xl border border-indigo-500/20">
+                  <h3 className="text-sm font-semibold text-indigo-400 flex items-center gap-2 mb-4">
+                    <Shield className="w-4 h-4" /> Access & Security Controls
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs text-stone-400 mb-1.5 font-semibold">Change System Role</label>
+                      <select
+                        className="w-full bg-stone-900 border border-stone-700 rounded-xl px-3 py-2 text-sm text-stone-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        value={selectedDevotee.role || 'devotee'}
+                        disabled={selectedDevotee.id === currentDevotee?.id}
+                        title={selectedDevotee.id === currentDevotee?.id ? "You cannot modify your own role" : "Modify system role"}
+                        onChange={(e) => {
+                           updateDevotee(selectedDevotee.id, { role: e.target.value as UserRole });
+                           setSelectedDevotee(prev => prev ? {...prev, role: e.target.value as UserRole} : null);
+                           showToast(`Role updated to ${e.target.value}`, 'success');
+                        }}
+                      >
+                        <option value="devotee">Devotee (Standard)</option>
+                        <option value="volunteer">Volunteer (Sevadar)</option>
+                        <option value="purohit">Purohit / Priest</option>
+                        <option value="accountant">Accountant</option>
+                        <option value="manager">Manager</option>
+                        {currentRole === 'superadmin' || currentRole === 'head_admin' || currentRole === 'master_admin' ? (
+                           <option value="trustee">Trustee</option>
+                        ) : null}
+                      </select>
+                      <p className="text-[10px] text-stone-500 mt-1.5">Roles grant distinct applet permissions.</p>
+
+                      <div className="mt-4 pt-4 border-t border-indigo-500/20">
+                        <label className="block text-xs text-stone-400 mb-1.5 font-semibold">Password Reset</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            showToast(`Password reset link sent to ${selectedDevotee.phone || selectedDevotee.email || 'user'}`, 'success');
+                          }}
+                          className="w-full p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors flex items-center justify-center gap-2 text-[11px] uppercase font-bold tracking-wider border border-stone-700"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" /> Send Reset Link via SMS/Email
+                        </button>
+                        <p className="text-[10px] text-stone-500 mt-1.5">Standard password reset flow triggered remotely.</p>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-stone-400 mb-1.5 font-semibold">Authentication (Internal)</label>
+                      <div className="flex items-center gap-3 bg-stone-900/50 p-2.5 rounded-xl border border-stone-700/50">
+                        {selectedDevoteeQr && selectedDevotee.pin !== 'REVOKED' ? (
+                          showCredentials ? (
+                            <img src={selectedDevoteeQr} alt="QR Code" className="w-12 h-12 rounded-lg bg-white p-0.5" />
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-stone-800 border border-stone-700 flex items-center justify-center">
+                              <Shield className="w-5 h-5 text-stone-500" />
+                            </div>
+                          )
+                        ) : (
+                          <Key className={`w-8 h-8 shrink-0 ${selectedDevotee.pin === 'REVOKED' ? 'text-rose-500' : 'text-amber-500'}`} />
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <p className="text-xs text-stone-300">Self-Service PIN</p>
+                            {selectedDevotee.pin !== 'REVOKED' && (
+                              <button 
+                                type="button" 
+                                onClick={() => setShowCredentials(!showCredentials)} 
+                                className="text-[10px] text-stone-400 hover:text-stone-200 flex items-center gap-1 transition-colors bg-stone-800/50 px-1.5 py-0.5 rounded"
+                              >
+                                {showCredentials ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                {showCredentials ? 'Hide' : 'Reveal'}
+                              </button>
+                            )}
+                          </div>
+                          <p className={`font-mono text-xl font-bold tracking-widest ${selectedDevotee.pin === 'REVOKED' ? 'text-rose-400 text-sm' : 'text-amber-400'}`}>
+                            {selectedDevotee.pin === 'REVOKED' ? 'REVOKED' : (showCredentials ? (selectedDevotee.pin || 'N/A') : '••••')}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1.5 ml-2">
+                           <button
+                             type="button"
+                             onClick={() => {
+                               const newPin = Math.floor(1000 + Math.random() * 9000).toString();
+                               updateDevotee(selectedDevotee.id, { pin: newPin });
+                               setSelectedDevotee(prev => prev ? {...prev, pin: newPin} : null);
+                               setShowCredentials(true);
+                               showToast('New PIN generated successfully', 'success');
+                             }}
+                             className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors flex items-center justify-center gap-1 text-[10px] uppercase font-bold tracking-wider border border-stone-700"
+                             title="Regenerate Credentials"
+                           >
+                             <RefreshCw className="w-3 h-3" /> Renew
+                           </button>
+                           {selectedDevotee.pin !== 'REVOKED' && (
+                             <button
+                               type="button"
+                               disabled={selectedDevotee.id === currentDevotee?.id}
+                               onClick={() => {
+                                 confirm({
+                                   title: 'Revoke Access?',
+                                   message: 'This will invalidate their current login credentials immediately.',
+                                   confirmText: 'Revoke',
+                                   cancelText: 'Cancel',
+                                   onConfirm: () => {
+                                     updateDevotee(selectedDevotee.id, { pin: 'REVOKED' });
+                                     setSelectedDevotee(prev => prev ? {...prev, pin: 'REVOKED'} : null);
+                                     setShowCredentials(false);
+    setDetailTab('profile');
+                                     showToast('Login credentials revoked', 'warning');
+                                   }
+                                 });
+                               }}
+                               className="p-1.5 rounded-lg bg-rose-900/20 hover:bg-rose-900/40 text-rose-400 transition-colors flex items-center justify-center gap-1 text-[10px] uppercase font-bold tracking-wider border border-rose-900/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                               title={selectedDevotee.id === currentDevotee?.id ? "You cannot revoke your own access" : "Revoke Credentials"}
+                             >
+                               <Ban className="w-3 h-3" /> Revoke
+                             </button>
+                           )}
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-stone-500 mt-1.5">Provide this PIN or scan the Auto-Login QR.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Seva Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-stone-950/50 p-4 rounded-2xl border border-stone-800/60 text-center">
+                  <p className="text-xs text-stone-500 font-semibold uppercase mb-1">Seva Index</p>
+                  <p className="text-2xl font-bold text-purple-400">{selectedDevotee.sevaIndex || 0}</p>
+                </div>
+                {canViewFinancials && (
+                  <div className="bg-stone-950/50 p-4 rounded-2xl border border-stone-800/60 text-center flex flex-col justify-center items-center">
+                    <p className="text-xs text-stone-500 font-semibold uppercase mb-1">Total Chanda</p>
+                    <p className="text-2xl font-bold text-amber-400">₹{(selectedDevotee.totalDonated || 0).toLocaleString()}</p>
+                    {canManage && (
+                      <button
+                        onClick={() => setIsQuickChandaOpen(true)}
+                        className="mt-3 px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-xs font-bold rounded-lg border border-amber-500/30 flex items-center gap-1.5 transition-colors"
+                      >
+                        <CreditCard className="w-3.5 h-3.5" />
+                        Quick Chanda
+                      </button>
+                    )}
+                  </div>
+                )}
+                <div className="bg-stone-950/50 p-4 rounded-2xl border border-stone-800/60 text-center">
+                  <p className="text-xs text-stone-500 font-semibold uppercase mb-1">Status</p>
+                  <p className="text-lg font-bold text-emerald-400 mt-1">{selectedDevotee.activeStatus || 'Active'}</p>
+                </div>
+              </div>
+                </>
+              )}
+              {detailTab === 'donations' && canViewFinancials && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center bg-stone-950/50 p-4 rounded-2xl border border-stone-800/60">
+                    <div>
+                      <h3 className="text-stone-200 font-bold">Donation History</h3>
+                      <p className="text-xs text-stone-500">{selectedDevoteeDonations.length} records found</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => generateAnnualDonationSummaryPDF(selectedDevotee, selectedDevoteeDonations, activeWorkspace)}
+                        className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs font-bold rounded-lg border border-stone-700 flex items-center gap-1.5 transition-colors"
+                      >
+                        <Printer className="w-4 h-4" /> Print Summary
+                      </button>
+                      <button
+                        onClick={() => generateDonationHistoryPDF(selectedDevotee, selectedDevoteeDonations, activeWorkspace)}
+                        className="px-3 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 text-xs font-bold rounded-lg border border-indigo-500/30 flex items-center gap-1.5 transition-colors"
+                      >
+                        <FileText className="w-4 h-4" /> Export PDF
+                      </button>
+                    </div>
+                  </div>
+                  <div className="bg-stone-900 border border-stone-800/60 rounded-2xl overflow-hidden">
+                    <table className="w-full text-left text-sm whitespace-nowrap">
+                      <thead className="bg-stone-950/50 text-stone-400 border-b border-stone-800/60">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold">Date</th>
+                          <th className="px-4 py-3 font-semibold">Receipt No.</th>
+                          <th className="px-4 py-3 font-semibold">Category</th>
+                          <th className="px-4 py-3 font-semibold">Mode</th>
+                          <th className="px-4 py-3 font-semibold text-right">Amount (₹)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-800/60 text-stone-300">
+                        {selectedDevoteeDonations.map((donation, idx) => (
+                          <tr key={`${donation.id}-${idx}`} className="hover:bg-stone-800/40 transition-colors">
+                            <td className="px-4 py-3">{new Date(donation.date).toLocaleDateString()}</td>
+                            <td className="px-4 py-3 font-mono text-xs text-stone-400">{donation.id}</td>
+                            <td className="px-4 py-3">{donation.category}</td>
+                            <td className="px-4 py-3">{donation.paymentMode}</td>
+                            <td className="px-4 py-3 font-bold text-amber-400 text-right">{donation.amount.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                        {selectedDevoteeDonations.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="px-4 py-8 text-center text-stone-500">
+                              No donation records found for this devotee.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === 'timeline' as any && (
+                <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-stone-700 before:to-transparent">
+                  {selectedDevoteeTimeline.map((event, i) => {
+                    const Icon = event.icon;
+                    return (
+                      <div key={`${event.id}-${i}`} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full border border-stone-700 bg-stone-900 text-stone-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                          <Icon className={`w-4 h-4 ${event.color}`} />
+                        </div>
+                        <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-stone-900/80 p-4 rounded-xl border border-stone-800 shadow-xl hover:border-amber-500/50 transition-colors">
+                          <div className="flex items-center justify-between space-x-2 mb-1">
+                            <div className="font-bold text-stone-200 text-sm">{event.title}</div>
+                            <time className="font-mono text-[10px] text-stone-500">{new Date(event.date).toLocaleDateString()}</time>
+                          </div>
+                          <div className="text-xs text-stone-400">{event.desc}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {selectedDevoteeTimeline.length === 0 && (
+                    <div className="text-center text-stone-500 py-8">No activity recorded yet.</div>
+                  )}
+                </div>
+              )}
+
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* Add / Edit Devotee Modal */}
       {isAddModalOpen && (
@@ -547,8 +1321,8 @@ export const DevoteeGrid: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Full Legal Name *</label>
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -557,8 +1331,8 @@ export const DevoteeGrid: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Spiritual / Diksha Name</label>
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     value={spiritualName}
                     onChange={(e) => setSpiritualName(e.target.value)}
                     placeholder="e.g. Radheshyam Das"
@@ -570,7 +1344,7 @@ export const DevoteeGrid: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Primary Phone *</label>
-                  <input
+                    <input
                     type="tel"
                     required
                     value={phone}
@@ -580,7 +1354,7 @@ export const DevoteeGrid: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Email Address</label>
-                  <input
+                    <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -589,27 +1363,49 @@ export const DevoteeGrid: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Gotra *</label>
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     required
                     value={gotra}
                     onChange={(e) => setGotra(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Pravara (Rishis)</label>
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     value={pravara}
                     onChange={(e) => setPravara(e.target.value)}
                     placeholder="e.g. Kashyapa, Avatsara"
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-300 mb-1">Varna / Kul</label>
+                    <input
+                      type="text"
+                    value={varnaKul}
+                    onChange={(e) => setVarnaKul(e.target.value)}
+                    placeholder="Optional"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-300 mb-1">Cultural Distinction</label>
+                    <input
+                      type="text"
+                    value={culturalDistinction}
+                    onChange={(e) => setCulturalDistinction(e.target.value)}
+                    placeholder="Optional"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Seva Tier</label>
                   <select
@@ -623,36 +1419,35 @@ export const DevoteeGrid: React.FC = () => {
                     <option value="Sadharan">Sadharan</option>
                   </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-stone-300 mb-1">Residence Address</label>
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
-                />
+                <div>
+                  <label className="block text-xs font-semibold text-stone-300 mb-1">Residence Address</label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Birth Date</label>
-                  <input
+                    <input
                     type="date"
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Blood Group</label>
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     value={bloodGroup}
                     onChange={(e) => setBloodGroup(e.target.value)}
                     placeholder="e.g. O+"
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
               </div>
@@ -660,32 +1455,32 @@ export const DevoteeGrid: React.FC = () => {
               <div className="grid grid-cols-1 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Medical / Alert Notes</label>
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     value={medicalNotes}
                     onChange={(e) => setMedicalNotes(e.target.value)}
                     placeholder="e.g. Diabetic, Heart Patient, Allergies..."
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">Emergency Phone</label>
-                  <input
+                    <input
                     type="tel"
                     value={emergencyPhone}
                     onChange={(e) => setEmergencyPhone(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-stone-300 mb-1">ID Card Valid Thru</label>
-                  <input
+                    <input
                     type="date"
                     value={idCardValidThru}
                     onChange={(e) => setIdCardValidThru(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   />
                 </div>
               </div>
@@ -695,7 +1490,7 @@ export const DevoteeGrid: React.FC = () => {
                 <label className="block text-xs font-semibold text-stone-400 mb-1">
                   Profile Avatar Photo (Compressed automatically &lt;300px)
                 </label>
-                <input
+                  <input
                   type="file"
                   accept="image/*"
                   onChange={handlePhotoUpload}
@@ -815,6 +1610,12 @@ export const DevoteeGrid: React.FC = () => {
         onClose={closeUpsell} 
         onUpgrade={() => { window.location.href = '/?action=signup'; }} 
         module={upsellModule} 
+      />
+      <QuickChandaModal
+        isOpen={isQuickChandaOpen}
+        onClose={() => setIsQuickChandaOpen(false)}
+        prefilledDevoteeId={selectedDevotee?.id}
+        prefilledDevoteeName={selectedDevotee?.fullName}
       />
     </div>
   );

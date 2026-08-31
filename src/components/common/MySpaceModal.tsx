@@ -365,8 +365,8 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                   <div className="max-h-72 overflow-y-auto p-3 custom-scrollbar">
                      {filteredPersonalTransactions.length > 0 ? (
                        <div className="space-y-2">
-                         {filteredPersonalTransactions.map(tr => (
-                           <div key={tr.id} className="p-4 bg-white border border-stone-100 hover:border-stone-200 hover:shadow-sm rounded-2xl transition-all flex justify-between items-center group min-w-0">
+                         {filteredPersonalTransactions.map((tr, idx) => (
+                           <div key={`${tr.id}-${idx}`} className="p-4 bg-white border border-stone-100 hover:border-stone-200 hover:shadow-sm rounded-2xl transition-all flex justify-between items-center group min-w-0">
                              <div className="min-w-0 pr-4">
                                <p className="text-sm font-black text-stone-900 truncate">{tr.purpose || tr.category}</p>
                                <p className="text-[10px] font-bold text-stone-400 tracking-wider mt-1">{new Date(tr.date).toLocaleString()}</p>

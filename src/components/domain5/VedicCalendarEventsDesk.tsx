@@ -150,9 +150,9 @@ export const VedicCalendarEventsDesk: React.FC = () => {
 
       {/* Events Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {events.map((ev) => (
+        {events.map((ev, idx) => (
           <div
-            key={ev.id}
+            key={`${ev.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4"
           >
             <div>

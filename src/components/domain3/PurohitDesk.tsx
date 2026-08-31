@@ -88,7 +88,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
     const unsubPur = onSnapshot(purohitRef, (snap) => {
       if (!snap.empty) {
-        const arr = snap.docs.map(d => ({ purohitId: d.id, ...d.data() }));
+        const arr = snap.docs.map((d, idx) => ({ purohitId: d.id, ...d.data() }));
         setPurohits(arr);
         localStorage.setItem(`sb_purohits_${session.communityId}`, JSON.stringify(arr));
       } else setPurohits([]);
@@ -96,7 +96,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
     const unsubYaj = onSnapshot(yajRef, (snap) => {
       if (!snap.empty) {
-        const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const arr = snap.docs.map((d, idx) => ({ id: d.id, ...d.data() }));
         setYajamans(arr);
         localStorage.setItem(`sb_yajamans_${session.communityId}`, JSON.stringify(arr));
       } else setYajamans([]);
@@ -104,7 +104,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
     const unsubAnu = onSnapshot(anuRef, (snap) => {
       if (!snap.empty) {
-        const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const arr = snap.docs.map((d, idx) => ({ id: d.id, ...d.data() }));
         arr.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
         setAnushthans(arr);
         localStorage.setItem(`sb_anushthans_${session.communityId}`, JSON.stringify(arr));
@@ -114,7 +114,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
     const appRef = collection(db, `communities/${session.communityId}/purohit_applications`);
     const unsubApp = onSnapshot(appRef, (snap) => {
       if (!snap.empty) {
-        setApplications(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+        setApplications(snap.docs.map((d, idx) => ({ id: d.id, ...d.data() })));
       } else {
         setApplications([]);
       }
@@ -122,7 +122,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
     
     const unsubSam = onSnapshot(samRef, (snap) => {
       if (!snap.empty) {
-        const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const arr = snap.docs.map((d, idx) => ({ id: d.id, ...d.data() }));
         setSamagri(arr);
         localStorage.setItem(`sb_samagri_${session.communityId}`, JSON.stringify(arr));
       } else setSamagri([]);
@@ -393,8 +393,8 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {activeTab === 'ANUSHTHAN' && (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 animate-in fade-in">
-          {filteredAnushthans.length > 0 ? filteredAnushthans.map(anu => (
-            <div key={anu.id} className="bg-white rounded-3xl border border-gray-200 shadow-sm hover:shadow-lg p-6 flex flex-col group transition-all duration-300 relative overflow-hidden ring-1 ring-black/5">
+          {filteredAnushthans.length > 0 ? filteredAnushthans.map((anu, idx) => (
+            <div key={`${anu.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm hover:shadow-lg p-6 flex flex-col group transition-all duration-300 relative overflow-hidden ring-1 ring-black/5">
                <div className={`absolute top-0 left-0 w-1.5 h-full ${anu.status === 'COMPLETED' ? 'bg-green-500' : anu.status === 'BOOKED' ? 'bg-blue-500' : 'bg-orange-500'}`}></div>
                <div className="flex justify-between items-start mb-5 border-b border-gray-100 pb-4 pl-3">
                  <div>
@@ -445,8 +445,8 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         <div className="space-y-6 animate-in fade-in">
           {applications.length > 0 ? (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {applications.map(app => (
-                <div key={app.id} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
+              {applications.map((app, idx) => (
+                <div key={`${app.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -508,8 +508,8 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {activeTab === 'YAJAMAN' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in">
-          {filteredYajamans.length > 0 ? filteredYajamans.map(yjm => (
-            <div key={yjm.id} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg hover:border-orange-200 transition-all duration-300">
+          {filteredYajamans.length > 0 ? filteredYajamans.map((yjm, idx) => (
+            <div key={`${yjm.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg hover:border-orange-200 transition-all duration-300">
                <div className="flex items-center gap-4 mb-5">
                  <div className="w-14 h-14 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-500 rounded-full flex items-center justify-center font-black text-xl border border-orange-200 shadow-inner shrink-0">{yjm.name.charAt(0)}</div>
                  <div className="min-w-0">
@@ -542,8 +542,8 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {activeTab === 'SAMAGRI' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in">
-          {filteredSamagri.length > 0 ? filteredSamagri.map(sam => (
-            <div key={sam.id} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg transition-all duration-300 relative overflow-hidden ring-1 ring-black/5">
+          {filteredSamagri.length > 0 ? filteredSamagri.map((sam, idx) => (
+            <div key={`${sam.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg transition-all duration-300 relative overflow-hidden ring-1 ring-black/5">
                <div className="absolute top-0 left-0 w-full h-1 bg-orange-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
                <h3 className="text-lg font-black text-gray-900 mb-3 truncate border-b border-gray-100 pb-3">{sam.title}</h3>
                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mb-5 flex-1 shadow-inner relative">
@@ -569,8 +569,8 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {activeTab === 'MANDALI' && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in">
-          {filteredPurohits.length > 0 ? filteredPurohits.map(purohit => (
-            <div key={purohit.purohitId} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-5 hover:shadow-lg hover:border-orange-200 transition-all duration-300 flex flex-col justify-between group">
+          {filteredPurohits.length > 0 ? filteredPurohits.map((purohit, idx) => (
+            <div key={`${purohit.purohitId}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-5 hover:shadow-lg hover:border-orange-200 transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm ${purohit.availabilityStatus === 'AVAILABLE' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
@@ -695,7 +695,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('select_yajaman', 'Select Yajaman')} *</label>
                     <select required value={anushthanForm.yajamanId} onChange={e=>setAnushthanForm({...anushthanForm, yajamanId: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm appearance-none">
                       <option value="" disabled>{safeTranslate('choose_client', 'Choose existing client...')}</option>
-                      {yajamans.map(y => <option key={y.id} value={y.id}>{y.name} ({y.phone})</option>)}
+                      {yajamans.map((y, idx) => <option key={`${y.id}-${idx}`} value={y.id}>{y.name} ({y.phone})</option>)}
                     </select>
                   </div>
                   <div>

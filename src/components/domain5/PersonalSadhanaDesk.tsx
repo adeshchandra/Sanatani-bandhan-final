@@ -46,7 +46,7 @@ export default function PersonalSadhanaDesk() {
     if (!activeWorkspace?.id) return;
     const logsRef = collection(db, `communities/${activeWorkspace.id}/sadhana_logs`);
     const unsub = onSnapshot(logsRef, (snap) => {
-      const parsedLogs: any[] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const parsedLogs: any[] = snap.docs.map((d, idx) => ({ id: d.id, ...d.data() }));
       
       const myLogs = parsedLogs.filter(l => l.uid === currentUser?.id).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
       setLogs(myLogs);
@@ -126,8 +126,8 @@ export default function PersonalSadhanaDesk() {
     if (logs.length === 0) return 0;
     
     // Get unique dates sorted descending
-    const uniqueDates = Array.from(new Set(logs.map(l => new Date(l.timestamp).toDateString())))
-                             .map(d => new Date(d))
+    const uniqueDates = Array.from(new Set(logs.map((l, idx) => new Date(l.timestamp).toDateString())))
+                             .map((d, idx) => new Date(d))
                              .sort((a, b) => b.getTime() - a.getTime());
                              
     let currentStreak = 0;
@@ -323,8 +323,8 @@ export default function PersonalSadhanaDesk() {
                 <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm animate-in slide-in-from-right-4">
                   <h2 className="text-lg font-black text-gray-900 flex items-center gap-2 mb-6"><BookOpen className="text-emerald-500"/> My Log History</h2>
                   <div className="space-y-4">
-                    {logs.map(log => (
-                      <div key={log.id} className="flex gap-4 p-4 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white transition-colors group">
+                    {logs.map((log, idx) => (
+                      <div key={`${log.id}-${idx}`} className="flex gap-4 p-4 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white transition-colors group">
                         <div className="w-12 h-12 bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col items-center justify-center shrink-0">
                            <span className="text-[10px] font-black text-gray-400 uppercase">{new Date(log.timestamp).toLocaleString('default', {month:'short'})}</span>
                            <span className="text-sm font-black text-gray-800">{new Date(log.timestamp).getDate()}</span>
@@ -359,8 +359,8 @@ export default function PersonalSadhanaDesk() {
 
         {activeTab === 'COMMUNITY' && (
           <div className="max-w-3xl mx-auto space-y-6 animate-in slide-in-from-bottom-4">
-            {allLogs.length > 0 ? allLogs.map(log => (
-              <div key={log.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            {allLogs.length > 0 ? allLogs.map((log, idx) => (
+              <div key={`${log.id}-${idx}`} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center border border-indigo-200 shadow-inner">

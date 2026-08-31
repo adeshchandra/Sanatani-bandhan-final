@@ -6,12 +6,13 @@ import {
   Download, Printer, Share2, Copy, Check, ExternalLink,
   Bot, Search, ArrowRight, RefreshCw, AlertCircle, Eye, EyeOff,
   SwitchCamera, Edit3, X, Zap, Volume2, Send, Clock, FileText,
-  Bookmark, Activity
+  Bookmark, Activity, Building2
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
 import { useWorkspaceTaxonomy } from '../../hooks/useWorkspaceTaxonomy';
+import { useData } from "../../context/DataContext";
 
 export type ProfileTab = 'card' | 'assistant' | 'non_ai_help' | 'bookings' | 'sadhana' | 'settings';
 
@@ -20,6 +21,7 @@ export const PersonalAccountDesk: React.FC<{
   onNavigateDesk?: (deskId: string) => void;
 }> = ({ initialTab = 'card', onNavigateDesk }) => {
   const { currentUser, currentRole, activeWorkspace, setViewMode, switchRole, logout } = useAuthWorkspace();
+  const { treasury } = useData();
   const { language, setLanguage, safeTranslate, t } = useLanguage();
   const taxonomy = useWorkspaceTaxonomy();
   const { showToast } = useToast();
@@ -36,7 +38,7 @@ export const PersonalAccountDesk: React.FC<{
       name: currentUser?.name || 'Acharya Devotee',
       email: (currentUser as any)?.email || 'devotee@sanatan.org',
       phone: '+91 98765 43210',
-      sanataniId: `SB-${activeWorkspace?.id?.toUpperCase().slice(0, 4) || 'KASH'}-2083`,
+      sanataniId: `SB-${String(activeWorkspace?.id || 'KASH').toUpperCase().slice(0, 4)}-2083`,
       gotra: 'Kashyapa',
       nakshatra: 'Rohini',
       kulaDaivam: 'Sri Shiva Parvati',
@@ -399,15 +401,17 @@ export const PersonalAccountDesk: React.FC<{
               <span>Edit Details</span>
             </button>
 
-            {(currentRole === 'head_admin' || currentRole === 'manager' || currentRole === 'trustee' || currentRole === 'master_admin') && (
-              <button
-                onClick={() => setViewMode('ADMIN')}
-                className="flex-1 sm:flex-none justify-center items-center flex gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 text-[11px] sm:text-xs font-black transition-all shadow-sm"
-              >
-                <SwitchCamera className="w-3.5 h-3.5" />
-                <span className="truncate">Admin Portal</span>
-              </button>
-            )}
+            <button
+              onClick={() => {
+                setViewMode('ADMIN');
+                showToast(`Switched back to ${activeWorkspace?.name || 'Organisation'} Console 🙏`, 'success', 'Mode Changed');
+              }}
+              className="flex-1 sm:flex-none justify-center items-center flex gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 text-[11px] sm:text-xs font-black transition-all shadow-md cursor-pointer border border-amber-300"
+              title="Switch back to Organisation / Mandir Management Workspace (46 Desks)"
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span className="truncate">Organisation View</span>
+            </button>
           </div>
         </div>
 
@@ -444,9 +448,9 @@ export const PersonalAccountDesk: React.FC<{
             { key: 'bookings', label: '📜 Bookings & 80G', icon: FileText },
             { key: 'sadhana', label: '🧘 Sadhana Stats', icon: Flame },
             { key: 'settings', label: '⚙️ Preferences', icon: Settings },
-          ].map(t => (
+          ].map((t, idx) => (
             <button
-              key={t.key}
+              key={`${t.key}-${idx}`}
               onClick={() => setActiveTab(t.key as ProfileTab)}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all ${
                 activeTab === t.key
@@ -727,9 +731,9 @@ export const PersonalAccountDesk: React.FC<{
 
                 {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-stone-50/50">
-                  {aiChatMessages.map(msg => (
+                  {aiChatMessages.map((msg, idx) => (
                     <div
-                      key={msg.id}
+                      key={`${msg.id}-${idx}`}
                       className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       {msg.sender === 'assistant' && (
@@ -787,7 +791,7 @@ export const PersonalAccountDesk: React.FC<{
                     'How to download 80G tax receipt?',
                     'Rules for Gotra pravara compatibility',
                     'Auspicious Muhurat for Griha Pravesh'
-                  ].map(prompt => (
+                  ].map((prompt, idx) => (
                     <button
                       key={prompt}
                       onClick={() => handleSendAiMessage(prompt)}
@@ -844,9 +848,9 @@ export const PersonalAccountDesk: React.FC<{
                       { key: 'devotee', label: 'Devotee' },
                       { key: 'manager', label: 'Manager' },
                       { key: 'admin', label: 'Admin/Trustee' }
-                    ].map(f => (
+                    ].map((f, idx) => (
                       <button
-                        key={f.key}
+                        key={`${f.key}-${idx}`}
                         onClick={() => setNonAiCategory(f.key as any)}
                         className={`px-3 py-1.5 rounded-lg transition-all ${
                           nonAiCategory === f.key
@@ -877,11 +881,11 @@ export const PersonalAccountDesk: React.FC<{
                   {filteredFaqs.length === 0 ? (
                     <p className="text-xs text-stone-400 text-center py-6">No SOPs found matching your query.</p>
                   ) : (
-                    filteredFaqs.map(item => {
+                    filteredFaqs.map((item, idx) => {
                       const isExpanded = expandedFaqId === item.id;
                       return (
                         <div
-                          key={item.id}
+                          key={`${item.id}-${idx}`}
                           className={`rounded-2xl border transition-all overflow-hidden ${
                             isExpanded
                               ? 'bg-indigo-50/40 border-indigo-200 shadow-xs'
@@ -947,10 +951,10 @@ export const PersonalAccountDesk: React.FC<{
                   <div>
                     <h3 className="text-base font-black text-stone-900 flex items-center gap-2">
                       <FileText className="w-5 h-5 text-amber-600" />
-                      Pooja Bookings & 80G Tax Certificates
+                      My Bookings, Expenses & Tax
                     </h3>
                     <p className="text-xs text-stone-500 mt-0.5">
-                      View all registered Sankalpas, donations, and download instant Section 80G tax exemption certificates.
+                      View your registered Sankalpas, donations, and expense reimbursements.
                     </p>
                   </div>
                 </div>
@@ -984,8 +988,8 @@ export const PersonalAccountDesk: React.FC<{
                       purohit: 'Annapurna Kitchen',
                       is80G: true
                     }
-                  ].map(rec => (
-                    <div key={rec.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  ].map((rec, idx) => (
+                    <div key={`${rec.id}-${idx}`} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="text-sm font-bold text-stone-900">{rec.title}</h4>
@@ -1100,7 +1104,7 @@ export const PersonalAccountDesk: React.FC<{
                       { code: 'hi', name: 'हिन्दी (Hindi)' },
                       { code: 'bn', name: 'বাংলা (Bengali)' },
                       { code: 'sa', name: 'संस्कृतम् (Sanskrit)' }
-                    ].map(l => (
+                    ].map((l, idx) => (
                       <button
                         key={l.code}
                         onClick={() => {

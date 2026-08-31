@@ -87,7 +87,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
     const gigsRef = collection(db, `communities/${session.communityId}/purohit_gigs`);
     const unsubGigs = onSnapshot(gigsRef, (snap) => {
       if (!snap.empty) {
-        const list: any[] = snap.docs.map(d => ({ gigId: d.id, ...d.data() }));
+        const list: any[] = snap.docs.map((d, idx) => ({ gigId: d.id, ...d.data() }));
         setGigs(list);
         setMyOfferedGigs(list.filter(g => g.purohitId === session.uid));
         localStorage.setItem(`sb_purohit_gigs_${session.communityId}`, JSON.stringify(list));
@@ -159,7 +159,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
     
     const unsubCon = onSnapshot(conRef, (snap) => {
       if (!snap.empty) {
-        const list = snap.docs.map(d => ({ contractId: d.id, ...d.data() }));
+        const list = snap.docs.map((d, idx) => ({ contractId: d.id, ...d.data() }));
         list.sort((a: any,b: any) => b.createdAt - a.createdAt);
         setContracts(session.role === 'ADMIN' ? list : list.filter((c: any) => c.clientId === session.uid || c.purohitId === session.uid));
         localStorage.setItem(`sb_purohit_contracts_${session.communityId}`, JSON.stringify(list));
@@ -436,7 +436,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
         {activeTab === 'GIGS' && (
           <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-hide px-2">
             <Filter size={14} className="text-gray-400 shrink-0 hidden sm:block"/>
-            {['ALL', 'Mandir & Home Rituals', 'Special Seva', 'Off-site Seva'].map(cat => (
+            {['ALL', 'Mandir & Home Rituals', 'Special Seva', 'Off-site Seva'].map((cat, idx) => (
               <button 
                 key={cat} 
                 onClick={() => setSelectedCategory(cat)}
@@ -453,9 +453,9 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
         <div className="space-y-6 animate-in fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredGigs.length > 0 ? (
-              filteredGigs.map(gig => (
+              filteredGigs.map((gig, idx) => (
                 <div 
-                  key={gig.gigId} 
+                  key={`${gig.gigId}-${idx}`} 
                   onClick={() => { setSelectedGig(gig); setCheckoutStep('DETAILS'); }}
                   className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer ring-1 ring-black/5"
                 >
@@ -524,8 +524,8 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
 
           <div className="space-y-4">
             {contracts.length > 0 ? (
-              contracts.map(con => (
-                <div key={con.contractId} className="bg-white p-5 sm:p-6 rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative overflow-hidden group">
+              contracts.map((con, idx) => (
+                <div key={`${con.contractId}-${idx}`} className="bg-white p-5 sm:p-6 rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 relative overflow-hidden group">
                   <div className={`absolute top-0 left-0 w-1.5 h-full ${con.status === 'COMPLETED' ? 'bg-green-500' : con.status === 'CONFIRMED' ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
 
                   <div className="flex-1 space-y-3 pl-2 w-full">

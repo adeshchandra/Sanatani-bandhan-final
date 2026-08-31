@@ -68,9 +68,9 @@ export const TaxReceiptDesk: React.FC = () => {
 
       {/* Tax Receipts List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {eligibleTransactions.map((tx) => (
+        {eligibleTransactions.map((tx, idx) => (
           <div
-            key={tx.id}
+            key={`${tx.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>
@@ -78,7 +78,7 @@ export const TaxReceiptDesk: React.FC = () => {
                 <div>
                   <h3 className="font-extrabold text-sm text-stone-100">{tx.devoteeName || 'Donor'}</h3>
                   <p className="text-[11px] text-amber-400 font-mono">
-                    Receipt #{tx.taxReceiptNumber || `SB-80G-${tx.id.slice(-4)}`}
+                    Receipt #{tx.taxReceiptNumber || `SB-80G-${String(tx.id || '').slice(-4)}`}
                   </p>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">

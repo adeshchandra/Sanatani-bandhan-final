@@ -13,10 +13,16 @@ import {
   Check,
   Flame,
   Shield,
-  HelpCircle
+  HelpCircle,
+  PanelLeftClose,
+  PanelLeftOpen,
+  UserCircle,
+  Building2,
+  ArrowLeftRight
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
 import { useWorkspaceTaxonomy } from '../../hooks/useWorkspaceTaxonomy';
 import { useNotifications } from '../../context/NotificationContext';
 import { calculatePanchang } from '../../utils/panchang';
@@ -25,6 +31,8 @@ import { NotificationPanel } from './NotificationPanel';
 
 interface HeaderProps {
   onOpenSidebar: () => void;
+  isSidebarCollapsed?: boolean;
+  onToggleSidebarCollapse?: () => void;
   onOpenTelemetry: () => void;
   onOpenMySpace: () => void;
   onOpenQuickPay?: () => void;
@@ -40,6 +48,8 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   onOpenSidebar,
+  isSidebarCollapsed = false,
+  onToggleSidebarCollapse,
   onOpenTelemetry,
   onOpenMySpace,
   onOpenQuickPay,
@@ -60,6 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useAuthWorkspace();
 
   const { language, setLanguage, t } = useLanguage();
+  const { showToast } = useToast();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showLangDropdown, setShowLangDropdown] = useState(false);
@@ -84,10 +95,22 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={onOpenSidebar}
-          className="lg:hidden p-2 -ml-2 rounded-xl text-stone-400 hover:text-white hover:bg-white/10 transition-all"
+          className="lg:hidden p-2 -ml-2 rounded-xl text-stone-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+          title="Open Desks Menu"
         >
           <Menu className="w-6 h-6" />
         </button>
+
+        {onToggleSidebarCollapse && (
+          <button
+            type="button"
+            onClick={onToggleSidebarCollapse}
+            className="hidden lg:flex p-2 -ml-1 rounded-xl text-stone-400 hover:text-amber-400 hover:bg-white/10 transition-all cursor-pointer"
+            title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar to Icon Rail'}
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5 text-amber-400" /> : <PanelLeftClose className="w-5 h-5" />}
+          </button>
+        )}
 
         <div className="flex items-center gap-3">
           {activeWorkspace.logoBase64 ? (
@@ -161,7 +184,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
             {showLangDropdown && (
               <div className="absolute right-0 mt-2 w-32 rounded-xl bg-stone-800 border border-stone-700 shadow-xl p-1.5 z-50">
-                {['en', 'hi', 'bn', 'sa'].map((lang) => (
+                {['en', 'hi', 'bn', 'sa'].map((lang, idx) => (
                   <button key={lang} onClick={() => { setLanguage(lang as any); setShowLangDropdown(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-colors ${language === lang ? 'bg-[#FF9933]/20 text-[#FF9933]' : 'hover:bg-white/5 text-stone-300'}`}>
                     {lang === 'en' ? 'English' : lang === 'hi' ? 'हिन्दी' : lang === 'bn' ? 'বাংলা' : 'संस्कृतम्'}
                   </button>
@@ -203,13 +226,17 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           <button
-          onClick={() => setViewMode('MEMBER')}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 hover:text-white rounded-lg transition-colors border border-stone-700"
-          title="Switch to Personal/Member View"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-          <span className="text-xs font-semibold">Personal View</span>
-        </button>
+            id="header-btn-switch-personal"
+            onClick={() => {
+              setViewMode('MEMBER');
+              showToast('Switched to Personal Devotee Space 🙏', 'success', 'Personal Mode Active');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500 hover:to-orange-500 text-amber-300 hover:text-stone-950 rounded-xl transition-all border border-amber-500/40 font-bold text-xs shadow-xs cursor-pointer group"
+            title="Switch to Personal Devotee View (Darshan, Sadhana Japa, Vivah, e-Pass & 80G Receipts)"
+          >
+            <UserCircle className="w-4 h-4 text-amber-400 group-hover:text-stone-950 transition-colors" />
+            <span className="font-bold">Personal View</span>
+          </button>
         {checkPermission(['head_admin', 'master_admin', 'superadmin']) && (
           <button onClick={onOpenTelemetry} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-emerald-400 transition-colors border border-white/5">
             <Activity className="w-4 h-4" />
@@ -289,7 +316,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="px-2.5 py-1.5 mt-1">
                   <p className="text-[10px] uppercase font-bold text-stone-500 mb-1.5">Language</p>
                   <div className="flex gap-2">
-                    {['en', 'hi', 'bn', 'sa'].map((lang) => (
+                    {['en', 'hi', 'bn', 'sa'].map((lang, idx) => (
                       <button key={lang} onClick={() => { setLanguage(lang as any); setShowRoleDropdown(false); }} className={`flex-1 py-1 rounded-lg text-[10px] font-bold text-center border transition-colors ${language === lang ? 'bg-[#FF9933]/20 border-[#FF9933]/50 text-[#FF9933]' : 'border-stone-600 text-stone-400 hover:bg-white/5'}`}>
                         {lang.toUpperCase()}
                       </button>
@@ -305,7 +332,7 @@ export const Header: React.FC<HeaderProps> = ({
                   Role-Based Access
                 </p>
               </div>
-              {(['head_admin', 'manager', 'devotee'] as UserRole[]).map((r) => (
+              {(['head_admin', 'manager', 'devotee'] as UserRole[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => { switchRole(r); setShowRoleDropdown(false); }}

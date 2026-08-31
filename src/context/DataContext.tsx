@@ -27,6 +27,9 @@ import {
 import { trackTreasuryPurchase, trackSignUp, trackGenerateLead } from '../utils/gtm';
 import { useAuthWorkspace } from './AuthWorkspaceContext';
 import { useToast } from './ToastContext';
+import { db } from '../lib/firebase';
+import { doc, setDoc, deleteDoc, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+
 
 // Master Initial Datasets
 export const INITIAL_DEVOTEES: DevoteeMember[] = [
@@ -938,7 +941,7 @@ interface DataContextType {
 
   // Mutators
   seedDemoData: (workspaceId: string, type: string) => void;
-  addDevotee: (devotee: Omit<DevoteeMember, 'id' | 'qrCodeRef' | 'joinedDate'>) => boolean;
+  addDevotee: (devotee: Omit<DevoteeMember, 'id' | 'qrCodeRef' | 'joinedDate'>) => string | boolean;
   updateDevotee: (id: string, updates: Partial<DevoteeMember>) => void;
   deleteDevotee: (id: string) => void;
   addFamily: (family: Omit<FamilyHousehold, 'id'>) => boolean;
@@ -966,7 +969,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { activeWorkspace, currentRole } = useAuthWorkspace();
+  const { activeWorkspace, currentRole, isAuthenticated } = useAuthWorkspace();
   const { showToast } = useToast();
   const initialData = useInitialData();
 
@@ -1022,6 +1025,45 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [allShlokas] = useState<ShlokaCardItem[]>(INITIAL_SHLOKAS);
   const [allResolutions, setAllResolutions] = useState<TrusteeResolution[]>(INITIAL_RESOLUTIONS);
   const [allShifts, setAllShifts] = useState<SevadarDutyShift[]>(INITIAL_SHIFTS);
+
+  // FIREBASE SYNC EFFECT
+  useEffect(() => {
+    if (!activeWorkspace?.id || !isAuthenticated) return;
+    const collections = [
+      { name: 'devotees', setter: setAllDevotees },
+      { name: 'families', setter: setAllFamilies },
+      { name: 'treasury', setter: setAllTreasury },
+      { name: 'assets', setter: setAllAssets },
+      { name: 'inventory', setter: setAllInventory },
+      { name: 'poojaBookings', setter: setAllPoojaBookings },
+      { name: 'residentPujas', setter: setAllResidentPujas },
+      { name: 'pitruRecords', setter: setAllPitruRecords },
+      { name: 'cows', setter: setAllCows },
+      { name: 'annadanam', setter: setAllAnnadanamList },
+      { name: 'gurukulStudents', setter: setAllGurukulStudents },
+      { name: 'campaigns', setter: setAllCampaigns },
+      { name: 'resolutions', setter: setAllResolutions },
+      { name: 'shifts', setter: setAllShifts }
+    ];
+
+    const unsubscribes = collections.map(c => {
+      return onSnapshot(collection(db, c.name), (snapshot) => {
+        if (!snapshot.empty) {
+          const items = snapshot.docs.map(doc => doc.data() as any);
+          // Only update if there are items, to not overwrite initial mock data if db is empty
+          c.setter(items);
+        }
+      }, (err) => console.error("Firebase sync error", err));
+    });
+
+    return () => unsubscribes.forEach(unsub => unsub());
+  }, [activeWorkspace?.id, isAuthenticated]);
+
+  // Helper to push to firestore
+  const pushToFirestore = (colName: string, id: string, data: any) => {
+    setDoc(doc(db, colName, id), data, { merge: true }).catch(console.error);
+  };
+
 
   // ----------------------------------------------------
   // AUTOMATIC DATA DELETION / SANDBOX PURGE CYCLE
@@ -1316,7 +1358,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAllCampaigns(prev => [...prev, c1 as unknown as CampaignCrowdfund, c2 as unknown as CampaignCrowdfund]);
   };
 
-  const addDevotee = (data: Omit<DevoteeMember, 'id' | 'qrCodeRef' | 'joinedDate'>): boolean => {
+  const addDevotee = (data: Omit<DevoteeMember, 'id' | 'qrCodeRef' | 'joinedDate'>): string | boolean => {
     if (!checkAndIncrementModuleQuota('devotees')) return false;
 
     const id = `dev-${Date.now()}`;
@@ -1337,18 +1379,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       `${data.fullName} enrolled into ${activeWorkspace.name}. (Auto-purge scheduled in 24h)`,
       'success'
     );
-    return true;
+    return id;
   };
 
   const updateDevotee = (id: string, updates: Partial<DevoteeMember>) => {
     setAllDevotees((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, ...updates } : d))
+      prev.map((d, idx) => (d.id === id ? { ...d, ...updates } : d))
     );
     showToast('Devotee record updated', 'success');
   };
 
   const deleteDevotee = (id: string) => {
     setAllDevotees((prev) => prev.filter((d) => d.id !== id));
+    deleteDoc(doc(db, 'devotees', id)).catch(console.error);
     showToast('Member removed from directory', 'info');
   };
 
@@ -1415,7 +1458,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     setAllGuests((prev) =>
-      prev.map((g) => (g.id === guestId ? { ...g, status: 'Promoted' as const } : g))
+      prev.map((g, idx) => (g.id === guestId ? { ...g, status: 'Promoted' as const } : g))
     );
     showToast(`Guest ${guest.name} promoted to enrolled Member!`, 'success');
   };
@@ -1451,13 +1494,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Update devotee total if linked
       if (tx.devoteeId) {
+        const devotee = allDevotees.find(d => d.id === tx.devoteeId);
+        if (devotee) {
+          const oldTotal = devotee.totalDonated || 0;
+          const newTotal = oldTotal + tx.amount;
+          const milestones = [100000, 500000, 1000000, 5000000, 10000000];
+          for (const m of milestones) {
+            if (oldTotal < m && newTotal >= m) {
+              setTimeout(() => {
+                showToast(`🏆 Milestone Alert! ${devotee.fullName} crossed ₹${m.toLocaleString()} in lifetime donations!`, 'success', 'Major Contributor');
+              }, 1500);
+            }
+          }
+        }
+
         setAllDevotees((prev) =>
-          prev.map((d) =>
+          prev.map((d, idx) =>
             d.id === tx.devoteeId
               ? {
                   ...d,
-                  totalDonated: d.totalDonated + tx.amount,
-                  sevaIndex: Math.min(1000, d.sevaIndex + Math.floor(tx.amount / 100)),
+                  totalDonated: (d.totalDonated || 0) + tx.amount,
+                  sevaIndex: Math.min(1000, (d.sevaIndex || 0) + Math.floor(tx.amount / 100)),
                 }
               : d
           )
@@ -1492,7 +1549,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateInventoryStock = (id: string, newStock: number) => {
     setAllInventory((prev) =>
-      prev.map((item) =>
+      prev.map((item, idx) =>
         item.id === id
           ? { ...item, currentStock: newStock, lastRestockedDate: new Date().toISOString().slice(0, 10) }
           : item
@@ -1559,7 +1616,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePoojaStatus = (id: string, status: PoojaBooking['status']) => {
     setAllPoojaBookings((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status } : b))
+      prev.map((b, idx) => (b.id === id ? { ...b, status } : b))
     );
     showToast(`Pooja status updated to ${status}`, 'success');
   };
@@ -1583,7 +1640,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const adoptCow = (cowId: string, sponsorName: string, sponsorGotra?: string, sponsorPhone?: string) => {
     setAllCows((prev) =>
-      prev.map((c) =>
+      prev.map((c, idx) =>
         c.id === cowId
           ? {
               ...c,
@@ -1713,13 +1770,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addCampaignDonation = (campaignId: string, donorName: string, amount: number, city: string) => {
     setAllCampaigns((prev) =>
-      prev.map((c) =>
+      prev.map((c, idx) =>
         c.id === campaignId
           ? {
               ...c,
               collectedAmount: c.collectedAmount + amount,
               donorsCount: c.donorsCount + 1,
-              topDonors: [{ name: donorName, amount, city }, ...c.topDonors].slice(0, 5),
+              topDonors: [{ name: donorName, amount, city }, ...(c.topDonors || [])].slice(0, 5),
             }
           : c
       )

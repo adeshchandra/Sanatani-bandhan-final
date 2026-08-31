@@ -115,6 +115,7 @@ export interface DevoteeMember {
   gotra: string;
   pravara?: string;
   varnaKul?: string;
+  culturalDistinction?: string;
   familyId?: string;
   isHeadOfFamily?: boolean;
   avatarBase64?: string;
@@ -189,6 +190,7 @@ export interface TreasuryTransaction {
   type: 'Income' | 'Expense';
   category: string;
   subcategory?: string;
+  eventName?: string;
   amount: number;
   handledBy: string; vendorName?: string; // Custody tracking
   devoteeId?: string;
@@ -201,6 +203,8 @@ export interface TreasuryTransaction {
   taxReceiptIssued?: boolean;
   taxReceiptNumber?: string;
   auditVerified: boolean;
+  isRecurring?: boolean;
+  recurringInterval?: 'Monthly' | 'Annually';
 }
 
 export interface AssetRecord {

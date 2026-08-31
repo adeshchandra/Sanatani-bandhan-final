@@ -4,6 +4,7 @@ import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { PoojaBookingRecord } from '../../types';
 import { useToast } from '../../context/ToastContext';
+import { MemberSearchSelect } from '../common/MemberSearchSelect';
 import { usePlanGate } from '../../hooks/usePlanGate';
 import { UpsellModal } from '../common/UpsellModal';
 import { CameraScanner } from '../common/CameraScanner';
@@ -160,9 +161,9 @@ export const PoojaBookingDesk: React.FC = () => {
 
       {/* Pooja Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredPoojas.map((pooja) => (
+        {filteredPoojas.map((pooja, idx) => (
           <div
-            key={pooja.id}
+            key={`${pooja.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>
@@ -297,8 +298,8 @@ export const PoojaBookingDesk: React.FC = () => {
                     className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
                   >
                     <option value="">-- Or enter name manually --</option>
-                    {devotees.map((d) => (
-                      <option key={d.id} value={d.id}>
+                    {devotees.map((d, idx) => (
+                      <option key={`${d.id}-${idx}`} value={d.id}>
                         {d.fullName} ({d.gotra})
                       </option>
                     ))}

@@ -142,7 +142,7 @@ export const RakthaSevaDesk: React.FC = () => {
             >
               All Types
             </button>
-            {BLOOD_GROUPS.map(bg => (
+            {BLOOD_GROUPS.map((bg, idx) => (
               <button
                 key={bg}
                 onClick={() => setFilterGroup(bg)}
@@ -174,8 +174,8 @@ export const RakthaSevaDesk: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredDonors.map((donor) => (
-                  <tr key={donor.id} className="hover:bg-slate-50/50 transition-colors group">
+                filteredDonors.map((donor, idx) => (
+                  <tr key={`${donor.id}-${idx}`} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="p-4">
                       <div className="flex flex-col">
                         <span className="font-bold text-slate-800">{donor.name}</span>
@@ -232,7 +232,7 @@ export const RakthaSevaDesk: React.FC = () => {
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Blood Group</label>
                   <select value={newDonor.bloodGroup} onChange={e => setNewDonor({...newDonor, bloodGroup: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500">
-                    {BLOOD_GROUPS.map(g => <option key={g} value={g}>{g}</option>)}
+                    {BLOOD_GROUPS.map((g, idx) => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
                 <div>

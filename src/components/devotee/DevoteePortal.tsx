@@ -47,8 +47,8 @@ export const DevoteePortal: React.FC = () => {
                 <p className="text-sm text-stone-500 font-medium">No donations found yet.</p>
               </div>
             ) : (
-              myDonations.map(tx => (
-                <div key={tx.id} className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 flex items-center justify-between">
+              myDonations.map((tx, idx) => (
+                <div key={`${tx.id}-${idx}`} className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-stone-900">{tx.category}</p>
                     <p className="text-xs text-stone-500">{new Date(tx.date).toLocaleDateString()}</p>
@@ -91,8 +91,8 @@ export const DevoteePortal: React.FC = () => {
                 <p className="text-sm text-stone-500 font-medium">No Poojas booked.</p>
               </div>
             ) : (
-              myPoojas.map(p => (
-                <div key={p.id} className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100">
+              myPoojas.map((p, idx) => (
+                <div key={`${p.id}-${idx}`} className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-sm font-bold text-stone-900">{p.poojaName}</p>

@@ -88,8 +88,8 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({ node, onAddChild }) => {
               <div className="absolute top-0 left-12 right-12 h-0.5 bg-amber-500/50" />
             )}
 
-            {node.children!.map((child) => (
-              <div key={child.id} className="flex flex-col items-center relative">
+            {node.children!.map((child, idx) => (
+              <div key={`${child.id}-${idx}`} className="flex flex-col items-center relative">
                 {/* Branch Top Pin */}
                 <div className="w-0.5 h-4 bg-amber-500/50 absolute -top-4" />
                 <TreeNodeComponent node={child} onAddChild={onAddChild} />

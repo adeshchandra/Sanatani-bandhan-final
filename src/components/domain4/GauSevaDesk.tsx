@@ -156,7 +156,7 @@ export const GauSevaDesk: React.FC = () => {
             className="bg-stone-800 border border-stone-700 rounded-xl px-2.5 py-1.5 text-xs text-stone-200"
           >
             <option value="all">All Indigenous Breeds</option>
-            {breeds.map((b) => (
+            {breeds.map((b, idx) => (
               <option key={b} value={b}>
                 {b}
               </option>
@@ -167,9 +167,9 @@ export const GauSevaDesk: React.FC = () => {
 
       {/* Cows Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {filteredCows.map((cow) => (
+        {filteredCows.map((cow, idx) => (
           <div
-            key={cow.id}
+            key={`${cow.id}-${idx}`}
             className="bg-stone-900/90 border border-stone-800 hover:border-amber-500/40 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4 transition-all"
           >
             <div>
@@ -381,7 +381,7 @@ export const GauSevaDesk: React.FC = () => {
                     onChange={(e) => setBreed(e.target.value as any)}
                     className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
                   >
-                    {breeds.map((b) => (
+                    {breeds.map((b, idx) => (
                       <option key={b} value={b}>
                         {b}
                       </option>

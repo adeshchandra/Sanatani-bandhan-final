@@ -91,8 +91,8 @@ export const DharamshalaDesk: React.FC = () => {
       {/* Room Grid */}
       {activeTab === 'rooms' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rooms.map(room => (
-            <div key={room.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col">
+          {rooms.map((room, idx) => (
+            <div key={`${room.id}-${idx}`} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-black text-slate-800">Room {room.id}</span>

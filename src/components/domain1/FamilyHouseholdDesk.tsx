@@ -3,6 +3,7 @@ import { Home, Plus, Users, Phone, MapPin, Sparkles, Heart, ChevronRight, X } fr
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { useToast } from '../../context/ToastContext';
+import { MemberSearchSelect } from '../common/MemberSearchSelect';
 
 export const FamilyHouseholdDesk: React.FC = () => {
   const { activeWorkspace } = useAuthWorkspace();
@@ -88,12 +89,12 @@ export const FamilyHouseholdDesk: React.FC = () => {
 
       {/* Household Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {families.map((fam) => {
+        {families.map((fam, idx) => {
           const karta = devotees.find((d) => d.id === fam.kartaDevoteeId);
 
           return (
             <div
-              key={fam.id}
+              key={`${fam.id}-${idx}`}
               className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg space-y-4"
             >
               <div className="flex items-start justify-between gap-3 pb-3 border-b border-stone-800">
@@ -174,19 +175,12 @@ export const FamilyHouseholdDesk: React.FC = () => {
             <form onSubmit={handleAddFamily} className="space-y-3 text-xs">
               <div>
                 <label className="block text-stone-300 font-semibold mb-1">Select Karta (Head of Family) *</label>
-                <select
-                  required
-                  value={kartaDevoteeId}
-                  onChange={(e) => handleKartaChange(e.target.value)}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
-                >
-                  <option value="">-- Choose Member --</option>
-                  {devotees.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.fullName} ({d.gotra} • {d.phone})
-                    </option>
-                  ))}
-                </select>
+                <MemberSearchSelect
+                  value=""
+                  onChange={(name, id) => handleKartaChange(id)}
+                  placeholder="Search and select existing enrolled member..."
+                  allowFreeText={false}
+                />
               </div>
 
               <div>
