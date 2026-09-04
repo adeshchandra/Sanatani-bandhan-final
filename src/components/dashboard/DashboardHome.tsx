@@ -50,7 +50,15 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
   const { devotees, treasury, poojaBookings, cows, shlokas } = useData();
   const { showToast } = useToast();
 
-  const [currentShlokaIndex, setCurrentShlokaIndex] = useState(0);
+  const [currentShlokaIndex, setCurrentShlokaIndex] = useState(() => {
+    // Mathematically seed using the day of the year so all users see the same daily shloka
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = (now.getTime() - start.getTime()) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+    const oneDay = 1000 * 60 * 60 * 24;
+    const dayOfYear = Math.floor(diff / oneDay);
+    return dayOfYear % Math.max(shlokas.length, 1);
+  });
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
   const taxonomy = useWorkspaceTaxonomy();
@@ -440,7 +448,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                           tx.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'
                         }`}
                       >
-                        {tx.type === 'Income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                        {tx.type === 'Income' ? '+' : '-'} ₹{(tx.amount || 0).toLocaleString()}
                       </p>
                       <p className="text-[9px] text-slate-400 font-mono mt-0.5">{tx.date}</p>
                     </div>

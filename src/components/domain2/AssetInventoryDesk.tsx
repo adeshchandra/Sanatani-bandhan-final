@@ -133,7 +133,7 @@ export const AssetInventoryDesk: React.FC = () => {
               <div className="p-3 rounded-xl bg-stone-950/60 border border-stone-800 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] text-stone-400 font-semibold uppercase">Asset Valuation</p>
-                  <p className="text-lg font-black text-amber-400">₹{asset.valuation.toLocaleString()}</p>
+                  <p className="text-lg font-black text-amber-400">₹{(asset.valuation || 0).toLocaleString()}</p>
                 </div>
                 <ShieldCheck className="w-5 h-5 text-amber-500 opacity-80" />
               </div>

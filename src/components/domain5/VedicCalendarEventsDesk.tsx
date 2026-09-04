@@ -171,7 +171,7 @@ export const VedicCalendarEventsDesk: React.FC = () => {
               <div className="py-2 space-y-1.5 text-xs text-stone-300">
                 <p>
                   <span className="text-stone-400">Expected Footfall:</span>{' '}
-                  <span className="font-bold text-amber-400">~{ev.expectedFootfall.toLocaleString()} Devotees</span>
+                  <span className="font-bold text-amber-400">~{(ev.expectedFootfall || 0).toLocaleString()} Devotees</span>
                 </p>
                 <p>
                   <span className="text-stone-400">Chief Coordinator:</span>{' '}
@@ -179,7 +179,7 @@ export const VedicCalendarEventsDesk: React.FC = () => {
                 </p>
                 <p>
                   <span className="text-stone-400">Budget:</span>{' '}
-                  <span className="font-mono text-emerald-400 font-bold">₹{ev.budgetAllocated.toLocaleString()}</span>
+                  <span className="font-mono text-emerald-400 font-bold">₹{(ev.budgetAllocated || 0).toLocaleString()}</span>
                 </p>
 
                 <div className="pt-2">

@@ -464,7 +464,7 @@ export default function PersonalSadhanaDesk() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-black text-emerald-600">{user.karma.toLocaleString()}</p>
+                        <p className="text-lg font-black text-emerald-600">{(user.karma || 0).toLocaleString()}</p>
                         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Karma</p>
                       </div>
                     </div>

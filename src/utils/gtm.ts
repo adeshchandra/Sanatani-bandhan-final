@@ -19,7 +19,7 @@ export const subscribeTelemetry = (listener: TelemetryListener) => {
   };
 };
 
-const pushDataLayer = (eventName: string, payload: Record<string, any>) => {
+export const pushToDataLayer = (eventName: string, payload: Record<string, any>) => {
   if (typeof window !== 'undefined') {
     window.dataLayer = window.dataLayer || [];
     const eventObject = {
@@ -58,7 +58,7 @@ export const trackTreasuryPurchase = (params: {
   workspaceId: string;
   userRole: UserRole;
 }) => {
-  pushDataLayer('purchase', {
+  pushToDataLayer('purchase', {
     transaction_id: params.transactionId,
     value: params.value,
     currency: params.currency || 'INR',
@@ -88,7 +88,7 @@ export const trackGenerateLead = (params: {
   workspaceType: WorkspaceType;
   workspaceId: string;
 }) => {
-  pushDataLayer('generate_lead', {
+  pushToDataLayer('generate_lead', {
     lead_type: params.purpose,
     lead_city: params.city,
     workspace_type: params.workspaceType,
@@ -107,7 +107,7 @@ export const trackSignUp = (params: {
   workspaceType: WorkspaceType;
   workspaceId: string;
 }) => {
-  pushDataLayer('sign_up', {
+  pushToDataLayer('sign_up', {
     method: 'Sanatani_Identity_PIN',
     member_id: params.memberId,
     gotra: params.gotra,
@@ -126,7 +126,7 @@ export const trackShare = (params: {
   method: 'WhatsApp' | 'PDF' | 'Copy_Link' | 'System_Share';
   workspaceId?: string;
 }) => {
-  pushDataLayer('share', {
+  pushToDataLayer('share', {
     content_type: params.contentType,
     item_id: params.itemId,
     method: params.method,
@@ -142,7 +142,7 @@ export const trackViewItem = (params: {
   itemName: string;
   itemCategory: string;
 }) => {
-  pushDataLayer('view_item', {
+  pushToDataLayer('view_item', {
     items: [
       {
         item_id: params.itemId,

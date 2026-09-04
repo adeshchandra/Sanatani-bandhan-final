@@ -201,7 +201,7 @@ export const DevoteeGrid: React.FC = () => {
         date: new Date(t.date).getTime(),
         type: 'donation',
         title: `Donation: ${t.category}`,
-        desc: `₹${t.amount.toLocaleString()} via ${t.paymentMode}`,
+        desc: `₹${(t.amount || 0).toLocaleString()} via ${t.paymentMode}`,
         icon: Receipt,
         color: 'text-amber-400'
       });
@@ -1254,7 +1254,7 @@ export const DevoteeGrid: React.FC = () => {
                             <td className="px-4 py-3 font-mono text-xs text-stone-400">{donation.id}</td>
                             <td className="px-4 py-3">{donation.category}</td>
                             <td className="px-4 py-3">{donation.paymentMode}</td>
-                            <td className="px-4 py-3 font-bold text-amber-400 text-right">{donation.amount.toLocaleString()}</td>
+                            <td className="px-4 py-3 font-bold text-amber-400 text-right">{(donation.amount || 0).toLocaleString()}</td>
                           </tr>
                         ))}
                         {selectedDevoteeDonations.length === 0 && (

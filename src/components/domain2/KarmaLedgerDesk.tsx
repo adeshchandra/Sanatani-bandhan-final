@@ -128,7 +128,7 @@ export const KarmaLedgerDesk: React.FC = () => {
                     </span>
                   </td>
                   <td className="p-3 font-mono text-sky-400">{d.volunteerHours}h</td>
-                  <td className="p-3 font-mono text-amber-400">₹{d.totalDonated.toLocaleString()}</td>
+                  <td className="p-3 font-mono text-amber-400">₹{(d.totalDonated || 0).toLocaleString()}</td>
                   <td className="p-3 text-right">
                     <span className="font-black text-sm text-purple-400 font-mono">
                       {d.sevaIndex} pts

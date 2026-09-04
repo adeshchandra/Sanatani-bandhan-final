@@ -376,7 +376,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                         tx.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'
                       }`}
                     >
-                      {tx.type === 'Income' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
+                      {tx.type === 'Income' ? '+' : '-'} ₹{(tx.amount || 0).toLocaleString()}
                     </p>
                     {tx.is80GEligible && (
                       <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">

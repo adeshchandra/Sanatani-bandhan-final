@@ -52,7 +52,7 @@ export const MandirCampaignsDesk: React.FC = () => {
 
       {/* Campaign Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {campaigns.map((camp, idx) => {
+        {(campaigns || []).map((camp, idx) => {
           const pct = Math.min(100, Math.round((camp.collectedAmount / camp.targetAmount) * 100));
 
           return (
@@ -87,11 +87,11 @@ export const MandirCampaignsDesk: React.FC = () => {
                   <div className="flex items-center justify-between text-xs">
                     <div>
                       <p className="text-stone-400 text-[10px] font-semibold uppercase">Collected</p>
-                      <p className="font-black text-amber-400 text-sm">₹{camp.collectedAmount.toLocaleString()}</p>
+                      <p className="font-black text-amber-400 text-sm">₹{(camp.collectedAmount || 0).toLocaleString()}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-stone-400 text-[10px] font-semibold uppercase">Target</p>
-                      <p className="font-bold text-stone-200 text-sm">₹{camp.targetAmount.toLocaleString()}</p>
+                      <p className="font-bold text-stone-200 text-sm">₹{(camp.targetAmount || 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -103,13 +103,13 @@ export const MandirCampaignsDesk: React.FC = () => {
                     <span>Top Donors Hall of Seva</span>
                   </p>
                   <div className="divide-y divide-stone-800 text-xs">
-                    {camp.topDonors.map((d, idx) => (
+                    {(camp.topDonors || []).map((d, idx) => (
                       <div key={idx} className="py-1.5 flex items-center justify-between">
                         <span className="text-stone-300 font-medium">
                           {idx + 1}. {d.name} <span className="text-[10px] text-stone-400">({d.city})</span>
                         </span>
                         <span className="font-mono font-bold text-amber-400">
-                          ₹{d.amount.toLocaleString()}
+                          ₹{(d.amount || 0).toLocaleString()}
                         </span>
                       </div>
                     ))}

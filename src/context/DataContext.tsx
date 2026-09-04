@@ -953,11 +953,12 @@ interface DataContextType {
   updateInventoryStock: (id: string, newStock: number) => void;
   addInventoryItem: (item: Omit<InventoryItem, 'id' | 'lastRestockedDate'>) => boolean;
   addPoojaBooking: (booking: Omit<PoojaBooking, 'id' | 'receiptRef' | 'status' | 'paymentStatus'>) => boolean;
-  updatePoojaStatus: (id: string, status: PoojaBooking['status']) => void;
+  updatePoojaStatus: (id: string, status: PoojaBooking['status'], additionalUpdates?: Partial<PoojaBooking>) => void;
   addCow: (cow: Omit<GoshalaCowRecord, 'id'>) => boolean;
   adoptCow: (cowId: string, sponsorName: string, sponsorGotra?: string, sponsorPhone?: string) => void;
   addAnnadanam: (ann: Omit<AnnadanamSponsorship, 'id'>) => boolean;
   addResolution: (res: Omit<TrusteeResolution, 'id'>) => boolean;
+  voteOnResolution: (id: string, type: 'favor' | 'against') => void;
   addShift: (shift: Omit<SevadarDutyShift, 'id'>) => boolean;
   addCampaignDonation: (campaignId: string, donorName: string, amount: number, city: string) => void;
   addResidentPuja: (puja: Omit<ResidentPujaSchedule, 'id'>) => boolean;
@@ -969,7 +970,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { activeWorkspace, currentRole, isAuthenticated } = useAuthWorkspace();
+  const { activeWorkspace, currentRole, isAuthenticated, firebaseUser } = useAuthWorkspace();
   const { showToast } = useToast();
   const initialData = useInitialData();
 
@@ -1028,7 +1029,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // FIREBASE SYNC EFFECT
   useEffect(() => {
-    if (!activeWorkspace?.id || !isAuthenticated) return;
+    if (!activeWorkspace?.id || !isAuthenticated || !firebaseUser) return;
     const collections = [
       { name: 'devotees', setter: setAllDevotees },
       { name: 'families', setter: setAllFamilies },
@@ -1057,7 +1058,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => unsubscribes.forEach(unsub => unsub());
-  }, [activeWorkspace?.id, isAuthenticated]);
+  }, [activeWorkspace?.id, isAuthenticated, firebaseUser]);
 
   // Helper to push to firestore
   const pushToFirestore = (colName: string, id: string, data: any) => {
@@ -1614,9 +1615,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
-  const updatePoojaStatus = (id: string, status: PoojaBooking['status']) => {
+  const updatePoojaStatus = (id: string, status: PoojaBooking['status'], additionalUpdates?: Partial<PoojaBooking>) => {
     setAllPoojaBookings((prev) =>
-      prev.map((b, idx) => (b.id === id ? { ...b, status } : b))
+      prev.map((b, idx) => (b.id === id ? { ...b, status, ...additionalUpdates } : b))
     );
     showToast(`Pooja status updated to ${status}`, 'success');
   };
@@ -1701,6 +1702,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAllResolutions((prev) => [newRes, ...prev]);
     showToast(`Resolution ${res.resolutionNumber} saved to governance ledger`, 'success');
     return true;
+  };
+
+  const voteOnResolution = (id: string, type: 'favor' | 'against') => {
+    setAllResolutions(prev => prev.map(r => {
+      if (r.id === id) {
+        return {
+          ...r,
+          votesInFavor: type === 'favor' ? r.votesInFavor + 1 : r.votesInFavor,
+          votesAgainst: type === 'against' ? r.votesAgainst + 1 : r.votesAgainst
+        };
+      }
+      return r;
+    }));
   };
 
   const addResidentPuja = (puja: Omit<ResidentPujaSchedule, 'id'>): boolean => {
@@ -1841,6 +1855,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         adoptCow,
         addAnnadanam,
         addResolution,
+        voteOnResolution,
         addShift,
         addCampaignDonation,
         addResidentPuja,

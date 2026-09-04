@@ -1,9 +1,9 @@
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 
 export interface QueuedAction {
   id: string;
-  type: 'SOS' | 'MESSAGE' | 'LOCATION' | 'RICH_SOS' | 'DIRECT_MESSAGE' | 'RESPOND_SOS' | 'FORWARD_SOS' | 'RESOLVE_SOS';
+  type: 'SOS' | 'MESSAGE' | 'LOCATION' | 'RICH_SOS' | 'DIRECT_MESSAGE' | 'RESPOND_SOS' | 'FORWARD_SOS' | 'RESOLVE_SOS' | 'POST_SOCIAL' | 'PRANAM_POST' | 'HIDE_SOCIAL_POST' | 'COMMENT_SOCIAL';
   payload: any;
   timestamp: number;
   status: 'PENDING' | 'SYNCED' | 'FAILED';
@@ -97,6 +97,35 @@ export const OfflineSyncManager = {
             resolverId: item.payload.resolverId,
             resolverName: item.payload.resolverName,
           });
+        } else if (item.type === 'POST_SOCIAL') {
+          const workspaceId = item.payload.workspaceId || 'demo';
+          await setDoc(doc(db, `communities/${workspaceId}/social_feed`, item.payload.id), {
+            ...item.payload,
+            syncedAt: serverTimestamp()
+          });
+        } else if (item.type === 'PRANAM_POST') {
+          const { workspaceId, postId, pranams, flowersOffered, diyasLit } = item.payload;
+          if (workspaceId && postId) {
+            const updates: any = {};
+            if (pranams) updates.pranams = increment(pranams);
+            if (flowersOffered) updates.flowersOffered = increment(flowersOffered);
+            if (diyasLit) updates.diyasLit = increment(diyasLit);
+            await updateDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), updates);
+          }
+        } else if (item.type === 'HIDE_SOCIAL_POST') {
+          const { workspaceId, postId } = item.payload;
+          if (workspaceId && postId) {
+            await updateDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), {
+              isHidden: true
+            });
+          }
+        } else if (item.type === 'COMMENT_SOCIAL') {
+          const { workspaceId, postId, comment } = item.payload;
+          if (workspaceId && postId && comment) {
+            await updateDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), {
+              comments: arrayUnion(comment)
+            });
+          }
         }
         
         item.status = 'SYNCED';

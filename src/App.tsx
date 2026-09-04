@@ -71,6 +71,7 @@ const SanataniVivahDesk = lazy(() => import('./components/domain4/SanataniVivahD
 // Domain 6: Enterprise Control & Multi-Workspace
 const WorkspaceSelectorDesk = lazy(() => import('./components/domain6/WorkspaceSelectorDesk').then(m => ({ default: m.WorkspaceSelectorDesk })));
 const MasterSettingsDesk = lazy(() => import('./components/domain6/MasterSettingsDesk').then(m => ({ default: m.MasterSettingsDesk })));
+const AppStoreDesk = lazy(() => import('./components/domain6/AppStoreDesk').then(m => ({ default: m.AppStoreDesk })));
 const CrisisCommandCenter = lazy(() => import('./components/domain6/CrisisCommandCenter').then(m => ({ default: m.CrisisCommandCenter })));
 const UserRolesDesk = lazy(() => import('./components/domain6/UserRolesDesk').then(m => ({ default: m.UserRolesDesk })));
 const AuditLogDesk = lazy(() => import('./components/domain6/AuditLogDesk').then(m => ({ default: m.AuditLogDesk })));
@@ -83,6 +84,8 @@ const MemberAppShell = lazy(() => import('./components/devotee/MemberAppShell').
 const YatraNetDesk = lazy(() => import('./components/domain7/YatraNetDesk').then(m => ({ default: m.default })));
 const DharamshalaDesk = lazy(() => import('./components/domain4/DharamshalaDesk').then(m => ({ default: m.DharamshalaDesk })));
 const SevadarRosterDesk = lazy(() => import('./components/domain6/SevadarRosterDesk').then(m => ({ default: m.SevadarRosterDesk })));
+const PanchayatPollingDesk = lazy(() => import('./components/domain6/PanchayatPollingDesk').then(m => ({ default: m.PanchayatPollingDesk })));
+
 
 
 
@@ -265,10 +268,13 @@ const AppContent: React.FC = () => {
         return checkPermission(['trustee', 'manager']) ? <AuditLogDesk /> : <RestrictedAccess />;
       case 'sevadarRoster':
         return checkPermission(['trustee', 'manager']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
+      case 'appStore':
+        return checkPermission(['trustee']) ? <AppStoreDesk /> : <RestrictedAccess />;
       case 'masterSettings':
-      case 'panchayatPolls':
       case 'socialWall':
         return checkPermission(['trustee']) ? <MasterSettingsDesk /> : <RestrictedAccess />;
+      case 'panchayatPolls':
+        return checkPermission(['trustee', 'manager']) ? <PanchayatPollingDesk /> : <RestrictedAccess />;
       case 'crisis-command':
         return checkPermission(['trustee', 'manager']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
 

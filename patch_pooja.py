@@ -4,53 +4,32 @@ filepath = 'src/components/domain3/PoojaBookingDesk.tsx'
 with open(filepath, 'r') as f:
     content = f.read()
 
-# Add import
-content = content.replace("import { useToast } from '../../context/ToastContext';", "import { useToast } from '../../context/ToastContext';\nimport { MemberSearchSelect } from '../common/MemberSearchSelect';")
+target = """                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                    pooja.status === 'Completed'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : pooja.status === 'In-Progress'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse'
+                      : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                  }`}
+                >
+                  {pooja.status}
+                </span>"""
 
-# Replace dual inputs
-orig_input = """              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Select Registered Devotee</label>
-                  <select
-                    value={devoteeId}
-                    onChange={(e) => handleDevoteeSelect(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
-                  >
-                    <option value="">-- Or enter name manually --</option>
-                    {devotees.map((d, idx) => (
-                      <option key={`${d.id}-${idx}`} value={d.id}>
-                        {d.fullName} ({d.gotra})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Devotee Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={devoteeName}
-                    onChange={(e) => setDevoteeName(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
-                  />
-                </div>
-              </div>"""
+replacement = """                <span
+                  className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm ${
+                    pooja.status === 'Completed'
+                      ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/50'
+                      : pooja.status === 'Confirmed'
+                      ? 'bg-blue-950 text-blue-400 border border-blue-800/50'
+                      : pooja.status === 'In-Progress'
+                      ? 'bg-amber-950 text-amber-400 border border-amber-800/50 animate-pulse'
+                      : 'bg-stone-800 text-stone-400 border border-stone-700'
+                  }`}
+                >
+                  {pooja.status || 'Pending'}
+                </span>"""
 
-new_input = """              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="block text-stone-300 font-semibold mb-1">Devotee / Sponsor Name *</label>
-                  <MemberSearchSelect
-                    value={devoteeName}
-                    onChange={(name, id) => {
-                      setDevoteeName(name);
-                      setDevoteeId(id);
-                    }}
-                    placeholder="Search enrolled devotees or type new name..."
-                  />
-                </div>
-              </div>"""
-
-content = content.replace(orig_input, new_input)
-
+content = content.replace(target, replacement)
 with open(filepath, 'w') as f:
     f.write(content)

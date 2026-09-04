@@ -94,7 +94,7 @@ export interface WorkspaceConfig {
   sampradaya: string;
   kuladevata: string;
   logoBase64?: string; bannerBase64?: string;
-  taxExemptionNumber?: string; // 80G / 12A
+  taxExemptionNumber?: string; enabledModules?: string[];
   trustRegNumber?: string;
   pinRequired: boolean;
   adminPin: string;
@@ -255,7 +255,7 @@ export interface PoojaBooking {
   dakshinaAmount: number;
   status: 'Confirmed' | 'Completed' | 'Standby' | 'Cancelled' | string;
   paymentStatus: 'Paid' | 'Pending' | string;
-  receiptRef: string;
+  receiptRef: string; bookingType?: "Individual" | "Organization"; organizationName?: string; cancellationReason?: string;
 }
 
 export interface ResidentPujaSchedule {
@@ -445,6 +445,7 @@ export interface TrusteeResolution {
   status: 'Passed' | 'Pending Review' | 'Deferred' | 'Rejected';
   quorumMet: boolean;
   details: string;
+  expiresAt?: number;
 }
 
 export interface SevadarDutyShift {

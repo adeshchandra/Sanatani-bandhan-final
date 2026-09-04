@@ -13,6 +13,11 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
     
+    match /polls/{pollId} {
+      allow read: if true;
+      allow write: if true; // Just for ease of preview environment if they're voting without full auth yet
+    }
+    
     // All other collections require the user to be logged in
     match /{document=**} {
       allow read, write: if isAuthenticated();

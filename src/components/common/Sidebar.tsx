@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import {
-  LayoutDashboard,
+import React, { useState, useEffect, useMemo } from "react";
+import { Layers, LayoutDashboard,
   Users,
   Home,
   GitFork,
@@ -122,9 +121,10 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'trusteeGovernance', name: 'Trustee Board & Governance', domain: 6, domainTitle: 'Governance & Security', icon: Scale },
   { id: 'legalVault', name: 'Encrypted Legal Vault (80G/Deeds)', domain: 6, domainTitle: 'Governance & Security', icon: Lock },
   { id: 'sevadarRoster', name: 'Sevadar Shift Roster', domain: 6, domainTitle: 'Governance & Security', icon: UserCheck },
+  { id: 'appStore', name: 'App Store & Add-ons', domain: 6, domainTitle: 'Governance & Security', icon: Layers, badge: 'Integrations' },
   { id: 'masterSettings', name: 'Organization Settings & Logos', domain: 6, domainTitle: 'Governance & Security', icon: Settings },
   { id: 'spiritualSettings', name: 'Sampradaya & Kuladevata Config', domain: 6, domainTitle: 'Governance & Security', icon: Compass },
-  { id: 'crisis-command', name: 'Crisis Command Center', domain: 6, domainTitle: 'Governance & Security', icon: ShieldAlert },
+  { id: 'crisis-command', name: 'Crisis Command Center', domain: 6, domainTitle: 'Governance & Security', icon: ShieldAlert, badge: 'SOS' },
 
   // Domain 7: Individual Life & Connect
   { id: 'sadhana-karma', name: 'Sadhana & Japa Counters', domain: 7, domainTitle: 'Sanatani Life & Connect', icon: Flame },
@@ -198,7 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const term = searchTerm.trim().toLowerCase();
     return MODULE_CATALOG.filter((m) => {
       // 1. Check workspace taxonomy
-      const allowedForWorkspace = isModuleAllowed(activeWorkspace?.type || 'Mandir', m.id);
+      const allowedForWorkspace = isModuleAllowed(activeWorkspace, m.id);
       if (!allowedForWorkspace) return false;
       
       // 2. Check RBAC permissions
@@ -213,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       else if (['sandeshBroadcast'].includes(m.id)) {
         hasRole = checkPermission(['manager', 'trustee']);
       }
-      else if (['workspace-hub', 'masterSettings', 'spiritualSettings', 'panchayatPolls'].includes(m.id)) {
+      else if (['workspace-hub', 'masterSettings', 'appStore', 'spiritualSettings', 'panchayatPolls'].includes(m.id)) {
         hasRole = checkPermission(['trustee']);
       }
       else if (['user-roles-rbac', 'trusteeGovernance', 'sevadarRoster', 'auditLog', 'legalVault', 'crisis-command', 'socialWall'].includes(m.id)) {

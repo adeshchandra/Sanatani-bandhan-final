@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Receipt, Download, Search, ShieldCheck, CheckCircle2, QrCode } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
-import { generateTaxReceiptPDF } from '../../utils/pdfGenerator';
+import { generateTaxReceiptPDF, generateBulkTaxReceiptsPDF } from '../../utils/pdfGenerator';
 import { useToast } from '../../context/ToastContext';
 
 export const TaxReceiptDesk: React.FC = () => {
@@ -10,7 +10,7 @@ export const TaxReceiptDesk: React.FC = () => {
   const { treasury } = useData();
   const { showToast } = useToast();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); const [selectedTxIds, setSelectedTxIds] = useState<Set<string>>(new Set());
 
   const eligibleTransactions = treasury.filter(
     (t) =>
@@ -27,6 +27,37 @@ export const TaxReceiptDesk: React.FC = () => {
       showToast(`Section 80G Tax Exemption Certificate downloaded for ${tx.devoteeName || 'Devotee'}`, 'success');
     } catch (e: any) {
       showToast('Error generating certificate', 'error');
+    }
+  };
+
+  const handleBulkDownload = async () => {
+    const selectedTxs = eligibleTransactions.filter(tx => selectedTxIds.has(tx.id));
+    if (selectedTxs.length === 0) return;
+    
+    try {
+      await generateBulkTaxReceiptsPDF(selectedTxs, activeWorkspace);
+      showToast(`Bulk Section 80G Certificates generated for ${selectedTxs.length} transactions`, 'success');
+      setSelectedTxIds(new Set()); // Reset selection after download
+    } catch (e: any) {
+      showToast('Error generating bulk certificates', 'error');
+    }
+  };
+
+  const toggleSelection = (id: string) => {
+    const newSelection = new Set(selectedTxIds);
+    if (newSelection.has(id)) {
+      newSelection.delete(id);
+    } else {
+      newSelection.add(id);
+    }
+    setSelectedTxIds(newSelection);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedTxIds.size === eligibleTransactions.length) {
+      setSelectedTxIds(new Set());
+    } else {
+      setSelectedTxIds(new Set(eligibleTransactions.map(tx => tx.id)));
     }
   };
 
@@ -69,17 +100,27 @@ export const TaxReceiptDesk: React.FC = () => {
       {/* Tax Receipts List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {eligibleTransactions.map((tx, idx) => (
-          <div
+                    <div
             key={`${tx.id}-${idx}`}
-            className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
+            className={`bg-stone-900/90 border rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4 transition-all ${
+              selectedTxIds.has(tx.id) ? 'border-amber-500 shadow-amber-500/10 bg-stone-800/80' : 'border-stone-800'
+            }`}
           >
             <div>
               <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800">
-                <div>
-                  <h3 className="font-extrabold text-sm text-stone-100">{tx.devoteeName || 'Donor'}</h3>
-                  <p className="text-[11px] text-amber-400 font-mono">
-                    Receipt #{tx.taxReceiptNumber || `SB-80G-${String(tx.id || '').slice(-4)}`}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <input 
+                    type="checkbox"
+                    className="mt-1 w-4 h-4 rounded border-stone-600 bg-stone-900 text-amber-500 focus:ring-amber-500 focus:ring-offset-stone-900 cursor-pointer"
+                    checked={selectedTxIds.has(tx.id)}
+                    onChange={() => toggleSelection(tx.id)}
+                  />
+                  <div>
+                    <h3 className="font-extrabold text-sm text-stone-100">{tx.devoteeName || 'Donor'}</h3>
+                    <p className="text-[11px] text-amber-400 font-mono">
+                      Receipt #{tx.taxReceiptNumber || `SB-80G-${String(tx.id || '').slice(-4)}`}
+                    </p>
+                  </div>
                 </div>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
                   80G Certified
@@ -108,7 +149,7 @@ export const TaxReceiptDesk: React.FC = () => {
               <div className="p-3 rounded-xl bg-stone-950/60 border border-stone-800 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] text-stone-400 font-semibold uppercase">Exempt Amount</p>
-                  <p className="text-lg font-black text-emerald-400">₹{tx.amount.toLocaleString()}</p>
+                  <p className="text-lg font-black text-emerald-400">₹{(tx.amount || 0).toLocaleString()}</p>
                 </div>
                 <ShieldCheck className="w-6 h-6 text-emerald-400 opacity-80" />
               </div>

@@ -364,11 +364,46 @@ export const SanataniSocialFeed: React.FC = () => {
     }
   }, [posts, storageKey]);
 
+  // Sync remote posts from Firestore
+  useEffect(() => {
+    if (!activeWorkspace?.id) return;
+    const feedRef = collection(db, `communities/${activeWorkspace.id}/social_feed`);
+    const unsubscribe = onSnapshot(feedRef, (snapshot) => {
+      const remotePosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FeedPost[];
+      
+      setPosts(prev => {
+        const prevMap = new Map(prev.map(p => [p.id, p]));
+        
+        // Enhance remote posts with local transient UI states (like hasPranamed)
+        const enhancedRemote = remotePosts.map(rp => {
+          const localMatch = prevMap.get(rp.id);
+          if (localMatch) {
+            return { ...rp, hasPranamed: localMatch.hasPranamed };
+          }
+          return rp;
+        });
+
+        const remoteMap = new Map(enhancedRemote.map(p => [p.id, p]));
+        const localOnly = prev.filter(p => !remoteMap.has(p.id) && String(p.id).startsWith('post-'));
+        
+        const combined = [...localOnly, ...enhancedRemote].sort((a, b) => {
+          return String(b.id).localeCompare(String(a.id));
+        });
+        
+        return combined;
+      });
+    });
+    return () => unsubscribe();
+  }, [activeWorkspace?.id]);
+
+
   // Handle Pranam Reaction
   const handlePranam = (postId: string) => {
     setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
         const newStatus = !p.hasPranamed;
+        const inc = newStatus ? 1 : -1;
+        OfflineSyncManager.addToQueue('PRANAM_POST', { workspaceId: activeWorkspace?.id, postId, pranams: inc });
         return {
           ...p,
           hasPranamed: newStatus,
@@ -383,7 +418,7 @@ export const SanataniSocialFeed: React.FC = () => {
   const handleOfferFlower = (postId: string) => {
     setOfferingAnimation('flower');
     setTimeout(() => setOfferingAnimation(null), 1200);
-
+    OfflineSyncManager.addToQueue('PRANAM_POST', { workspaceId: activeWorkspace?.id, postId, flowersOffered: 1 });
     setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
         return { ...p, flowersOffered: p.flowersOffered + 1 };
@@ -397,10 +432,10 @@ export const SanataniSocialFeed: React.FC = () => {
   const handleOfferDiya = (postId: string) => {
     setOfferingAnimation('diya');
     setTimeout(() => setOfferingAnimation(null), 1200);
-
+    OfflineSyncManager.addToQueue('PRANAM_POST', { workspaceId: activeWorkspace?.id, postId, diyasLit: 1 });
     setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
-        return { ...p, flowersOffered: p.flowersOffered + 1, diyasLit: p.diyasLit + 1 };
+        return { ...p, diyasLit: p.diyasLit + 1 };
       }
       return p;
     }));
@@ -440,6 +475,8 @@ export const SanataniSocialFeed: React.FC = () => {
       text,
       timestamp: 'Just now'
     };
+
+    OfflineSyncManager.addToQueue('COMMENT_SOCIAL', { workspaceId: activeWorkspace?.id, postId, comment: newComment });
 
     setPosts(prev => prev.map((p, idx) => {
       if (p.id === postId) {
@@ -508,6 +545,7 @@ export const SanataniSocialFeed: React.FC = () => {
     };
 
     setPosts([newPost, ...posts]);
+    OfflineSyncManager.addToQueue('POST_SOCIAL', newPost);
     
     // Reset form
     setNewPostContent('');

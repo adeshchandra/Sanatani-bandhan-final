@@ -218,7 +218,7 @@ export const AnnadanamKitchenDesk: React.FC = () => {
               <div className="p-3 rounded-xl bg-stone-950/60 border border-stone-800 flex items-center justify-between text-xs">
                 <div>
                   <p className="text-[10px] text-stone-400 font-semibold uppercase">Seva Contribution</p>
-                  <p className="font-black text-amber-400 text-sm">₹{s.costRupees.toLocaleString()}</p>
+                  <p className="font-black text-amber-400 text-sm">₹{(s.costRupees || 0).toLocaleString()}</p>
                 </div>
                 <Utensils className="w-5 h-5 text-amber-500 opacity-80" />
               </div>

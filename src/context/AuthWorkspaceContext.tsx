@@ -218,6 +218,7 @@ interface AuthWorkspaceContextType {
   currentDevotee: DevoteeMember | null;
   currentUser?: { id: string; name: string; role: UserRole };
   isAuthenticated: boolean;
+  firebaseUser: any;
   switchWorkspace: (workspaceId: string) => void;
   updateWorkspaceType: (newType: WorkspaceType) => void;
   switchRole: (role: UserRole) => void;
@@ -249,6 +250,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     return initialData.sanatani_user_role || 'head_admin';
   });
 
+  const [firebaseUser, setFirebaseUser] = useState<any>(null);
   const [currentDevotee, setCurrentDevotee] = useState<DevoteeMember | null>(() => {
     return initialData.sanatani_current_devotee || null;
   });
@@ -257,6 +259,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   // FIREBASE AUTH SYNC
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setFirebaseUser(user);
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -272,6 +275,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
           console.error("Error fetching user role", e);
         }
       } else {
+        setFirebaseUser(null);
         setIsAuthenticated(false);
         setCurrentRole('devotee');
         setCurrentDevotee(null);
@@ -461,6 +465,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         currentDevotee,
         currentUser,
         isAuthenticated,
+        firebaseUser,
         switchWorkspace,
         updateWorkspaceType,
         switchRole,
