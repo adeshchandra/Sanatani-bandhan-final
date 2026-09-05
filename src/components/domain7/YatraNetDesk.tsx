@@ -656,7 +656,7 @@ export default function YatraNetDesk() {
                 >
                   <div className="flex items-start gap-3">
                     {b.type === 'RICH_SOS' && b.senderPhoto ? (
-                      <img src={b.senderPhoto} alt="User" className={`w-10 h-10 rounded-xl object-cover shrink-0 ${isSOS ? 'ring-2 ring-red-500 animate-pulse' : ''}`} />
+                      <img src={b.senderPhoto || undefined} alt="User" className={`w-10 h-10 rounded-xl object-cover shrink-0 ${isSOS ? 'ring-2 ring-red-500 animate-pulse' : ''}`} />
                     ) : (
                       <div className={`p-2 rounded-xl shrink-0 ${isSOS ? 'bg-red-100 text-red-600 animate-pulse' : isLocation ? 'bg-blue-100 text-blue-600' : 'bg-stone-100 text-stone-600'}`}>
                         {isSOS ? <AlertTriangle className="w-5 h-5" /> : isLocation ? <MapPin className="w-5 h-5" /> : <Radio className="w-5 h-5" />}

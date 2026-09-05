@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-3">
           {activeWorkspace.logoUrl ? (
             <img 
-              src={activeWorkspace.logoUrl} 
+              src={activeWorkspace.logoUrl || undefined} 
               alt={activeWorkspace.name} 
               className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-cover border border-[#FF9933]/50 shadow-[0_0_10px_rgba(255,153,51,0.2)] shrink-0 bg-white" 
             />

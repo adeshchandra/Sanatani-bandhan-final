@@ -8,6 +8,7 @@ import {
   Image as ImageIcon, X, Clock, UserPlus, EyeOff
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
+import { DirectMessageChat } from '../common/DirectMessageChat';
 import { useLanguage } from '../../context/LanguageContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { usePlanGate } from '../../hooks/usePlanGate';
@@ -40,6 +41,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
   const [filterGotra, setFilterGotra] = useState('');
   const [filterEducation, setFilterEducation] = useState('');
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [activeChatProfile, setActiveChatProfile] = useState<any>(null);
 
   const [profileForm, setProfileForm] = useState({
     name: currentUser?.name || currentUser?.fullName || '',
@@ -305,7 +307,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                   <label className="block text-[10px] font-black text-stone-500 uppercase tracking-widest mb-2">Profile Photo (Auto-Compressed & Privacy Masked)</label>
                   <div className="flex gap-4 items-center">
                     {profileForm.photoUrl ? (
-                      <img src={profileForm.photoUrl} alt="Avatar" className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-stone-200" />
+                      <img src={profileForm.photoUrl || undefined} alt="Avatar" className="w-20 h-20 rounded-2xl object-cover shadow-sm border border-stone-200" />
                     ) : (
                       <div className="w-20 h-20 bg-stone-100 rounded-2xl border border-stone-200 border-dashed flex items-center justify-center text-stone-400">
                         <ImageIcon size={24}/>
@@ -403,7 +405,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                     <div className="h-56 bg-stone-100 relative overflow-hidden">
                       {profile.photoUrl ? (
                         <img 
-                          src={profile.photoUrl} 
+                          src={profile.photoUrl || undefined} 
                           alt="Profile" 
                           className={`w-full h-full object-cover transition-transform duration-700 ${!isConnected ? 'blur-2xl grayscale opacity-60' : 'group-hover:scale-105'}`}
                         />
@@ -452,7 +454,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                       
                       <button 
                         onClick={(e) => { e.stopPropagation(); status ? null : handleConnect(profile.uid); }}
-                        disabled={!!status}
+                        disabled={status === 'PENDING' || status === 'REJECTED'}
                         className={`w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border flex items-center justify-center gap-2 
                           ${status === 'PENDING' ? 'bg-stone-100 text-stone-500 border-stone-200 cursor-not-allowed' 
                           : status === 'ACCEPTED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
@@ -501,7 +503,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                     <div className="flex items-center gap-4 w-full sm:w-auto">
                       <div className="w-16 h-16 rounded-2xl bg-stone-100 overflow-hidden shrink-0">
                         {targetProfile.photoUrl && status === 'ACCEPTED' ? (
-                          <img src={targetProfile.photoUrl} className="w-full h-full object-cover"/>
+                          <img src={targetProfile.photoUrl || undefined} className="w-full h-full object-cover"/>
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-stone-200"><UserCircle size={32} className="text-stone-400"/></div>
                         )}
@@ -526,7 +528,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                         </>
                       )}
                       {status === 'ACCEPTED' && (
-                         <button className="w-full sm:w-auto py-3 px-6 bg-stone-900 hover:bg-black text-white text-xs font-black uppercase tracking-widest rounded-xl transition-colors flex items-center justify-center gap-2">
+                         <button onClick={() => setActiveChatProfile(targetProfile)} className="w-full sm:w-auto py-3 px-6 bg-stone-900 hover:bg-black text-white text-xs font-black uppercase tracking-widest rounded-xl transition-colors flex items-center justify-center gap-2">
                            <MessageCircle size={16}/> Message
                          </button>
                       )}
@@ -556,7 +558,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                   <div className="relative h-64 bg-stone-100">
                     {selectedProfile.photoUrl ? (
                       <img 
-                        src={selectedProfile.photoUrl} 
+                        src={selectedProfile.photoUrl || undefined} 
                         alt="Profile" 
                         className={`w-full h-full object-cover ${!isConnected ? 'blur-xl grayscale opacity-70' : ''}`}
                       />
@@ -615,6 +617,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                     <button 
                       onClick={() => {
                         if (!status) handleConnect(selectedProfile.uid);
+                        else if (status === 'ACCEPTED') setActiveChatProfile(selectedProfile);
                       }}
                       disabled={!!status}
                       className={`w-full py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all border flex items-center justify-center gap-2 
@@ -623,12 +626,27 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
                         : 'bg-stone-900 hover:bg-black text-white border-stone-800 shadow-md hover:shadow-xl hover:-translate-y-0.5'}`}
                     >
                       {status === 'PENDING' ? <Clock size={16}/> : status === 'ACCEPTED' ? <MessageCircle size={16}/> : <UserPlus size={16}/>}
-                      {status === 'PENDING' ? 'Request Pending' : status === 'ACCEPTED' ? 'Chat Available' : 'Connect'}
+                      {status === 'PENDING' ? 'Request Pending' : status === 'ACCEPTED' ? 'Send Message' : 'Connect'}
                     </button>
                   </div>
                 </>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* CHAT OVERLAY */}
+      {activeChatProfile && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-stone-950/60 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl h-full max-h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+            <DirectMessageChat 
+              recipientId={activeChatProfile.uid}
+              recipientName={activeChatProfile.name}
+              recipientPhone={activeChatProfile.phone || '919876543210'}
+              contextType="VIVAH"
+              onClose={() => setActiveChatProfile(null)}
+            />
           </div>
         </div>
       )}

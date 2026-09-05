@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { doc, collection, onSnapshot, writeBatch, setDoc, addDoc } from 'firebase/firestore';
+import { doc, collection, onSnapshot, writeBatch, setDoc, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { 
   Sparkles, Star, Award, CheckCircle2, MapPin, Phone, CalendarDays, 
-  UserCheck, Search, Filter, X, Loader2, Heart, ShieldCheck, BookOpen, Plus, 
+  UserCheck, User, Search, Filter, X, Loader2, Heart, ShieldCheck, BookOpen, Plus, 
   Send, Clock, Check, MessageSquare, AlertTriangle, WifiOff, ScrollText, FileText, Banknote,
   ChevronRight, ArrowLeft, Shield, CalendarClock
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { usePlanGate } from '../../hooks/usePlanGate';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
+import { DirectMessageChat } from '../common/DirectMessageChat';
 import { useNotifications } from '../../context/NotificationContext';
 
 export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: boolean }) {
@@ -32,6 +33,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
   const [activeTab, setActiveTab] = useState('GIGS'); // 'GIGS' | 'MY_ORDERS' | 'MY_OFFERED_GIGS'
   const [submitting, setSubmitting] = useState(false);
   const [isVerifiedPurohit, setIsVerifiedPurohit] = useState(false);
+  const [recentChats, setRecentChats] = useState<any[]>([]);
   
   const [applyForm, setApplyForm] = useState({ name: session?.userName || '', phone: '', specialization: 'Vedic Rituals', experienceYears: '5', address: '', whyJoin: '', certificates: '' });
   const [gigForm, setGigForm] = useState({ title: '', description: '', category: 'Mandir & Home Rituals', sampradaya: 'Smarta', language: 'Sanskrit', specialties: 'Vastu', durationHours: 2, dakshinaFee: 1500 });
@@ -447,6 +449,9 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
           <button onClick={() => setActiveTab('MY_ORDERS')} className={`flex-1 md:w-40 py-3 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-4 ${activeTab === 'MY_ORDERS' ? 'bg-white text-stone-900 shadow-md border border-stone-100' : 'text-stone-500 hover:text-stone-800'}`}>
             <ScrollText size={14}/> My Bookings
           </button>
+          <button onClick={() => setActiveTab('INBOX')} className={`flex-1 md:w-32 py-3 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-4 ${activeTab === 'INBOX' ? 'bg-white text-stone-900 shadow-md border border-stone-100' : 'text-stone-500 hover:text-stone-800'}`}>
+            <MessageSquare size={14}/> Inbox
+          </button>
           {isVerifiedPurohit && (
             <button onClick={() => setActiveTab('MY_OFFERED_GIGS')} className={`flex-1 md:w-48 py-3 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-4 ${activeTab === 'MY_OFFERED_GIGS' ? 'bg-white text-stone-900 shadow-md border border-stone-100' : 'text-stone-500 hover:text-stone-800'}`}>
               <Award size={14}/> My Offered Services
@@ -617,6 +622,46 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
         </div>
       )}
 
+      {activeTab === 'INBOX' && (
+        <div className="space-y-6 animate-in fade-in max-w-5xl mx-auto w-full">
+          <div className="flex items-center justify-between border-b border-stone-200 pb-4 px-2">
+            <div>
+              <h3 className="text-xl font-black text-stone-900 flex items-center gap-2"><MessageSquare className="text-stone-700"/> Messages</h3>
+              <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mt-1">Recent communications</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            {recentChats.length > 0 ? (
+              recentChats.map(chat => {
+                const recipientId = chat.participants?.find((p) => p !== session?.uid) || 'Unknown';
+                const recipientName = chat.participantNames?.[recipientId] || 'Chat Participant';
+                return (
+                  <div key={chat.id} className="bg-white p-5 rounded-3xl border border-stone-200 shadow-sm hover:shadow-md transition-all flex justify-between items-center cursor-pointer group hover:-translate-y-0.5" onClick={() => {
+                     setSelectedGig({ purohitId: recipientId, purohitName: recipientName, title: 'Chat Inquiry' });
+                     setCheckoutStep('CHAT');
+                  }}>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 shadow-sm"><User size={20}/></div>
+                      <div>
+                        <h4 className="text-sm font-black text-stone-900 group-hover:text-amber-700 transition-colors">{recipientName}</h4>
+                        <p className="text-xs text-stone-500 mt-0.5 line-clamp-1 font-medium">{chat.lastMessage || 'No messages yet'}</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="text-stone-300 group-hover:text-amber-500 transition-colors"/>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-stone-200">
+                 <MessageSquare size={48} className="mx-auto mb-4 opacity-20 text-stone-500"/>
+                 <p className="text-lg font-black text-stone-800">No recent messages</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {activeTab === 'MY_OFFERED_GIGS' && (
          <div className="space-y-6 animate-in fade-in max-w-5xl mx-auto w-full">
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200 shadow-sm">
@@ -698,7 +743,19 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
                    <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">{selectedGig.purohitName}</p>
                  </div>
               </div>
-              {checkoutStep === 'FORM' && (
+              {checkoutStep === 'CHAT' && (
+              <div className="flex-1 h-full max-h-[80vh]">
+                <DirectMessageChat 
+                  recipientId={selectedGig.purohitId} 
+                  recipientName={selectedGig.purohitName}
+                  recipientPhone={selectedGig.phone || '919876543210'}
+                  contextType="PUROHIT"
+                  onClose={() => setCheckoutStep('VIEW')}
+                />
+              </div>
+            )}
+            
+            {checkoutStep === 'FORM' && (
                 <button onClick={() => setCheckoutStep('DETAILS')} className="text-xs font-black text-stone-500 hover:text-stone-900 uppercase tracking-widest">Cancel Booking</button>
               )}
             </div>
@@ -751,12 +808,35 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
                        <span className="text-xl font-black text-stone-900">{curSymbol}{selectedGig.dakshinaFee}</span>
                      </div>
                    </div>
-                   <button 
-                     onClick={() => setCheckoutStep('FORM')}
-                     className="w-full py-4 sm:py-5 bg-stone-900 hover:bg-black text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 flex justify-center items-center gap-2"
-                   >
-                     Continue to Booking <ChevronRight size={18}/>
-                   </button>
+                   <div className="flex flex-col gap-3">
+                     <div className="flex gap-3">
+                       <button 
+                         onClick={() => {
+                           const msg = `Hari Om Pandit ji, I am interested in booking: ${selectedGig.title}. Can we discuss?`;
+                           const phone = selectedGig.phone || '919876543210';
+                           window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                         }}
+                         className="flex-1 py-4 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex justify-center items-center gap-2"
+                       >
+                         <Phone size={16}/> WhatsApp
+                       </button>
+                       <button 
+                         onClick={() => {
+                           showToast(`Opening secure chat with ${selectedGig.purohitName}...`, 'success');
+                           // In a real app, this would route to the in-app chat module
+                         }}
+                         className="flex-1 py-4 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex justify-center items-center gap-2"
+                       >
+                         <MessageSquare size={16}/> In-App Chat
+                       </button>
+                     </div>
+                     <button 
+                       onClick={() => setCheckoutStep('FORM')}
+                       className="w-full py-4 sm:py-5 bg-stone-900 hover:bg-black text-white rounded-xl sm:rounded-2xl text-xs sm:text-sm font-black uppercase tracking-widest shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1 flex justify-center items-center gap-2 mt-2"
+                     >
+                       Continue to Booking <ChevronRight size={18}/>
+                     </button>
+                   </div>
                 </div>
               </div>
             )}

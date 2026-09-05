@@ -5,12 +5,14 @@ import {
   Heart, Calendar, Star, Clock, 
   ArrowRight, Download, User, QrCode, 
   Bell, FileText, CheckCircle, MapPin, 
-  Shield, Activity, Share2, Award, Zap, X
+  Shield, Activity, Share2, Award, Zap, X, Printer
 } from 'lucide-react';
 import { TreasuryTransaction, PoojaBookingRecord, PitruRecord, SevadarDutyShift, FamilyHousehold, DevoteeMember } from '../../types';
 import { MySpaceModal } from '../common/MySpaceModal';
-import QRCode from 'qrcode';
-import { generateAnnualDonationSummaryPDF } from '../../utils/pdfGenerator';
+import { DevoteeQRPass } from './DevoteeQRPass';
+import { DonationHistoryModal } from './DonationHistoryModal';
+import { TaxReceiptsWidget } from './TaxReceiptsWidget';
+import { generateAnnualDonationSummaryPDF, generateDevoteeCardPDF } from '../../utils/pdfGenerator';
 import { useToast } from '../../context/ToastContext';
 
 export const DevoteePortal: React.FC = () => {
@@ -19,16 +21,9 @@ export const DevoteePortal: React.FC = () => {
   
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isQrOpen, setIsQrOpen] = useState(false);
-  const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState('');
-
-  const uid = currentUser?.id || currentDevotee?.id || '';
-
-  React.useEffect(() => {
-    if (isQrOpen && uid) {
-      QRCode.toDataURL(`devotee:${uid}`, { width: 200, margin: 1, color: { dark: '#1c1917', light: '#ffffff' } }).then(setQrCodeDataUrl).catch(console.error);
-    }
-  }, [isQrOpen, uid]);
-
+  const [isDonationHistoryOpen, setIsDonationHistoryOpen] = useState(false);
+  const [isTaxWidgetOpen, setIsTaxWidgetOpen] = useState(false);
+  
   // Data Fetching
   const donations = useScopedData<TreasuryTransaction>('treasury', { type: 'Income' }, { orderBy: { field: 'date', direction: 'desc' }});
   const poojas = useScopedData<PoojaBookingRecord>('pooja_bookings', {}, { orderBy: { field: 'bookingDate', direction: 'desc' }});
@@ -49,12 +44,30 @@ export const DevoteePortal: React.FC = () => {
     window.dispatchEvent(new CustomEvent('NAVIGATE', { detail: module }));
   };
 
+  const handlePrintProfile = async () => {
+    if (!currentDevotee) {
+      showToast('Profile data not found', 'error');
+      return;
+    }
+    if (!activeWorkspace) {
+      showToast('Workspace data not found', 'error');
+      return;
+    }
+    
+    try {
+      showToast('Generating ID Card...', 'info');
+      await generateDevoteeCardPDF(currentDevotee, activeWorkspace);
+    } catch(e) {
+      console.error(e);
+      showToast('Error generating ID card', 'error');
+    }
+  };
+
   const handleDownloadTaxReceipt = () => {
     if (donations.length === 0) {
       showToast('No donations available to generate receipt', 'error');
       return;
     }
-    // Simple summary generation (assumes a utility function exists, using try-catch)
     try {
       showToast('Generating Annual Receipt...', 'success');
       generateAnnualDonationSummaryPDF(currentDevotee as any || { fullName: currentUser?.name }, donations, activeWorkspace!);
@@ -117,7 +130,7 @@ export const DevoteePortal: React.FC = () => {
         {/* SECTION B: Quick Actions */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
           <h2 className="text-sm font-black text-stone-900 uppercase tracking-widest mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <button onClick={() => handleNavigate('poojaBooking')} className="flex flex-col items-center justify-center p-4 bg-stone-50 hover:bg-amber-50 rounded-xl border border-stone-100 hover:border-amber-200 transition-colors gap-3">
               <div className="p-3 bg-amber-100 text-amber-600 rounded-full"><Zap className="w-5 h-5" /></div>
               <span className="text-xs font-bold text-stone-700">Book Pooja</span>
@@ -126,7 +139,7 @@ export const DevoteePortal: React.FC = () => {
               <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full"><Share2 className="w-5 h-5" /></div>
               <span className="text-xs font-bold text-stone-700">Family Tree</span>
             </button>
-            <button onClick={handleDownloadTaxReceipt} className="flex flex-col items-center justify-center p-4 bg-stone-50 hover:bg-emerald-50 rounded-xl border border-stone-100 hover:border-emerald-200 transition-colors gap-3">
+            <button onClick={() => setIsTaxWidgetOpen(true)} className="flex flex-col items-center justify-center p-4 bg-stone-50 hover:bg-emerald-50 rounded-xl border border-stone-100 hover:border-emerald-200 transition-colors gap-3">
               <div className="p-3 bg-emerald-100 text-emerald-600 rounded-full"><Download className="w-5 h-5" /></div>
               <span className="text-xs font-bold text-stone-700">Tax Receipts</span>
             </button>
@@ -138,6 +151,10 @@ export const DevoteePortal: React.FC = () => {
               <div className="p-3 bg-purple-100 text-purple-600 rounded-full"><QrCode className="w-5 h-5" /></div>
               <span className="text-xs font-bold text-stone-700">QR Pass</span>
             </button>
+            <button onClick={handlePrintProfile} className="flex flex-col items-center justify-center p-4 bg-stone-50 hover:bg-rose-50 rounded-xl border border-stone-100 hover:border-rose-200 transition-colors gap-3">
+              <div className="p-3 bg-rose-100 text-rose-600 rounded-full"><Printer className="w-5 h-5" /></div>
+              <span className="text-xs font-bold text-stone-700">Print Profile</span>
+            </button>
           </div>
         </div>
 
@@ -148,38 +165,20 @@ export const DevoteePortal: React.FC = () => {
             {/* SECTION C: Upcoming Reminders */}
             <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-black text-stone-900 uppercase tracking-widest flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-amber-500" /> Upcoming Reminders
-                </h2>
+                <h2 className="text-sm font-black text-stone-900 uppercase tracking-widest">Upcoming Reminders</h2>
+                <button className="text-xs font-bold text-stone-500 hover:text-stone-700 flex items-center gap-1">
+                  View Calendar <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
               <div className="space-y-3">
-                {pitruRecords.slice(0, 2).map((record) => (
-                  <div key={record.id} className="p-4 rounded-xl border border-rose-100 bg-rose-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
-                         <Star className="w-5 h-5 text-rose-500" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-stone-900">Annual Shradh: {record.ancestorName}</h4>
-                        <p className="text-xs text-stone-500 mt-0.5">{record.tithiOfDemise || 'Upcoming'} • {record.relationship || 'Ancestor'}</p>
-                      </div>
-                    </div>
-                    <button onClick={() => handleNavigate('poojaBooking')} className="shrink-0 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
-                      Book Sankalp
-                    </button>
+                <div className="flex items-center gap-4 p-3 bg-stone-50 rounded-xl border border-stone-100">
+                  <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex flex-col items-center justify-center shrink-0">
+                    <span className="text-[10px] font-bold uppercase leading-none">Nov</span>
+                    <span className="text-sm font-black leading-none mt-0.5">14</span>
                   </div>
-                ))}
-
-                {/* Dummy Kuladevata Festival Reminder */}
-                <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                       <Award className="w-5 h-5 text-amber-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-stone-900">Kuladevata Utsav</h4>
-                      <p className="text-xs text-stone-500 mt-0.5">Your family deity's annual festival is approaching in 14 days.</p>
-                    </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-stone-900">Kartik Purnima Mahotsav</p>
+                    <p className="text-xs text-stone-500 mt-0.5">Your family deity's annual festival is approaching in 14 days.</p>
                   </div>
                   <button onClick={() => handleNavigate('poojaBooking')} className="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm transition-colors">
                     Offer Seva
@@ -217,13 +216,23 @@ export const DevoteePortal: React.FC = () => {
                     </div>
                   </div>
                 ))}
-
+                
                 {poojas.length === 0 && donations.length === 0 && (
                    <p className="text-sm text-stone-500 italic pl-6">No recent activity found.</p>
                 )}
               </div>
+              
+              {donations.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-stone-100 flex justify-center">
+                  <button 
+                    onClick={() => setIsDonationHistoryOpen(true)}
+                    className="flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl"
+                  >
+                    <Heart className="w-4 h-4" /> View Full Donation History
+                  </button>
+                </div>
+              )}
             </div>
-
           </div>
 
           {/* Right Column (Section E) */}
@@ -273,7 +282,6 @@ export const DevoteePortal: React.FC = () => {
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </div>
@@ -287,28 +295,39 @@ export const DevoteePortal: React.FC = () => {
         />
       )}
 
-      {/* QR Code Modal */}
-      {isQrOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200">
-            <button onClick={() => setIsQrOpen(false)} className="absolute top-4 right-4 p-2 bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-full transition-colors z-10">
-               <X className="w-4 h-4" />
-            </button>
-            <div className="p-8 text-center bg-gradient-to-b from-amber-50 to-white relative">
-               <h3 className="text-lg font-black text-stone-900 mb-1">Digital Entry Pass</h3>
-               <p className="text-xs text-stone-500 font-medium mb-6">Scan at the mandir gates or seva desk</p>
-               
-               <div className="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 inline-block">
-                 {qrCodeDataUrl ? <img src={qrCodeDataUrl} alt="QR Pass" className="w-48 h-48 mx-auto" /> : <div className="w-48 h-48 bg-stone-100 animate-pulse rounded-xl mx-auto"></div>}
-               </div>
-               
-               <div className="mt-6 flex items-center justify-center gap-2 text-emerald-600 font-bold text-sm bg-emerald-50 py-2 px-4 rounded-xl inline-flex">
-                 <CheckCircle className="w-4 h-4" /> Active & Verified
-               </div>
+      {/* QR Code Pass */}
+      <DevoteeQRPass 
+        isOpen={isQrOpen} 
+        onClose={() => setIsQrOpen(false)} 
+        devotee={currentDevotee}
+        workspaceName={activeWorkspace?.name}
+      />
+
+      
+      {/* Tax Receipts Modal */}
+      {isTaxWidgetOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-stone-900/60 backdrop-blur-sm">
+          <div className="bg-transparent rounded-3xl w-full max-w-4xl max-h-[90vh] relative animate-in zoom-in-95 duration-200 flex flex-col">
+            <div className="flex justify-end mb-2">
+               <button onClick={() => setIsTaxWidgetOpen(false)} className="p-2 bg-white hover:bg-stone-100 text-stone-600 rounded-full transition-colors shadow-sm">
+                 <X className="w-5 h-5" />
+               </button>
+            </div>
+            <div className="overflow-y-auto custom-scrollbar rounded-2xl shadow-2xl">
+               <TaxReceiptsWidget />
             </div>
           </div>
         </div>
       )}
+      
+      {/* Donation History Modal */}
+      <DonationHistoryModal
+        isOpen={isDonationHistoryOpen}
+        onClose={() => setIsDonationHistoryOpen(false)}
+        donations={donations}
+        workspace={activeWorkspace}
+        devoteeName={currentDevotee?.spiritualName || currentDevotee?.fullName || currentUser?.name || 'Devotee'}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  MessageCircle, Heart, Share2, Send, Image as ImageIcon, Sparkles, 
+  MessageSquare, MessageCircle, Heart, Share2, Send, Image as ImageIcon, Sparkles, 
   Calendar, Flame, Sun, Filter, Plus, Clock, MapPin, 
   Volume2, VolumeX, CheckCircle2, X, Bell, Award, User, RefreshCw,
   Globe, Users, Lock, ShieldCheck, ChevronDown, Check, Smile,
@@ -10,6 +10,7 @@ import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { OfflineSyncManager } from '../../services/OfflineSyncManager';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
+import { DirectMessageChat } from '../common/DirectMessageChat';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
 import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
@@ -165,6 +166,7 @@ export const SanataniSocialFeed: React.FC = () => {
   const [showFeelingsModal, setShowFeelingsModal] = useState(false);
   
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
+  const [activeChatUser, setActiveChatUser] = useState<{id: string, name: string} | null>(null);
   const [commentInput, setCommentInput] = useState<{ [postId: string]: string }>({});
   
   // New Post Form State (Facebook Style)
@@ -771,7 +773,16 @@ export const SanataniSocialFeed: React.FC = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-bold text-stone-900">{post.authorName}</span>
+                        <span className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                           {post.authorName}
+                           <button 
+                             onClick={(e) => { e.stopPropagation(); setActiveChatUser({ id: post.authorId || post.id + "_author", name: post.authorName || 'Author' }); }}
+                             className="text-amber-500 hover:text-amber-600 transition-colors p-1 bg-amber-50 hover:bg-amber-100 rounded-md"
+                             title="Direct Message"
+                           >
+                             <MessageSquare size={14} />
+                           </button>
+                        </span>
                         {post.isOfficial && (
                           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">
                             <CheckCircle2 className="w-3 h-3 text-amber-600" />
@@ -893,7 +904,7 @@ export const SanataniSocialFeed: React.FC = () => {
                 {post.imageUrl && (
                   <div className="mt-2 relative bg-stone-100 max-h-96 overflow-hidden">
                     <img
-                      src={post.imageUrl}
+                      src={post.imageUrl || undefined}
                       alt={post.title || 'Post image'}
                       className="w-full h-auto object-cover max-h-96"
                       loading="lazy"
@@ -1238,7 +1249,7 @@ export const SanataniSocialFeed: React.FC = () => {
 
                   {newPostImageUrl && (
                     <div className="mt-2 relative rounded-xl overflow-hidden max-h-40 border border-stone-200">
-                      <img src={newPostImageUrl} alt="Preview" className="w-full h-40 object-cover" />
+                      <img src={newPostImageUrl || undefined} alt="Preview" className="w-full h-40 object-cover" />
                     </div>
                   )}
                 </div>
@@ -1442,6 +1453,21 @@ export const SanataniSocialFeed: React.FC = () => {
         </div>
       )}
 
+
+      {/* CHAT OVERLAY */}
+      {activeChatUser && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-stone-950/60 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl h-full max-h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+            <DirectMessageChat 
+              recipientId={activeChatUser.id}
+              recipientName={activeChatUser.name}
+              recipientPhone="919876543210"
+              contextType="SOCIAL"
+              onClose={() => setActiveChatUser(null)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

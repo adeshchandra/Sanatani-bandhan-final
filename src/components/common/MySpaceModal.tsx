@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   QrCode, X, Download, Award, ShieldCheck, Sparkles, Heart, Clock, 
   Phone, MapPin, User, Mail, CreditCard, Droplet, Globe2, FileText, 
-  Edit, Lock, Banknote, Filter, History, FileDigit, HeartHandshake, Plus, Flame, Send, ShieldAlert, LogOut, Camera, CheckCircle2, AlertTriangle, Ticket
-} from 'lucide-react';
+  Edit, Lock, Banknote, Filter, History, FileDigit, HeartHandshake, Plus, Flame, Send, ShieldAlert, LogOut, Camera, CheckCircle2, AlertTriangle, Ticket,
+  LayoutDashboard, Bell
+, Fingerprint } from 'lucide-react';
 import { DevoteeSelfService } from '../account/DevoteeSelfService';
 import QRCode from 'qrcode';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
@@ -28,7 +29,59 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
 
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [profileTab, setProfileTab] = useState<'PASS' | 'IDENTITY' | 'ACTIVITY' | 'GLOBAL' | 'SECURITY'>('PASS');
+  const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
+
+  const handleBiometricToggle = async () => {
+    try {
+      if (!window.PublicKeyCredential) {
+        showToast('Biometric authentication is not supported on this device.', 'error');
+        return;
+      }
+
+      // Prevent console errors in AI Studio iframe preview by checking frame context
+      if (window.self !== window.top) {
+         if (!isBiometricEnabled) {
+            setIsBiometricEnabled(true);
+            showToast('Preview Mode: Biometric setup simulated. Open in a new tab for real WebAuthn.', 'success');
+         } else {
+            setIsBiometricEnabled(false);
+            showToast('Biometric authentication disabled.', 'success');
+         }
+         return;
+      }
+
+      if (!isBiometricEnabled) {
+        const publicKey: PublicKeyCredentialCreationOptions = {
+          challenge: new Uint8Array(32),
+          rp: { name: "Sanatani Bandhan", id: window.location.hostname },
+          user: {
+            id: new Uint8Array(16),
+            name: activeMember?.email || 'user@example.com',
+            displayName: activeMember?.fullName || activeMember?.name || 'User'
+          },
+          pubKeyCredParams: [{ alg: -7, type: "public-key" as "public-key" }],
+          authenticatorSelection: { authenticatorAttachment: "platform" as AuthenticatorAttachment },
+          timeout: 60000,
+        };
+        const cred = await navigator.credentials.create({ publicKey });
+        if (cred) {
+          setIsBiometricEnabled(true);
+          showToast('Biometric authentication enabled successfully!', 'success');
+        }
+      } else {
+         setIsBiometricEnabled(false);
+         showToast('Biometric authentication disabled.', 'success');
+      }
+    } catch (err: any) {
+      if (err?.name === 'NotAllowedError') {
+        showToast('Preview restricted: Please open the app in a new tab to use Biometrics.', 'error');
+      } else {
+        showToast('Biometric setup failed or was cancelled.', 'error');
+      }
+      console.error(err);
+    }
+  };
+  const [profileTab, setProfileTab] = useState<'DASHBOARD' | 'PASS' | 'IDENTITY' | 'ACTIVITY' | 'GLOBAL' | 'SECURITY'>('DASHBOARD');
   
   const [editModal, setEditModal] = useState<{field: string, displayName: string, value: string} | null>(null);
   const [activityFilterType, setActivityFilterType] = useState('ALL');
@@ -140,10 +193,10 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.94 }}
-          className="bg-white w-[95%] sm:w-full max-w-4xl h-full sm:h-auto max-h-[95dvh] mx-auto rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-white/20"
+          className="bg-white w-full sm:w-[95%] max-w-4xl h-full sm:h-auto max-h-[100dvh] sm:max-h-[95dvh] mx-auto sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden ring-1 ring-white/20"
         >
           {/* Header Banner */}
-          <div className="h-32 sm:h-40 bg-gradient-to-r from-stone-900 to-black relative shrink-0">
+          <div className="h-32 sm:h-40 bg-gradient-to-r from-stone-900 to-black relative shrink-0 pt-safe">
              <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-2 rounded-full backdrop-blur-sm z-10"><X size={20}/></button>
           </div>
 
@@ -152,8 +205,8 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                {/* Profile Photo */}
                <div className="relative group cursor-pointer w-28 h-28 sm:w-32 sm:h-32 -mt-14 sm:-mt-16 rounded-full border-4 border-white bg-white shadow-md shrink-0 mx-auto sm:mx-0" onClick={() => editPhotoRef.current?.click()}>
                  <div className={`w-full h-full rounded-full p-1 bg-gradient-to-tr ${halo.color}`}>
-                   {activeMember.photoUrl ? (
-                     <img src={activeMember.photoUrl} alt="Profile" className="w-full h-full object-cover rounded-full border-2 border-white" />
+                   {activeMember.photoUrl && activeMember.photoUrl !== "" ? (
+                     <img src={activeMember.photoUrl || undefined} alt="Profile" className="w-full h-full object-cover rounded-full border-2 border-white" />
                    ) : (
                      <div className="w-full h-full bg-white text-stone-400 rounded-full flex items-center justify-center font-black text-4xl sm:text-5xl border-2 border-white">
                        {getInitial(activeMember.fullName || activeMember.name || 'U')}
@@ -178,7 +231,8 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
              </div>
 
              {/* Profile Tabs */}
-             <div className="flex items-center justify-start gap-4 sm:gap-6 border-b border-stone-200 overflow-x-auto scrollbar-hide w-full px-2 sm:px-0">
+             <div className="flex items-center justify-start gap-5 sm:gap-6 border-b border-stone-200 overflow-x-auto scrollbar-hide w-full px-4 sm:px-0">
+                <button onClick={()=>setProfileTab('DASHBOARD')} className={`pb-3 text-[11px] sm:text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap flex items-center gap-1.5 ${profileTab === 'DASHBOARD' ? 'text-amber-600 border-b-2 border-amber-600' : 'text-stone-400 hover:text-stone-700'}`}><LayoutDashboard size={14} className="mb-0.5 mr-1"/> Overview</button>
                 <button onClick={()=>setProfileTab('PASS')} className={`pb-3 text-[11px] sm:text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap flex items-center gap-1.5 ${profileTab === 'PASS' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-stone-400 hover:text-stone-700'}`}><Ticket size={14} className="mb-0.5 mr-1"/> Gate Pass</button>
                 <button onClick={()=>setProfileTab('IDENTITY')} className={`pb-3 text-[11px] sm:text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap ${profileTab === 'IDENTITY' ? 'text-[#FF9933] border-b-2 border-[#FF9933]' : 'text-stone-400 hover:text-stone-700'}`}>Identity</button>
                 <button onClick={()=>setProfileTab('ACTIVITY')} className={`pb-3 text-[11px] sm:text-xs font-black uppercase tracking-widest transition-colors whitespace-nowrap ${profileTab === 'ACTIVITY' ? 'text-[#FF9933] border-b-2 border-[#FF9933]' : 'text-stone-400 hover:text-stone-700'}`}>Activity</button>
@@ -189,7 +243,118 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
 
           <div className="p-4 sm:p-8 overflow-y-auto bg-stone-50 flex-1 min-h-0 pb-12 custom-scrollbar">
 
-            {profileTab === 'PASS' && (
+            
+            {profileTab === 'DASHBOARD' && (
+              <div className="space-y-6 animate-in fade-in">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                   <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                     <Award className="w-8 h-8 text-amber-500 mb-2" />
+                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Seva Score</p>
+                     <p className="text-2xl font-black text-stone-900">{score}</p>
+                   </div>
+                   <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                     <Banknote className="w-8 h-8 text-emerald-500 mb-2" />
+                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Total Donated</p>
+                     <p className="text-2xl font-black text-stone-900">₹{(activeMember.totalDonated || 0).toLocaleString()}</p>
+                   </div>
+                   <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                     <Clock className="w-8 h-8 text-blue-500 mb-2" />
+                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Seva Hours</p>
+                     <p className="text-2xl font-black text-stone-900">{activeMember.volunteerHours || 0} hrs</p>
+                   </div>
+                   <div className="bg-white p-5 rounded-3xl shadow-sm border border-stone-100 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                     <CheckCircle2 className="w-8 h-8 text-indigo-500 mb-2" />
+                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Profile Status</p>
+                     <p className="text-2xl font-black text-stone-900">{completionScore}%</p>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                   {/* Left Column: Role & Permissions + Recent Activity */}
+                   <div className="md:col-span-2 space-y-6">
+                      <div className="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 sm:p-8 relative overflow-hidden">
+                         <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                            <ShieldCheck className="w-40 h-40" />
+                         </div>
+                         <h3 className="text-sm font-black text-stone-900 uppercase tracking-widest mb-6 flex items-center gap-2"><Lock className="w-4 h-4 text-stone-400"/> Role & Access Summary</h3>
+                         <div className="flex flex-col sm:flex-row gap-6 relative z-10">
+                            <div className="flex-1 bg-stone-50 rounded-2xl p-5 border border-stone-100 flex flex-col justify-center">
+                               <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1">Assigned Role</p>
+                               <p className="text-xl font-black text-stone-900">{currentRole}</p>
+                            </div>
+                            <div className="flex-1 bg-stone-50 rounded-2xl p-5 border border-stone-100 flex flex-col justify-center">
+                               <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1">Seva Tier</p>
+                               <p className="text-xl font-black text-amber-600">{activeMember.sevaTier || 'Sadharan'}</p>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 sm:p-8">
+                         <h3 className="text-sm font-black text-stone-900 uppercase tracking-widest mb-6 flex items-center gap-2"><History className="w-4 h-4 text-stone-400"/> Recent Activity</h3>
+                         {filteredPersonalTransactions.length > 0 ? (
+                            <div className="space-y-3">
+                               {filteredPersonalTransactions.slice(0, 3).map((tr, i) => (
+                                 <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-stone-50 transition-colors border border-transparent hover:border-stone-100 group cursor-default">
+                                    <div className="flex items-center gap-4">
+                                       <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${tr.type === 'Income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                                          <Banknote size={16} />
+                                       </div>
+                                       <div>
+                                          <p className="text-sm font-bold text-stone-900 group-hover:text-stone-700 transition-colors">{tr.category}</p>
+                                          <p className="text-[10px] font-bold text-stone-500 mt-0.5">{new Date(tr.date).toLocaleDateString()}</p>
+                                       </div>
+                                    </div>
+                                    <p className={`text-sm font-black ${tr.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                       {tr.type === 'Income' ? '+' : '-'}₹{tr.amount.toLocaleString()}
+                                    </p>
+                                 </div>
+                               ))}
+                            </div>
+                         ) : (
+                            <div className="text-center py-10 text-stone-400 bg-stone-50 rounded-2xl border border-stone-100 border-dashed flex flex-col items-center justify-center">
+                               <History className="w-8 h-8 mb-3 opacity-20" />
+                               <p className="text-xs font-bold uppercase tracking-widest">No recent activity</p>
+                            </div>
+                         )}
+                      </div>
+                   </div>
+
+                   {/* Right Column: Notifications Center */}
+                   <div className="md:col-span-1">
+                      <div className="bg-white rounded-3xl shadow-sm border border-stone-100 p-6 sm:p-8 h-full flex flex-col">
+                         <div className="flex items-center justify-between mb-6">
+                           <h3 className="text-sm font-black text-stone-900 uppercase tracking-widest flex items-center gap-2"><Bell className="w-4 h-4 text-stone-400"/> Notifications</h3>
+                           <span className="bg-amber-100 text-amber-700 text-[9px] font-black uppercase px-2 py-0.5 rounded-full">3 New</span>
+                         </div>
+                         
+                         <div className="space-y-4 flex-1">
+                            {[
+                               { id: 1, title: 'Profile Incomplete', desc: 'Please add your emergency contact.', icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-50' },
+                               { id: 2, title: 'Upcoming Duty', desc: 'You have a volunteer shift tomorrow at 8 AM.', icon: Clock, color: 'text-blue-500', bg: 'bg-blue-50' },
+                               { id: 3, title: 'Donation Received', desc: 'Thank you for your recent contribution.', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-50' },
+                            ].map(notif => (
+                               <div key={notif.id} className="flex gap-3 items-start p-4 rounded-2xl bg-stone-50/50 hover:bg-stone-50 border border-stone-100 transition-colors cursor-pointer group">
+                                  <div className={`mt-0.5 w-8 h-8 shrink-0 rounded-full flex items-center justify-center shadow-sm ${notif.bg} ${notif.color}`}>
+                                     <notif.icon size={14} />
+                                  </div>
+                                  <div>
+                                     <p className="text-xs font-bold text-stone-900 group-hover:text-stone-700 transition-colors">{notif.title}</p>
+                                     <p className="text-[10px] text-stone-500 font-medium leading-snug mt-1">{notif.desc}</p>
+                                  </div>
+                               </div>
+                            ))}
+                         </div>
+                         
+                         <button className="w-full mt-4 py-3 bg-stone-100 hover:bg-stone-200 text-stone-600 text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors">
+                           View All
+                         </button>
+                      </div>
+                   </div>
+                </div>
+              </div>
+            )}
+{profileTab === 'PASS' && (
               <div className="space-y-6 animate-in fade-in flex flex-col items-center justify-center py-4">
                  <div className="bg-white rounded-3xl shadow-xl border border-stone-200 w-full max-w-sm overflow-hidden relative">
                     <div className="bg-gradient-to-r from-orange-500 to-red-600 p-6 text-center">
@@ -201,7 +366,7 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                        <div className="absolute -right-4 top-0 w-8 h-8 bg-stone-50 rounded-full shadow-inner border border-stone-100"></div>
 
                        <img
-                         src={qrDataUrl}
+                         src={qrDataUrl || undefined}
                          alt="Safe Gate Pass QR"
                          className="w-48 h-48 rounded-2xl shadow-md border-4 border-white mb-6 bg-white p-2"
                        />
@@ -223,6 +388,20 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                          Present this secure pass to volunteers at any event gate. It contains <strong className="text-red-500">no</strong> sensitive login credentials.
                        </p>
                     </div>
+                 </div>
+                 
+                 {/* Quick Actions (Gate Pass) */}
+                 <div className="flex gap-3 w-full max-w-sm mt-4">
+                    <button onClick={handleDownloadPDF} className="flex-1 bg-white border border-stone-200 text-stone-700 hover:text-stone-900 hover:bg-stone-50 font-black py-4 rounded-xl text-[10px] uppercase tracking-widest flex justify-center items-center gap-2 shadow-sm transition-all hover:-translate-y-0.5">
+                      <Download size={16}/> Download
+                    </button>
+                    <button onClick={() => {
+                        const shareText = `Here is my Digital Gate Pass for ${activeWorkspace.name}`;
+                        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                        window.open(whatsappUrl, '_blank');
+                    }} className="flex-[2] bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-xl text-[10px] uppercase tracking-widest flex justify-center items-center gap-2 shadow-sm transition-all hover:-translate-y-0.5">
+                      <Send size={16}/> Share on WhatsApp
+                    </button>
                  </div>
               </div>
             )}
@@ -382,7 +561,7 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                    {showQR ? (
                      <div className="flex flex-col items-center bg-stone-50 p-4 rounded-2xl shadow-inner border border-stone-200 shrink-0 animate-in zoom-in-95 relative overflow-hidden">
                         <img 
-                          src={qrDataUrl} 
+                          src={qrDataUrl || undefined} 
                           alt="Secure Auto-Login URL QR" 
                           className="w-32 h-32 sm:w-40 sm:h-40 rounded-xl mb-3 border border-stone-200 shadow-sm blur-sm hover:blur-none transition-all duration-300"
                         />
@@ -414,6 +593,24 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                          </button>
                       </div>
                    </div>
+                </div>
+
+                <div className="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden mt-6">
+                   <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${isBiometricEnabled ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-stone-50 border-stone-200 text-stone-400'}`}>
+                         <Fingerprint size={24} />
+                      </div>
+                      <div>
+                         <h3 className="text-sm font-black text-stone-900 mb-1">Biometric Authentication</h3>
+                         <p className="text-xs font-bold text-stone-500 leading-relaxed max-w-sm">Use Face ID or Touch ID to log in securely without entering your PIN.</p>
+                      </div>
+                   </div>
+                   <button
+                     onClick={handleBiometricToggle}
+                     className={`w-14 h-8 flex items-center rounded-full p-1 transition-colors duration-300 shrink-0 ${isBiometricEnabled ? 'bg-emerald-500' : 'bg-stone-300'}`}
+                   >
+                     <div className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${isBiometricEnabled ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                   </button>
                 </div>
 
                 <div className="border border-rose-100 bg-rose-50/50 rounded-3xl p-6 md:p-8 shadow-sm relative overflow-hidden mt-6">

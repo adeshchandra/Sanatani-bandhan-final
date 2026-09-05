@@ -26,6 +26,7 @@ import { useData } from './context/DataContext';
 import { WorkspaceType, WorkspaceConfig } from './types';
 
 import { NotificationProvider } from './context/NotificationContext';
+const QRScanner = lazy(() => import('./components/admin/QRScanner').then(m => ({ default: m.QRScanner })));
 
 // Dashboard
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome').then(m => ({ default: m.DashboardHome })));
@@ -275,6 +276,8 @@ const AppContent: React.FC = () => {
         return checkPermission(['TRUSTEE', 'MANAGER']) ? <AuditLogDesk /> : <RestrictedAccess />;
       case 'sevadarRoster':
         return checkPermission(['TRUSTEE', 'MANAGER']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
+      case 'qrScanner':
+        return checkPermission(['TRUSTEE', 'MANAGER', 'VOLUNTEER']) ? <QRScanner /> : <RestrictedAccess />;
       case 'appStore':
         return checkPermission(['TRUSTEE']) ? <AppStoreDesk /> : <RestrictedAccess />;
       case 'masterSettings':

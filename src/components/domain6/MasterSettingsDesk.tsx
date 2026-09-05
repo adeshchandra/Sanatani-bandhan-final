@@ -323,7 +323,7 @@ export const MasterSettingsDesk: React.FC = () => {
              {/* Dynamic Banner Area */}
              <div className="h-32 sm:h-40 bg-gray-200 relative group">
                 {workspaceInfo.bannerUrl ? (
-                   <img src={workspaceInfo.bannerUrl} alt="Cover Banner" className="w-full h-full object-cover" />
+                   <img src={workspaceInfo.bannerUrl || undefined} alt="Cover Banner" className="w-full h-full object-cover" />
                 ) : (
                    <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300 flex items-center justify-center text-gray-400">
                      <ImageIcon size={32} className="opacity-50"/>
@@ -343,7 +343,7 @@ export const MasterSettingsDesk: React.FC = () => {
                <div className="flex justify-center sm:justify-start -mt-12 mb-6 relative z-10">
                  <div className="relative group w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden shrink-0 cursor-pointer">
                     {workspaceInfo.logoUrl ? (
-                      <img src={workspaceInfo.logoUrl} alt="Organization Logo" className="w-full h-full object-cover bg-white" />
+                      <img src={workspaceInfo.logoUrl || undefined} alt="Organization Logo" className="w-full h-full object-cover bg-white" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-orange-50 to-orange-100 text-sanatani-orange flex items-center justify-center font-black text-4xl shadow-inner border border-orange-200">
                         {workspaceInfo.name ? workspaceInfo.name.charAt(0).toUpperCase() : 'ॐ'}

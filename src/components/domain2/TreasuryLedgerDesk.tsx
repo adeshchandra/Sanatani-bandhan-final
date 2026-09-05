@@ -463,7 +463,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
               </button>
             </div>
             <img
-              src={selectedMemoUrl}
+              src={selectedMemoUrl || undefined}
               alt="Payment Memo"
               className="rounded-xl w-full max-h-96 object-contain border border-stone-800"
               referrerPolicy="no-referrer"

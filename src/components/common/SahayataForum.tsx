@@ -394,7 +394,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 
               {selectedThread.attachmentUrl && (
                 <div className="mt-6 border border-slate-200 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setLightboxImage(selectedThread.attachmentUrl!)}>
-                  <img src={selectedThread.attachmentUrl} alt="Attachment" className="max-h-96 w-auto object-contain bg-slate-100" />
+                  <img src={selectedThread.attachmentUrl || undefined} alt="Attachment" className="max-h-96 w-auto object-contain bg-slate-100" />
                 </div>
               )}
             </div>
@@ -541,7 +541,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               <label className="block text-sm font-bold text-slate-700 mb-2">Attach Screenshot (Optional)</label>
               {attachmentUrl ? (
                 <div className="relative inline-block border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
-                  <img src={attachmentUrl} alt="Preview" className="max-h-48 object-contain" />
+                  <img src={attachmentUrl || undefined} alt="Preview" className="max-h-48 object-contain" />
                   <button 
                     onClick={() => setAttachmentUrl('')} 
                     className="absolute top-2 right-2 p-1.5 bg-slate-900/50 hover:bg-slate-900 text-white rounded-full transition-colors backdrop-blur-md"
@@ -594,7 +594,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
         >
           <X className="w-6 h-6" />
         </button>
-        <img src={lightboxImage} alt="Attachment Full" className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" />
+        <img src={lightboxImage || undefined} alt="Attachment Full" className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" />
       </div>
     );
   };

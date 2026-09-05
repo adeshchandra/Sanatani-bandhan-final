@@ -675,7 +675,7 @@ export const DevoteeGrid: React.FC = () => {
                     </div>
                     {devotee.photoUrl ? (
                       <img
-                        src={devotee.photoUrl}
+                        src={devotee.photoUrl || undefined}
                         alt={devotee.fullName}
                         className="w-11 h-11 rounded-xl object-cover border border-amber-500/40 shrink-0"
                         referrerPolicy="no-referrer"
@@ -879,7 +879,7 @@ export const DevoteeGrid: React.FC = () => {
                     <div className="flex items-center gap-3">
                       {devotee.photoUrl ? (
                         <img
-                          src={devotee.photoUrl}
+                          src={devotee.photoUrl || undefined}
                           alt={devotee.fullName}
                           className="w-9 h-9 rounded-lg object-cover border border-stone-700 shrink-0"
                           referrerPolicy="no-referrer"
@@ -977,7 +977,7 @@ export const DevoteeGrid: React.FC = () => {
               <div className="flex items-center gap-4">
                 {selectedDevotee.photoUrl ? (
                   <img
-                    src={selectedDevotee.photoUrl}
+                    src={selectedDevotee.photoUrl || undefined}
                     alt={selectedDevotee.fullName}
                     className="w-14 h-14 rounded-2xl object-cover border border-stone-700"
                   />
@@ -1113,7 +1113,7 @@ export const DevoteeGrid: React.FC = () => {
                       <div className="flex items-center gap-3 bg-stone-900/50 p-2.5 rounded-xl border border-stone-700/50">
                         {selectedDevoteeQr && selectedDevotee.pin !== 'REVOKED' ? (
                           showCredentials ? (
-                            <img src={selectedDevoteeQr} alt="QR Code" className="w-12 h-12 rounded-lg bg-white p-0.5" />
+                            <img src={selectedDevoteeQr || undefined} alt="QR Code" className="w-12 h-12 rounded-lg bg-white p-0.5" />
                           ) : (
                             <div className="w-12 h-12 rounded-lg bg-stone-800 border border-stone-700 flex items-center justify-center">
                               <Shield className="w-5 h-5 text-stone-500" />
@@ -1571,7 +1571,7 @@ export const DevoteeGrid: React.FC = () => {
                     </p>
                   </div>
                   {standardA_QR ? (
-                    <img src={standardA_QR} alt="Security QR" className="w-48 h-48 mx-auto rounded-xl border-4 border-slate-100 shadow-sm" />
+                    <img src={standardA_QR || undefined} alt="Security QR" className="w-48 h-48 mx-auto rounded-xl border-4 border-slate-100 shadow-sm" />
                   ) : (
                     <div className="w-48 h-48 mx-auto bg-slate-100 rounded-xl animate-pulse" />
                   )}
@@ -1588,7 +1588,7 @@ export const DevoteeGrid: React.FC = () => {
                     </p>
                   </div>
                   {standardB_QR ? (
-                    <img src={standardB_QR} alt="Gate Pass QR" className="w-48 h-48 mx-auto rounded-xl border-4 border-slate-100 shadow-sm" />
+                    <img src={standardB_QR || undefined} alt="Gate Pass QR" className="w-48 h-48 mx-auto rounded-xl border-4 border-slate-100 shadow-sm" />
                   ) : (
                     <div className="w-48 h-48 mx-auto bg-slate-100 rounded-xl animate-pulse" />
                   )}

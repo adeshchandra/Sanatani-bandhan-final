@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { db, auth } from '../../lib/firebase';
 import { doc, updateDoc, addDoc, collection } from 'firebase/firestore';
 import { RecaptchaVerifier, signInWithPhoneNumber, verifyBeforeUpdateEmail, signInAnonymously } from 'firebase/auth';
-import { Camera, Check, Shield, AlertCircle, Phone, Mail, User, Info, Save, X, Loader2 } from 'lucide-react';
+import { Camera, Check, Shield, AlertCircle, Phone, Mail, User, HeartPulse, Sparkles, Save, X, Loader2, Calendar, FileText, Droplet, ShieldAlert } from 'lucide-react';
 import { compressDevoteeAvatar } from '../../utils/imageCompression';
 
 declare global {
@@ -20,16 +20,31 @@ export const DevoteeSelfService: React.FC = () => {
   const { showToast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'PERSONAL' | 'SPIRITUAL' | 'MEDICAL'>('PERSONAL');
   
   const [formData, setFormData] = useState({
+    fullName: currentDevotee?.fullName || currentDevotee?.name || '',
     phone: currentDevotee?.phone || '',
     email: currentDevotee?.email || '',
     address: currentDevotee?.address || '',
+    panNumber: currentDevotee?.panNumber || '',
+    birthDate: currentDevotee?.birthDate || '',
+    anniversaryDate: currentDevotee?.anniversaryDate || '',
+    
+    spiritualName: currentDevotee?.spiritualName || '',
+    gotra: currentDevotee?.gotra || '',
+    pravara: currentDevotee?.pravara || '',
+    kuladevata: currentDevotee?.kuladevata || '',
+    varnaKul: currentDevotee?.varnaKul || '',
+    dikshaGuru: currentDevotee?.dikshaGuru || '',
+    dikshaDate: currentDevotee?.dikshaDate || '',
+    
     emergencyContact: currentDevotee?.emergencyContact || '',
     emergencyPhone: currentDevotee?.emergencyPhone || '',
     bloodGroup: currentDevotee?.bloodGroup || '',
     medicalNotes: currentDevotee?.medicalNotes || '',
-    avatarUrl: currentDevotee?.avatarUrl || '',
+    
+    avatarUrl: currentDevotee?.avatarUrl || currentDevotee?.photoUrl || '',
   });
 
   const [phoneVerified, setPhoneVerified] = useState(true);
@@ -161,8 +176,8 @@ export const DevoteeSelfService: React.FC = () => {
       showToast('Invalid phone number format', 'error');
       return;
     }
-    if (!formData.address) {
-      showToast('Address is required', 'error');
+    if (!formData.fullName.trim()) {
+      showToast('Full name is required', 'error');
       return;
     }
     
@@ -176,9 +191,20 @@ export const DevoteeSelfService: React.FC = () => {
       }
       
       const updatePayload = {
+        fullName: formData.fullName.trim(),
         phone: formData.phone,
         email: formData.email,
         address: formData.address,
+        panNumber: formData.panNumber,
+        birthDate: formData.birthDate,
+        anniversaryDate: formData.anniversaryDate,
+        spiritualName: formData.spiritualName.trim(),
+        gotra: formData.gotra,
+        pravara: formData.pravara,
+        kuladevata: formData.kuladevata,
+        varnaKul: formData.varnaKul,
+        dikshaGuru: formData.dikshaGuru,
+        dikshaDate: formData.dikshaDate,
         emergencyContact: formData.emergencyContact,
         emergencyPhone: formData.emergencyPhone,
         bloodGroup: formData.bloodGroup,
@@ -193,7 +219,7 @@ export const DevoteeSelfService: React.FC = () => {
       await addDoc(collection(db, 'audit_logs'), {
         action: 'PROFILE_UPDATED',
         devoteeId: currentDevotee!.id,
-        devoteeName: currentDevotee!.fullName || currentDevotee!.name || 'Unknown',
+        devoteeName: formData.fullName || 'Unknown',
         timestamp: new Date().toISOString(),
         changes: updatePayload
       });
@@ -219,14 +245,25 @@ export const DevoteeSelfService: React.FC = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setFormData({
+      fullName: currentDevotee?.fullName || currentDevotee?.name || '',
       phone: currentDevotee?.phone || '',
       email: currentDevotee?.email || '',
       address: currentDevotee?.address || '',
+      panNumber: currentDevotee?.panNumber || '',
+      birthDate: currentDevotee?.birthDate || '',
+      anniversaryDate: currentDevotee?.anniversaryDate || '',
+      spiritualName: currentDevotee?.spiritualName || '',
+      gotra: currentDevotee?.gotra || '',
+      pravara: currentDevotee?.pravara || '',
+      kuladevata: currentDevotee?.kuladevata || '',
+      varnaKul: currentDevotee?.varnaKul || '',
+      dikshaGuru: currentDevotee?.dikshaGuru || '',
+      dikshaDate: currentDevotee?.dikshaDate || '',
       emergencyContact: currentDevotee?.emergencyContact || '',
       emergencyPhone: currentDevotee?.emergencyPhone || '',
       bloodGroup: currentDevotee?.bloodGroup || '',
       medicalNotes: currentDevotee?.medicalNotes || '',
-      avatarUrl: currentDevotee?.avatarUrl || '',
+      avatarUrl: currentDevotee?.avatarUrl || currentDevotee?.photoUrl || '',
     });
     setPhoneVerified(true);
     setEmailVerified(true);
@@ -235,231 +272,425 @@ export const DevoteeSelfService: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+    <div className="bg-white rounded-3xl shadow-xl border border-stone-100 overflow-hidden flex flex-col h-full">
       <div id="recaptcha-container"></div>
       
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-black text-stone-900">My Profile</h2>
-        {!isEditing ? (
-          <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 bg-stone-100 hover:bg-stone-200 px-4 py-2 rounded-xl text-sm font-bold text-stone-700 transition-colors">
-            <User className="w-4 h-4" /> Edit Profile
-          </button>
-        ) : (
-          <div className="flex gap-2">
-            <button onClick={handleCancel} className="flex items-center gap-2 bg-stone-100 hover:bg-stone-200 px-4 py-2 rounded-xl text-sm font-bold text-stone-700 transition-colors">
-              <X className="w-4 h-4" /> Cancel
-            </button>
-            <button onClick={handleSave} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 px-4 py-2 rounded-xl text-sm font-bold text-white transition-colors">
-              <Save className="w-4 h-4" /> Save Changes
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column: Avatar & Read Only */}
-        <div className="col-span-1 space-y-6">
-          <div className="flex flex-col items-center">
-            <div className="relative group">
-              <div className="w-32 h-32 rounded-full bg-stone-100 border-4 border-white shadow-md overflow-hidden flex items-center justify-center">
-                {previewUrl || formData.avatarUrl ? (
-                  <img src={previewUrl || formData.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-12 h-12 text-stone-300" />
-                )}
-              </div>
-              {isEditing && (
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="absolute bottom-0 right-0 p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
-                >
-                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                </button>
-              )}
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleImageUpload} 
-                accept="image/*" 
-                className="hidden" 
-              />
-            </div>
-          </div>
-
-          <div className="bg-stone-50 rounded-xl p-4 border border-stone-100 space-y-3">
-            <div className="flex items-center gap-2 text-stone-500 mb-2">
-              <Shield className="w-4 h-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">Verified Identity</span>
-            </div>
-            
-            <div>
-              <p className="text-xs text-stone-500 font-medium">Full Name</p>
-              <p className="text-sm font-bold text-stone-900">{currentDevotee?.fullName || currentDevotee?.name || 'N/A'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-stone-500 font-medium">Gotra & Pravara</p>
-              <p className="text-sm font-bold text-stone-900">{currentDevotee?.gotra || 'N/A'} • {currentDevotee?.pravara || 'N/A'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-stone-500 font-medium">Kuladevata</p>
-              <p className="text-sm font-bold text-stone-900">{currentDevotee?.kuladevata || 'N/A'}</p>
-            </div>
-            <div>
-              <p className="text-xs text-stone-500 font-medium">Seva Tier & Role</p>
-              <p className="text-sm font-bold text-amber-600">{currentDevotee?.sevaTier || 'Sadharan'} • {currentDevotee?.role}</p>
-            </div>
-            <div>
-              <p className="text-xs text-stone-500 font-medium">Joined Date</p>
-              <p className="text-sm font-bold text-stone-900">{currentDevotee?.joinedDate || 'N/A'}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Editable Fields */}
-        <div className="col-span-1 md:col-span-2 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Phone */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Phone Number *</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={formData.phone}
-                  onChange={handlePhoneChange}
-                  disabled={!isEditing}
-                  className={`w-full px-3 py-2 bg-stone-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${!phoneVerified && isEditing ? 'border-rose-300' : 'border-stone-200'}`}
-                  placeholder="10 digit mobile"
-                />
-                {isEditing && !phoneVerified && !otpSent && (
-                  <button onClick={sendOtp} className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shrink-0">
-                    Verify
-                  </button>
-                )}
-                {isEditing && phoneVerified && formData.phone && (
-                  <div className="px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-                    <Check className="w-4 h-4" />
-                  </div>
-                )}
-              </div>
-              {otpSent && (
-                <div className="flex gap-2 mt-2">
-                  <input
-                    type="text"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    className="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-sm"
-                    placeholder="Enter OTP"
-                  />
-                  <button onClick={verifyOtp} className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg shrink-0">
-                    Confirm
-                  </button>
-                </div>
+      {/* Header section with gradient */}
+      <div className="bg-gradient-to-r from-stone-900 to-stone-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        
+        <div className="relative z-10 flex gap-6 items-center">
+          <div className="relative group shrink-0">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-stone-100 border-4 border-stone-700 shadow-xl overflow-hidden flex items-center justify-center">
+              {previewUrl || formData.avatarUrl ? (
+                <img src={previewUrl || formData.avatarUrl || undefined} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-8 h-8 sm:w-10 sm:h-10 text-stone-400" />
               )}
             </div>
-
-            {/* Email */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Email Address</label>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={handleEmailChange}
-                  disabled={!isEditing}
-                  className={`w-full px-3 py-2 bg-stone-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 ${!emailVerified && isEditing ? 'border-amber-300' : 'border-stone-200'}`}
-                  placeholder="email@example.com"
-                />
-                {isEditing && !emailVerified && !verificationLinkSent && formData.email && (
-                  <button onClick={sendEmailLink} className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shrink-0">
-                    Verify
-                  </button>
-                )}
-                {isEditing && emailVerified && formData.email && (
-                  <div className="px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-                    <Check className="w-4 h-4" />
-                  </div>
-                )}
-              </div>
-              {verificationLinkSent && !emailVerified && (
-                <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> Waiting for email confirmation...
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Full Address *</label>
-            <input
-              type="text"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              disabled={!isEditing}
-              className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="City, State, Pincode"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Emergency Contact</label>
-              <input
-                type="text"
-                value={formData.emergencyContact}
-                onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="Name"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Emergency Phone</label>
-              <input
-                type="text"
-                value={formData.emergencyPhone}
-                onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="10 digit mobile"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Blood Group</label>
-              <select
-                value={formData.bloodGroup}
-                onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
-                disabled={!isEditing}
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-70"
+            {isEditing && (
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className="absolute -bottom-3 -right-3 p-2.5 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
               >
-                <option value="">Select...</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">Medical Notes</label>
-              <textarea
-                value={formData.medicalNotes}
-                onChange={(e) => setFormData({ ...formData, medicalNotes: e.target.value })}
-                disabled={!isEditing}
-                rows={2}
-                className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="Any allergies or medical conditions"
-              />
-            </div>
+                {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
+              </button>
+            )}
+            <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
           </div>
           
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-amber-50">
+              {formData.fullName || "Your Profile"}
+            </h2>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="px-2.5 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase tracking-widest rounded-lg border border-white/10">
+                {currentDevotee?.sevaTier || 'Member'}
+              </span>
+              <span className="text-sm font-medium text-stone-400">
+                Joined {currentDevotee?.joinedDate || 'Recently'}
+              </span>
+            </div>
+          </div>
         </div>
+
+        <div className="relative z-10">
+          {!isEditing ? (
+            <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all backdrop-blur-sm border border-white/10">
+              <User className="w-4 h-4" /> Edit Profile
+            </button>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button onClick={handleCancel} className="flex items-center justify-center gap-2 bg-stone-700 hover:bg-stone-600 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all">
+                <X className="w-4 h-4" /> Cancel
+              </button>
+              <button onClick={handleSave} className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 px-5 py-3 rounded-xl text-sm font-bold text-stone-900 shadow-lg shadow-amber-500/20 transition-all">
+                <Save className="w-4 h-4" /> Save
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-stone-100 px-2 sm:px-4 pt-2 bg-stone-50/50 overflow-x-auto scrollbar-hide">
+        {[
+          { id: 'PERSONAL', label: 'Personal Details', icon: User },
+          { id: 'SPIRITUAL', label: 'Spiritual Profile', icon: Sparkles },
+          { id: 'MEDICAL', label: 'Medical & Emergency', icon: HeartPulse },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex items-center gap-2 px-4 sm:px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
+              activeTab === tab.id 
+                ? 'border-amber-500 text-amber-700 bg-white rounded-t-xl' 
+                : 'border-transparent text-stone-500 hover:text-stone-700 hover:bg-stone-100/50 rounded-t-xl'
+            }`}
+          >
+            <tab.icon className="w-4 h-4" />
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Form Content */}
+      <div className="p-6 sm:p-8 flex-1 overflow-y-auto custom-scrollbar">
+        {activeTab === 'PERSONAL' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" /> Full Legal Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all"
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5" /> PAN Number (For 80G)
+                </label>
+                <input
+                  type="text"
+                  value={formData.panNumber}
+                  onChange={(e) => setFormData({ ...formData, panNumber: e.target.value.toUpperCase() })}
+                  disabled={!isEditing}
+                  maxLength={10}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all uppercase"
+                  placeholder="ABCDE1234F"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5" /> Phone Number *
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={handlePhoneChange}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 bg-stone-50 border rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all ${!phoneVerified && isEditing ? 'border-rose-300' : 'border-stone-200'}`}
+                    placeholder="10 digit mobile"
+                  />
+                  {isEditing && !phoneVerified && !otpSent && (
+                    <button onClick={sendOtp} className="px-5 py-3 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-sm">
+                      Verify
+                    </button>
+                  )}
+                  {isEditing && phoneVerified && formData.phone && (
+                    <div className="px-5 py-3 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+                      <Check className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
+                {otpSent && (
+                  <div className="flex gap-2 mt-2 p-3 bg-stone-50 rounded-xl border border-stone-200 animate-in fade-in">
+                    <input
+                      type="text"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-stone-200 rounded-lg text-sm font-bold tracking-widest text-center"
+                      placeholder="XXXXXX"
+                    />
+                    <button onClick={verifyOtp} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shrink-0 transition-colors">
+                      Confirm
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5" /> Email Address
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={handleEmailChange}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-3 bg-stone-50 border rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all ${!emailVerified && isEditing ? 'border-amber-300' : 'border-stone-200'}`}
+                    placeholder="email@example.com"
+                  />
+                  {isEditing && !emailVerified && !verificationLinkSent && formData.email && (
+                    <button onClick={sendEmailLink} className="px-5 py-3 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-sm">
+                      Verify
+                    </button>
+                  )}
+                  {isEditing && emailVerified && formData.email && (
+                    <div className="px-5 py-3 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+                      <Check className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
+                {verificationLinkSent && !emailVerified && (
+                  <p className="text-xs text-amber-600 mt-2 flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-lg font-medium">
+                    <AlertCircle className="w-4 h-4" /> Waiting for email confirmation...
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" /> Birth Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.birthDate}
+                  onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" /> Anniversary
+                </label>
+                <input
+                  type="date"
+                  value={formData.anniversaryDate}
+                  onChange={(e) => setFormData({ ...formData, anniversaryDate: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <User className="w-3.5 h-3.5" /> Full Address *
+              </label>
+              <textarea
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                disabled={!isEditing}
+                rows={3}
+                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all resize-none"
+                placeholder="Street Address, City, State, Pincode"
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'SPIRITUAL' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-amber-700" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-amber-900">Vedic & Spiritual Identity</h4>
+                <p className="text-xs text-amber-700/80 mt-1 font-medium leading-relaxed">
+                  These details help our Purohits perform sankalp and rituals accurately on your behalf.
+                  Your spiritual name will also be reflected across the community.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Spiritual / Diksha Name</label>
+                <input
+                  type="text"
+                  value={formData.spiritualName}
+                  onChange={(e) => setFormData({ ...formData, spiritualName: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="E.g. Hari Dasa"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Varna / Kul</label>
+                <input
+                  type="text"
+                  value={formData.varnaKul}
+                  onChange={(e) => setFormData({ ...formData, varnaKul: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Gotra</label>
+                <input
+                  type="text"
+                  value={formData.gotra}
+                  onChange={(e) => setFormData({ ...formData, gotra: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="Kashyapa, Bharadwaja..."
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Pravara</label>
+                <input
+                  type="text"
+                  value={formData.pravara}
+                  onChange={(e) => setFormData({ ...formData, pravara: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="Optional"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Kuladevata / Ishta Devata</label>
+                <input
+                  type="text"
+                  value={formData.kuladevata}
+                  onChange={(e) => setFormData({ ...formData, kuladevata: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="Family Deity"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Diksha Guru</label>
+                <input
+                  type="text"
+                  value={formData.dikshaGuru}
+                  onChange={(e) => setFormData({ ...formData, dikshaGuru: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="Name of Guru"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Diksha Date</label>
+                <input
+                  type="date"
+                  value={formData.dikshaDate}
+                  onChange={(e) => setFormData({ ...formData, dikshaDate: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'MEDICAL' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" /> Emergency Contact Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.emergencyContact}
+                  onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="Relative or friend name"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5" /> Emergency Phone
+                </label>
+                <input
+                  type="text"
+                  value={formData.emergencyPhone}
+                  onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  placeholder="10 digit mobile"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <Droplet className="w-3.5 h-3.5" /> Blood Group
+                </label>
+                <select
+                  value={formData.bloodGroup}
+                  onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                >
+                  <option value="">Select...</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                  <ShieldAlert className="w-3.5 h-3.5" /> Medical Notes / Allergies
+                </label>
+                <textarea
+                  value={formData.medicalNotes}
+                  onChange={(e) => setFormData({ ...formData, medicalNotes: e.target.value })}
+                  disabled={!isEditing}
+                  rows={4}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all resize-none"
+                  placeholder="Any known allergies, chronic conditions, or medications"
+                />
+              </div>
+            </div>
+            
+            <div className="bg-stone-50 border border-stone-100 p-5 rounded-2xl flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5 text-stone-500" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-stone-900">Privacy Notice</h4>
+                <p className="text-xs text-stone-500 mt-1 font-medium leading-relaxed">
+                  Medical and emergency contact information is securely stored and only accessible by authorized
+                  sevadars or medical responders in case of an emergency at the temple premises.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

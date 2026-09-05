@@ -51,7 +51,8 @@ export interface WorkspaceConfig {
   emergencyPhone?: string;
   medicalNotes?: string;
   idCardValidThru?: string;
-  idCardIssuedOn?: string;
+  
+          idCardIssuedOn?: string;
   city: string; gotra?: string;
   state: string;
   country: string;
@@ -96,6 +97,7 @@ export interface DevoteeMember {
   medicalNotes?: string;
   idCardValidThru?: string;
   idCardIssuedOn?: string;
+  panNumber?: string;
   birthDate?: string;
   anniversaryDate?: string;
   dikshaGuru?: string;

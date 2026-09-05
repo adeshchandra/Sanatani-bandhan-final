@@ -173,6 +173,7 @@ export const generateDevoteeCardPDF = async (
   // QR Code Stamp
   doc.addImage(qrDataUrl, 'PNG', 28.8, 80, 28, 28);
 
+
   // Footer & Crypto Ref
   doc.setFontSize(5);
   doc.setTextColor(107, 114, 128);
@@ -269,6 +270,7 @@ export const generateBulkTaxReceiptsPDF = async (
     doc.setFont('helvetica', 'bold');
     doc.text(tx.devoteeName || 'Generous Sanatan Bhakta', 65, 90);
 
+
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(107, 114, 128);
     doc.text('Seva / Purpose:', 25, 100);
@@ -323,8 +325,11 @@ export const generateBulkTaxReceiptsPDF = async (
 
 export const generateTaxReceiptPDF = async (
   tx: TreasuryTransaction,
-  workspace: WorkspaceConfig
-): Promise<void> => {
+  workspace: WorkspaceConfig,
+  returnType: 'save' | 'blob' = 'save',
+  isCopy: boolean = false,
+  devoteePan: string = ''
+): Promise<void | Blob> => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -332,6 +337,7 @@ export const generateTaxReceiptPDF = async (
   });
 
   const docRef = generateCryptoDocRef('TAX80G');
+
   const qrData = JSON.stringify({
     txId: tx.id,
     receiptNo: tx.taxReceiptNumber || `SB-TAX-${String(tx.id || '').slice(-6)}`,
@@ -342,6 +348,12 @@ export const generateTaxReceiptPDF = async (
   });
 
   const qrDataUrl = await QRCode.toDataURL(qrData, { margin: 1, width: 180 });
+
+  if (isCopy) {
+    doc.setTextColor(200, 200, 200);
+    doc.setFontSize(80);
+    doc.text('COPY', 105, 150, { align: 'center', angle: -45 });
+  }
 
   // Border & Header
   doc.setDrawColor(180, 83, 9);
@@ -445,6 +457,9 @@ export const generateTaxReceiptPDF = async (
   doc.text(docRef, 105, 268, { align: 'center' });
   doc.text('Made with ❤️ by TrackIQ Academy • Universal Community Management', 105, 273, { align: 'center' });
 
+  if (returnType === 'blob') {
+    return doc.output('blob');
+  }
   doc.save(`80G_Receipt_${tx.id}.pdf`);
 };
 

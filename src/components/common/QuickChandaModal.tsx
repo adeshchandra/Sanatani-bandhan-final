@@ -286,7 +286,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
                   <QrCode className="w-3.5 h-3.5" /> Scan to Pay Exactly ₹{amount}
                 </p>
                 <div className="bg-white p-2 rounded-lg shadow-sm">
-                  <img src={upiQrCodeUrl} alt="UPI QR Code" className="w-32 h-32 object-contain" />
+                  <img src={upiQrCodeUrl || undefined} alt="UPI QR Code" className="w-32 h-32 object-contain" />
                 </div>
                 <p className="text-[10px] text-stone-400">Directly settles to {activeWorkspace.name} Treasury</p>
               </div>
