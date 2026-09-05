@@ -113,7 +113,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
 
   // Non-AI Knowledge Base States
   const [nonAiSearch, setNonAiSearch] = useState('');
-  const [nonAiCategory, setNonAiCategory] = useState<'all' | 'devotee' | 'manager' | 'admin'>('all');
+  const [nonAiCategory, setNonAiCategory] = useState<'all' | 'DEVOTEE' | 'MANAGER' | 'MANAGER'>('all');
   const [expandedSopId, setExpandedSopId] = useState<string | null>('sop-1');
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -164,7 +164,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
   const offlineSopList = [
     {
       id: 'sop-1',
-      category: 'devotee',
+      category: 'DEVOTEE',
       role: 'Devotee / Member',
       title: 'How to Book a Sacred Puja, Havan, or Darshan Sankalp',
       steps: [
@@ -179,7 +179,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-2',
-      category: 'devotee',
+      category: 'DEVOTEE',
       role: 'Devotee / Member',
       title: 'How to Download 80G Tax Exemption Donation Certificates',
       steps: [
@@ -193,7 +193,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-3',
-      category: 'devotee',
+      category: 'DEVOTEE',
       role: 'Devotee / Member',
       title: 'How to use the Japa Mala Counter & Daily Sadhana Tracker',
       steps: [
@@ -208,7 +208,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-4',
-      category: 'manager',
+      category: 'MANAGER',
       role: 'Staff Manager',
       title: 'How to Count, Reconcile, and Seal Hundi Cash Collections',
       steps: [
@@ -222,7 +222,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-5',
-      category: 'manager',
+      category: 'MANAGER',
       role: 'Staff Manager',
       title: 'How to Manage Daily Aarti Rotations & Sevadar Shifts',
       steps: [
@@ -236,7 +236,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-6',
-      category: 'manager',
+      category: 'MANAGER',
       role: 'Staff Manager',
       title: 'How to Calculate Kitchen Raw Materials for 1,000+ Devotees',
       steps: [
@@ -250,7 +250,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-7',
-      category: 'admin',
+      category: 'MANAGER',
       role: 'Trustee / Admin',
       title: 'How to Manage User Roles & Role-Based Permissions (RBAC)',
       steps: [
@@ -264,7 +264,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
     },
     {
       id: 'sop-8',
-      category: 'admin',
+      category: 'MANAGER',
       role: 'Trustee / Admin',
       title: 'How to Audit Fiduciary Records & Export CA Pack',
       steps: [
@@ -327,7 +327,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
   // Contextual Presets based on active module
   function getContextualPrompts(moduleKey: string, wsType: string): string[] {
     const mod = (moduleKey || '').toLowerCase();
-    if (mod.includes('pooja') || mod.includes('aarti') || mod.includes('purohit') || mod.includes('pitru') || mod.includes('panchang')) {
+    if (mod.includes('pooja') || mod.includes('aarti') || mod.includes('PUROHIT') || mod.includes('pitru') || mod.includes('panchang')) {
       return [
         'What are the essential Samagri and Sankalp rules for Rudrabhishek?',
         'How to resolve Gotra Pravara conflict for rituals?',
@@ -359,7 +359,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
         'How to link devotee birthday Sankalps with Annadanam meals?'
       ];
     }
-    if (mod.includes('devotee') || mod.includes('family') || mod.includes('vanshavali') || mod.includes('census')) {
+    if (mod.includes('DEVOTEE') || mod.includes('family') || mod.includes('vanshavali') || mod.includes('census')) {
       return [
         'How to record Sapinda lineage up to 7 generations in Vanshavali?',
         'Significance of Rishi Gotras and Pravaras in Sanatan Dharma',
@@ -955,9 +955,9 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
             <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl text-xs font-bold">
               {[
                 { key: 'all', label: 'All SOPs' },
-                { key: 'devotee', label: 'Devotee' },
-                { key: 'manager', label: 'Manager' },
-                { key: 'admin', label: 'Trustee' },
+                { key: 'DEVOTEE', label: 'Devotee' },
+                { key: 'MANAGER', label: 'Manager' },
+                { key: 'MANAGER', label: 'Trustee' },
               ].map((f, idx) => (
                 <button
                   key={`${f.key}-${idx}`}
@@ -1009,9 +1009,9 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                   >
                     <div className="flex items-center gap-2">
                       <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
-                        sop.category === 'admin'
+                        sop.category === 'MANAGER'
                           ? 'bg-purple-900/40 text-purple-300 border border-purple-500/30'
-                          : sop.category === 'manager'
+                          : sop.category === 'MANAGER'
                           ? 'bg-blue-900/40 text-blue-300 border border-blue-500/30'
                           : 'bg-emerald-900/40 text-emerald-300 border border-emerald-500/30'
                       }`}>

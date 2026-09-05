@@ -81,11 +81,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   const getRoleLabel = (r: UserRole) => {
     switch (r) {
-      case 'master_admin': return 'God Mode';
-      case 'superadmin': return 'God Mode (Super Admin)';
-      case 'head_admin': return 'Head Admin (Trustee)';
-      case 'manager': return 'Staff Manager';
-      case 'devotee': return `Personal Mode (${taxonomy.memberNoun})`;
+      case 'SUPER_ADMIN': return 'God Mode';
+      
+      
+      case 'MANAGER': return 'Staff Manager';
+      case 'DEVOTEE': return `Personal Mode (${taxonomy.memberNoun})`;
     }
   };
 
@@ -113,9 +113,9 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         <div className="flex items-center gap-3">
-          {activeWorkspace.logoBase64 ? (
+          {activeWorkspace.logoUrl ? (
             <img 
-              src={activeWorkspace.logoBase64} 
+              src={activeWorkspace.logoUrl} 
               alt={activeWorkspace.name} 
               className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-cover border border-[#FF9933]/50 shadow-[0_0_10px_rgba(255,153,51,0.2)] shrink-0 bg-white" 
             />
@@ -237,7 +237,7 @@ export const Header: React.FC<HeaderProps> = ({
             <UserCircle className="w-4 h-4 text-amber-400 group-hover:text-stone-950 transition-colors" />
             <span className="font-bold">Personal View</span>
           </button>
-        {checkPermission(['head_admin', 'master_admin', 'superadmin']) && (
+        {checkPermission(['SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']) && (
           <button onClick={onOpenTelemetry} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-400 hover:text-emerald-400 transition-colors border border-white/5">
             <Activity className="w-4 h-4" />
           </button>
@@ -307,7 +307,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <Sparkles className="w-4 h-4 text-amber-500" /> Dharmic AI Assistant
                   </button>
                 )}
-                {checkPermission(['head_admin', 'master_admin', 'superadmin']) && (
+                {checkPermission(['SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']) && (
                   <button onClick={() => { setShowRoleDropdown(false); onOpenTelemetry(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-stone-300 text-xs font-bold transition-colors">
                     <Activity className="w-4 h-4 text-emerald-400" /> Live Telemetry
                   </button>
@@ -332,7 +332,7 @@ export const Header: React.FC<HeaderProps> = ({
                   Role-Based Access
                 </p>
               </div>
-              {(['head_admin', 'manager', 'devotee'] as UserRole[]).map((r, idx) => (
+              {(['SUPER_ADMIN', 'MANAGER', 'DEVOTEE'] as UserRole[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => { switchRole(r); setShowRoleDropdown(false); }}

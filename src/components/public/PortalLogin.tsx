@@ -139,7 +139,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
 
   // REGISTRATION STATES
   const [regData, setRegData] = useState({
-    commName: '', type: 'Mandir' as WorkspaceType, description: '', 
+    commName: '', type: 'MANDIR' as WorkspaceType, description: '', 
     adminName: '', email: '', phone: '', password: '',
     country: '', state: '', city: '', street: '',
     currency: { code: 'INR', symbol: '₹' }
@@ -251,8 +251,8 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
     try {
       // Map legacy demo credentials to Firebase-friendly email formats
       let email = identTrim;
-      if (email.toLowerCase() === 'admin') email = 'admin@sanatan.org';
-      else if (email.toLowerCase() === 'trustee') email = 'trustee@sanatan.org';
+      if (email.toLowerCase() === 'MANAGER') email = 'admin@sanatan.org';
+      else if (email.toLowerCase() === 'TRUSTEE') email = 'trustee@sanatan.org';
       else if (!email.includes('@')) email = `${email}@sanatan.org`;
 
       let password = credTrim;
@@ -264,9 +264,9 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
         // Auto-register for prototype convenience if not found
         if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
           const userCred = await createUserWithEmailAndPassword(auth, email, password);
-          let role = 'devotee';
-          if (email.startsWith('admin')) role = 'head_admin';
-          if (email.startsWith('trustee')) role = 'trustee';
+          let role = 'DEVOTEE';
+          if (email.startsWith('MANAGER')) role = 'SUPER_ADMIN';
+          if (email.startsWith('TRUSTEE')) role = 'TRUSTEE';
           await setDoc(doc(db, 'users', userCred.user.uid), { email, role });
         } else {
           throw err;
@@ -317,7 +317,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
 
       addWorkspace(newWorkspace);
       switchWorkspace(newWorkspace.id);
-      loginAsRole('head_admin', adminName);
+      loginAsRole('SUPER_ADMIN', adminName);
       
       showToast("Workspace Provisioned Successfully", "success");
       onSuccess();
@@ -501,7 +501,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
                 <div>
                   <label className="block text-[10px] font-black text-stone-500 uppercase tracking-widest mb-2">{t('reg_org_type')}</label>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {['Mandir', 'Goshala', 'Sangha', 'Ashram', 'Gurukul', 'Satsang', 'Yoga', 'Trust', 'Vidyalaya', 'Purohit'].map((type, idx) => (
+                    {['MANDIR', 'GOSHALA', 'SANGHA', 'ASHRAM', 'GURUKUL', 'SATSANG', 'YOGA_CENTER', 'TRUST', 'VIDYALAYA', 'PUROHIT_SABHA'].map((type, idx) => (
                       <label key={type} className={`flex items-center justify-center py-2.5 px-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-pointer border transition-all ${regData.type === type ? 'bg-white border-amber-500 text-amber-600 shadow-sm ring-2 ring-amber-50' : 'bg-stone-50 border-stone-200 text-stone-500 hover:bg-stone-100'}`}>
                         <input type="radio" name="type" value={type} checked={regData.type === type} onChange={e => setRegData({...regData, type: e.target.value as WorkspaceType})} className="hidden" />
                         {type}
@@ -512,7 +512,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
 
                 <div>
                   <label className="block text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1.5">{regData.type} {t('reg_org_name')} *</label>
-                  <input type="text" required value={regData.commName} onChange={e=>setRegData({...regData, commName: e.target.value})} className="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-sm font-bold text-stone-800 focus:border-amber-500 outline-none shadow-sm transition-colors" placeholder={regData.type === 'Purohit' ? 'e.g. Pt. Ramchandra Services' : `e.g. Sri Krishna ${regData.type}`} />
+                  <input type="text" required value={regData.commName} onChange={e=>setRegData({...regData, commName: e.target.value})} className="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-sm font-bold text-stone-800 focus:border-amber-500 outline-none shadow-sm transition-colors" placeholder={regData.type === 'PUROHIT_SABHA' ? 'e.g. Pt. Ramchandra Services' : `e.g. Sri Krishna ${regData.type}`} />
                 </div>
 
                 <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm space-y-4">
@@ -561,7 +561,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
                   <label className="block text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1.5">{t('reg_desc')}</label>
                   <div className="relative">
                     <AlignLeft size={16} className="absolute left-3 top-3.5 text-stone-400" />
-                    <textarea rows={2} value={regData.description} onChange={e=>setRegData({...regData, description: e.target.value})} className="w-full pl-10 pr-4 p-3.5 bg-white border border-stone-200 rounded-xl text-sm font-bold text-stone-800 focus:border-amber-500 outline-none shadow-sm transition-colors resize-none" placeholder={regData.type === 'Purohit' ? 'Short description of your services...' : 'Short description of your community...'} />
+                    <textarea rows={2} value={regData.description} onChange={e=>setRegData({...regData, description: e.target.value})} className="w-full pl-10 pr-4 p-3.5 bg-white border border-stone-200 rounded-xl text-sm font-bold text-stone-800 focus:border-amber-500 outline-none shadow-sm transition-colors resize-none" placeholder={regData.type === 'PUROHIT_SABHA' ? 'Short description of your services...' : 'Short description of your community...'} />
                   </div>
                 </div>
               </div>

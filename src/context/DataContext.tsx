@@ -41,7 +41,7 @@ export const INITIAL_DEVOTEES: DevoteeMember[] = [
     phone: '+91 98765 11223',
     email: 'rameshwar.shastri@gmail.com',
     pin: '1081',
-    role: 'manager',
+    role: 'MANAGER',
     sevaIndex: 920,
     sevaTier: 'Ratna',
     gotra: 'Shandilya',
@@ -63,7 +63,7 @@ export const INITIAL_DEVOTEES: DevoteeMember[] = [
     phone: '+91 98220 33445',
     email: 'gayatrisharma@yahoo.com',
     pin: '2108',
-    role: 'devotee',
+    role: 'DEVOTEE',
     sevaIndex: 780,
     sevaTier: 'Vishesh',
     gotra: 'Kashyapa',
@@ -84,7 +84,7 @@ export const INITIAL_DEVOTEES: DevoteeMember[] = [
     phone: '+91 94140 77889',
     email: 'rathore.vikram@gmail.com',
     pin: '3344',
-    role: 'head_admin',
+    role: 'SUPER_ADMIN',
     sevaIndex: 850,
     sevaTier: 'Ratna',
     gotra: 'Vatsa',
@@ -105,7 +105,7 @@ export const INITIAL_DEVOTEES: DevoteeMember[] = [
     phone: '+91 98110 55667',
     email: 'hari.dwivedi@vrindavan.org',
     pin: '1008',
-    role: 'head_admin',
+    role: 'SUPER_ADMIN',
     sevaIndex: 940,
     sevaTier: 'Ratna',
     gotra: 'Bharadwaja',
@@ -124,7 +124,7 @@ export const INITIAL_DEVOTEES: DevoteeMember[] = [
     phone: '+91 94066 33221',
     email: 'acharyas@sandipanigurukul.edu.in',
     pin: '1008',
-    role: 'head_admin',
+    role: 'SUPER_ADMIN',
     sevaIndex: 990,
     sevaTier: 'Ratna',
     gotra: 'Gautama',
@@ -1121,7 +1121,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const key = `${DEMO_QUOTA_KEY_PREFIX}${activeWorkspace.id}_${moduleName}`;
     const currentCount = parseInt(localStorage.getItem(key) || '0', 10);
 
-    if (currentCount >= 6 && currentRole !== 'superadmin' && currentRole !== 'master_admin') {
+    if (currentCount >= 6 && currentRole !== 'SUPER_ADMIN') {
       showToast(
         `Demo Quota Limit (4 manual inputs) reached for ${moduleName} in ${activeWorkspace.name}. Records auto-purge on schedule.`,
         'warning',
@@ -1447,7 +1447,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fullName: guest.name,
       phone: guest.phone,
       pin: '1008',
-      role: 'devotee',
+      role: 'DEVOTEE',
       sevaIndex: 150,
       sevaTier: 'Sadharan',
       gotra: 'Kashyapa',

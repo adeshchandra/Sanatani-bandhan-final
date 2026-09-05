@@ -25,7 +25,7 @@ export const compressImageFile = (
 
       // Hardening: Strictly use document.createElement('img')
       const img = document.createElement('img');
-      img.crossOrigin = 'anonymous';
+      img.crossOrigin = 'ANONYMOUS';
 
       img.onload = () => {
         let width = img.width;

@@ -5,6 +5,7 @@ import {
   Phone, MapPin, User, Mail, CreditCard, Droplet, Globe2, FileText, 
   Edit, Lock, Banknote, Filter, History, FileDigit, HeartHandshake, Plus, Flame, Send, ShieldAlert, LogOut, Camera, CheckCircle2, AlertTriangle, Ticket
 } from 'lucide-react';
+import { DevoteeSelfService } from '../account/DevoteeSelfService';
 import QRCode from 'qrcode';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
@@ -79,8 +80,8 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
     if (!file || !activeMember) return;
     try {
       const { compressAvatarImage } = await import('../../utils/imageCompression');
-      const compressedBase64 = await compressAvatarImage(file);
-      updateDevotee(activeMember.id, { photoBase64: compressedBase64 });
+      const downloadUrl = await compressAvatarImage(file);
+      updateDevotee(activeMember.id, { photoUrl: downloadUrl });
       showToast("Profile photo updated successfully.", "success");
     } catch (err) {
       console.error('Failed to compress avatar:', err);
@@ -151,8 +152,8 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
                {/* Profile Photo */}
                <div className="relative group cursor-pointer w-28 h-28 sm:w-32 sm:h-32 -mt-14 sm:-mt-16 rounded-full border-4 border-white bg-white shadow-md shrink-0 mx-auto sm:mx-0" onClick={() => editPhotoRef.current?.click()}>
                  <div className={`w-full h-full rounded-full p-1 bg-gradient-to-tr ${halo.color}`}>
-                   {activeMember.photoBase64 ? (
-                     <img src={activeMember.photoBase64} alt="Profile" className="w-full h-full object-cover rounded-full border-2 border-white" />
+                   {activeMember.photoUrl ? (
+                     <img src={activeMember.photoUrl} alt="Profile" className="w-full h-full object-cover rounded-full border-2 border-white" />
                    ) : (
                      <div className="w-full h-full bg-white text-stone-400 rounded-full flex items-center justify-center font-black text-4xl sm:text-5xl border-2 border-white">
                        {getInitial(activeMember.fullName || activeMember.name || 'U')}
@@ -227,92 +228,8 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
             )}
 
             {profileTab === 'IDENTITY' && (
-              <div className="space-y-6 animate-in fade-in">
-                
-                {/* Profile Completion Widget */}
-                <div className="bg-white border border-stone-200 rounded-3xl p-5 shadow-sm flex flex-col gap-3">
-                   <div className="flex justify-between items-end">
-                     <div>
-                       <h4 className="text-sm font-black text-stone-900">Profile Completion</h4>
-                       <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mt-0.5">Unlock verified status</p>
-                     </div>
-                     <span className={`text-xl font-black ${completionScore === 100 ? 'text-emerald-500' : 'text-[#FF9933]'}`}>{completionScore}%</span>
-                   </div>
-                   <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
-                     <motion.div 
-                       initial={{ width: 0 }} animate={{ width: `${completionScore}%` }} 
-                       className={`h-full rounded-full ${completionScore === 100 ? 'bg-emerald-500' : 'bg-gradient-to-r from-orange-400 to-[#FF9933]'}`} 
-                     />
-                   </div>
-                </div>
-
-                <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="bg-stone-50 px-5 py-3.5 border-b border-stone-200 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-stone-500 uppercase tracking-widest">Contact & Geography</span>
-                    <span className="text-[10px] font-black text-[#FF9933] uppercase tracking-widest flex items-center gap-1"><Edit size={12}/> Tap to Edit</span>
-                  </div>
-                  <div className="divide-y divide-stone-100">
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Full Name</p><p className="text-sm font-black text-stone-900 flex items-center gap-2 truncate"><User size={14} className="text-stone-400 shrink-0"/> {activeMember.fullName || activeMember.name}</p></div>
-                      <button onClick={() => setEditModal({ field: 'fullName', displayName: 'Full Name', value: activeMember.fullName || activeMember.name || '' })} className="text-indigo-600 bg-indigo-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0 bg-stone-50/50">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Phone Number</p><p className="text-sm font-black text-stone-900 flex items-center gap-2 truncate"><Phone size={14} className="text-stone-400 shrink-0"/> {activeMember.phone || 'N/A'}</p></div>
-                      <button onClick={() => setEditModal({ field: 'phone', displayName: 'Phone Number', value: activeMember.phone || '' })} className="text-indigo-600 bg-indigo-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0 bg-stone-50/50">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Email Address</p><p className="text-sm font-black text-stone-900 flex items-center gap-2 truncate"><Mail size={14} className="text-stone-400 shrink-0"/> {activeMember.email || 'N/A'}</p></div>
-                      <button onClick={() => setEditModal({ field: 'email', displayName: 'Email', value: activeMember.email || '' })} className="text-indigo-600 bg-indigo-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Govt ID / NID</p><p className="text-sm font-black text-stone-900 flex items-center gap-2 truncate"><CreditCard size={14} className="text-stone-400 shrink-0"/> {(activeMember as any).nid || 'Not Provided'}</p></div>
-                      <button onClick={() => setEditModal({ field: 'nid', displayName: 'Govt ID / NID', value: (activeMember as any).nid || '' })} className="text-indigo-600 bg-indigo-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Full Address</p><p className="text-sm font-black text-stone-900 flex items-start gap-2 max-w-lg leading-snug"><MapPin size={14} className="text-stone-400 shrink-0 mt-0.5"/> <span className="break-words">{activeMember.address || 'Not Provided'}</span></p></div>
-                      <button onClick={() => setEditModal({ field: 'address', displayName: 'Full Address', value: activeMember.address || '' })} className="text-indigo-600 bg-indigo-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="grid grid-cols-2 divide-x divide-stone-100">
-                      <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0">
-                        <div className="overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Blood Group</p><p className="text-sm font-black text-stone-900 flex items-center gap-1.5 truncate"><Droplet size={14} className="text-red-400 shrink-0"/> {activeMember.bloodGroup || 'N/A'}</p></div>
-                        <button onClick={() => setEditModal({ field: 'bloodGroup', displayName: 'Blood Group', value: activeMember.bloodGroup || '' })} className="text-indigo-600 bg-indigo-50 p-2 rounded-lg shrink-0 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={12}/></button>
-                      </div>
-                      <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-stone-50 transition-colors min-w-0">
-                        <div className="overflow-hidden min-w-0"><p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mb-1">Gotra Lineage</p><p className="text-sm font-black text-stone-900 flex items-center gap-1.5 truncate"><ShieldCheck size={14} className="text-purple-400 shrink-0"/> {activeMember.gotra || 'N/A'}</p></div>
-                        <button onClick={() => setEditModal({ field: 'gotra', displayName: 'Gotra Lineage', value: activeMember.gotra || '' })} className="text-indigo-600 bg-indigo-50 p-2 rounded-lg shrink-0 hover:bg-indigo-100 transition-colors border border-transparent hover:border-indigo-200"><Edit size={12}/></button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Emergency Details */}
-                <div className="bg-rose-50/30 border border-rose-100 rounded-2xl overflow-hidden shadow-sm">
-                  <div className="bg-rose-50 px-5 py-3.5 border-b border-rose-100 flex justify-between items-center">
-                    <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-1.5"><Heart size={12}/> Health & Emergency</span>
-                  </div>
-                  <div className="divide-y divide-rose-50 bg-white">
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-rose-50/50 transition-colors min-w-0">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-rose-400 font-bold uppercase tracking-wider mb-1">Emergency Contact Person</p><p className="text-sm font-black text-stone-900 flex items-center gap-2 truncate"><User size={14} className="text-rose-400 shrink-0"/> {activeMember.emergencyContact || 'Not Provided'}</p></div>
-                      <button onClick={() => setEditModal({ field: 'emergencyContact', displayName: 'Emergency Contact Person', value: activeMember.emergencyContact || '' })} className="text-rose-600 bg-rose-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-rose-100 transition-colors border border-transparent hover:border-rose-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-rose-50/50 transition-colors min-w-0">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-rose-400 font-bold uppercase tracking-wider mb-1">Emergency Phone Number</p><p className="text-sm font-black text-stone-900 flex items-center gap-2 truncate"><Phone size={14} className="text-rose-400 shrink-0"/> {activeMember.emergencyPhone || 'Not Provided'}</p></div>
-                      <button onClick={() => setEditModal({ field: 'emergencyPhone', displayName: 'Emergency Phone Number', value: activeMember.emergencyPhone || '' })} className="text-rose-600 bg-rose-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-rose-100 transition-colors border border-transparent hover:border-rose-200"><Edit size={14}/></button>
-                    </div>
-
-                    <div className="p-4 sm:p-5 flex justify-between items-center group hover:bg-rose-50/50 transition-colors min-w-0">
-                      <div className="w-full overflow-hidden min-w-0"><p className="text-[9px] text-rose-400 font-bold uppercase tracking-wider mb-1">Medical Notes (Allergies, Conditions)</p><p className="text-sm font-black text-stone-900 flex items-start gap-2 max-w-lg leading-snug"><AlertTriangle size={14} className="text-rose-400 shrink-0 mt-0.5"/> <span className="break-words">{activeMember.medicalNotes || 'None noted'}</span></p></div>
-                      <button onClick={() => setEditModal({ field: 'medicalNotes', displayName: 'Medical Notes', value: activeMember.medicalNotes || '' })} className="text-rose-600 bg-rose-50 p-2.5 rounded-xl shrink-0 ml-2 hover:bg-rose-100 transition-colors border border-transparent hover:border-rose-200"><Edit size={14}/></button>
-                    </div>
-                  </div>
-                </div>
+              <div className="animate-in fade-in">
+                <DevoteeSelfService />
               </div>
             )}
 

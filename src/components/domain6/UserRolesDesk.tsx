@@ -22,7 +22,7 @@ export const UserRolesDesk: React.FC = () => {
 
   const roleDefinitions: RolePermission[] = [
     {
-      role: 'superadmin',
+      role: 'SUPER_ADMIN',
       title: 'Param Adhyaksha (Superadmin)',
       description: 'Supreme control over all 46 modules, workspace switching, vault access, and cryptographic audits.',
       canAccessTreasury: true,
@@ -33,7 +33,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     },
     {
-      role: 'trustee',
+      role: 'TRUSTEE',
       title: 'Trustee / Mandir Committee',
       description: 'Treasury approval authority, asset registry audit, budget allocation, and board resolutions.',
       canAccessTreasury: true,
@@ -44,7 +44,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     },
     {
-      role: 'accountant',
+      role: 'ACCOUNTANT',
       title: 'Pradhan Koshadhyaksha (Accountant)',
       description: 'Double-entry ledger entry, 80G tax receipt generation, bhandara invoices, bank reconciliation.',
       canAccessTreasury: true,
@@ -55,7 +55,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     },
     {
-      role: 'purohit',
+      role: 'PUROHIT',
       title: 'Mukhya Purohit (Head Priest)',
       description: 'Pooja calendar scheduling, Sankalp verification, Aarti roster, Shradh alerts, Panjika muhurats.',
       canAccessTreasury: false,
@@ -66,7 +66,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
     },
     {
-      role: 'volunteer',
+      role: 'VOLUNTEER',
       title: 'Mukhya Sevadar (Volunteer Coordinator)',
       description: 'Bhandara food distribution logging, crowd flow scanning, visitor welcome desk entry.',
       canAccessTreasury: false,
@@ -77,7 +77,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
     },
     {
-      role: 'devotee',
+      role: 'DEVOTEE',
       title: 'Bhakt / Sadhak (Registered Devotee)',
       description: 'Personal Smart Pass ID, donation history, pooja booking tracking, and livestream access.',
       canAccessTreasury: false,

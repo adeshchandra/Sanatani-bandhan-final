@@ -1,0 +1,22 @@
+const fs = require('fs');
+
+let content = fs.readFileSync('src/context/LanguageContext.tsx', 'utf8');
+content = content.replace(/Mandir:/g, 'MANDIR:');
+content = content.replace(/Goshala:/g, 'GOSHALA:');
+content = content.replace(/Sangha:/g, 'SANGHA:');
+content = content.replace(/Ashram:/g, 'ASHRAM:');
+content = content.replace(/Gurukul:/g, 'GURUKUL:');
+content = content.replace(/Satsang:/g, 'SATSANG:');
+content = content.replace(/Yoga:/g, 'YOGA_CENTER:');
+content = content.replace(/Trust:/g, 'TRUST:');
+content = content.replace(/Vidyalaya:/g, 'VIDYALAYA:');
+content = content.replace(/Purohit:/g, 'PUROHIT_SABHA:');
+content = content.replace(/PurohitSabha:/g, 'PUROHIT_SABHA:');
+content = content.replace(/Tirth:/g, 'TIRTH:');
+content = content.replace(/Samaj:/g, 'SAMAJ:');
+content = content.replace(/AkshayaPatra:/g, 'ANNADAN_TRUST:');
+content = content.replace(/DharmadaTrust:/g, 'ANNADAN_TRUST:');
+content = content.replace(/MahotsavSamiti:/g, 'MAHOTSAV_SAMITI:');
+content = content.replace(/KashiKshetra:/g, 'KASHI_KSHETRA:');
+content = content.replace(/TAXONOMY_MAP\.en\.Mandir/g, 'TAXONOMY_MAP.en.MANDIR');
+fs.writeFileSync('src/context/LanguageContext.tsx', content);

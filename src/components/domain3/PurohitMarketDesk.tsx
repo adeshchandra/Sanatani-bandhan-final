@@ -22,7 +22,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
     communityId: activeWorkspace.id,
     uid: currentDevotee?.id || 'sys-admin',
     userName: currentDevotee?.name || currentDevotee?.fullName || 'Admin',
-    role: currentRole === 'admin' ? 'ADMIN' : 'MEMBER',
+    role: currentRole === 'MANAGER' ? 'MANAGER' : 'MEMBER',
     currency: { symbol: activeWorkspace.currencySymbol || '₹', code: activeWorkspace.currency || 'INR' }
   };
 
@@ -155,7 +155,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
       if (!snap.empty) {
         const list = snap.docs.map((d) => ({ contractId: d.id, ...d.data() }));
         list.sort((a: any,b: any) => b.createdAt - a.createdAt);
-        setContracts(session.role === 'ADMIN' ? list : list.filter((c: any) => c.clientId === session.uid || c.purohitId === session.uid));
+        setContracts(session.role === 'MANAGER' ? list : list.filter((c: any) => c.clientId === session.uid || c.purohitId === session.uid));
         localStorage.setItem(`sb_purohit_contracts_${session.communityId}`, JSON.stringify(list));
       } else {
         setContracts([]);

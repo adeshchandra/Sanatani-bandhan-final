@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
+import { useScopedData } from '../../hooks/useScopedData';
 import { TreasuryTransaction } from '../../types';
 import { generateTaxReceiptPDF, generateTreasuryLedgerPDF } from '../../utils/pdfGenerator';
 import { printThermalReceipt } from '../../utils/printUtils';
@@ -29,7 +30,8 @@ interface TreasuryLedgerDeskProps {
 
 export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQuickPay }) => {
   const { activeWorkspace } = useAuthWorkspace();
-  const { treasury, addTreasuryTransaction } = useData();
+  const { addTreasuryTransaction } = useData();
+  const treasury = useScopedData<TreasuryTransaction>('treasury', {}, { orderBy: { field: 'date', direction: 'desc' } });
   const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -399,10 +401,10 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                   </td>
                   <td className="p-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      {tx.memoImageBase64 && (
+                      {tx.memoImageUrl && (
                         <button
                           type="button"
-                          onClick={() => setSelectedMemoUrl(tx.memoImageBase64!)}
+                          onClick={() => setSelectedMemoUrl(tx.memoImageUrl!)}
                           className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300"
                           title="View Payment Memo"
                         >

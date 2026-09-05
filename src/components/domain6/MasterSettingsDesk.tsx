@@ -37,18 +37,18 @@ export const MasterSettingsDesk: React.FC = () => {
   const [confirmDialog, setConfirmDialog] = useState<any>(null);
 
   const [workspaceInfo, setWorkspaceInfo] = useState({ 
-    name: activeWorkspace.name || '', 
-    type: activeWorkspace.type || 'Mandir', 
-    email: activeWorkspace.email || '', 
-    phone: activeWorkspace.phone || '', 
-    address: activeWorkspace.address || '', 
-    country: activeWorkspace.country || 'N/A', 
-    currencyCode: activeWorkspace.currency || 'BDT',
-    logoUrl: activeWorkspace.logoBase64 || '',
-    bannerUrl: activeWorkspace.bannerBase64 || '',
-    registrationNo: activeWorkspace.trustRegNumber || '',
-    taxId: activeWorkspace.taxExemptionNumber || '',
-    description: activeWorkspace.tagline || ''
+    name: activeWorkspace?.name || '', 
+    type: activeWorkspace?.type || 'MANDIR', 
+    email: activeWorkspace?.email || '', 
+    phone: activeWorkspace?.phone || '', 
+    address: activeWorkspace?.address || '', 
+    country: activeWorkspace?.country || 'N/A', 
+    currencyCode: activeWorkspace?.currency || 'BDT',
+    logoUrl: activeWorkspace?.logoUrl || '',
+    bannerUrl: activeWorkspace?.bannerUrl || '',
+    registrationNo: activeWorkspace?.trustRegNumber || '',
+    taxId: activeWorkspace?.taxExemptionNumber || '',
+    description: activeWorkspace?.tagline || ''
   });
   
   const [limits, setLimits] = useState({ plan: 'FREE', devoteeCount: 15, pdfsGenerated: 2 });
@@ -88,14 +88,14 @@ export const MasterSettingsDesk: React.FC = () => {
   // Geolocation states
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(
-    (activeWorkspace as any).location?.lat ? (activeWorkspace as any).location : null
+    (activeWorkspace as any)?.location?.lat ? (activeWorkspace as any)?.location : null
   );
 
   const BKASH_ROCKET_NUM = "01608533529";
   const NAGAD_NUM = "01701987744"; 
   const INTL_PAYMENT_LINK = "https://wise.com/pay/me/adeshc";
 
-  const isAdmin = checkPermission(['trustee']);
+  const isAdmin = checkPermission(['TRUSTEE']);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -108,6 +108,7 @@ export const MasterSettingsDesk: React.FC = () => {
     };
   }, []);
 
+  if (!activeWorkspace) return null;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'banner'|'logo') => {
     if (!isAdmin) return showToast(localSafeTranslate('err_unauthorized', "Unauthorized. Only Trustees can upload images."), "error");
     const file = e.target.files?.[0];
@@ -146,8 +147,8 @@ export const MasterSettingsDesk: React.FC = () => {
         country: workspaceInfo.country?.trim() || '',
         currency: newCurrencyObj.code,
         currencySymbol: newCurrencyObj.symbol,
-        logoBase64: workspaceInfo.logoUrl || '',
-        bannerBase64: workspaceInfo.bannerUrl || '',
+        logoUrl: workspaceInfo.logoUrl || '',
+        bannerUrl: workspaceInfo.bannerUrl || '',
         trustRegNumber: workspaceInfo.registrationNo?.trim() || '',
         taxExemptionNumber: workspaceInfo.taxId?.trim() || '',
         tagline: workspaceInfo.description?.trim() || '',
@@ -155,7 +156,7 @@ export const MasterSettingsDesk: React.FC = () => {
       };
 
       updateWorkspaceDetails(updates);
-      await executeSafeUpdate('workspaces', activeWorkspace.id, updates, 'update');
+      await executeSafeUpdate('workspaces', activeWorkspace?.id, updates, 'update');
 
       showToast(localSafeTranslate('settings_saved', "Workspace Settings Updated Successfully!"), "success");
     } catch (err: any) {
@@ -231,7 +232,7 @@ export const MasterSettingsDesk: React.FC = () => {
       const requestRef = doc(collection(db, 'upgrade_requests'));
       await setDoc(requestRef, {
         requestId: requestRef.id,
-        communityId: activeWorkspace.id,
+        communityId: activeWorkspace?.id,
         communityName: workspaceInfo.name,
         adminName: currentUser?.name || 'Admin',
         contactInfo: upgradeForm.contact.trim(),
@@ -364,7 +365,7 @@ export const MasterSettingsDesk: React.FC = () => {
                    <Building2 size={18} className="text-sanatani-orange" /> {localSafeTranslate('official_identity', 'Official Identity')}
                  </div>
                  <span className="text-[10px] bg-gray-50 text-gray-500 px-3 py-1.5 rounded-lg font-mono font-bold border border-gray-200 shadow-sm flex items-center gap-1.5">
-                    <QrCode size={12}/> ID: {activeWorkspace.id}
+                    <QrCode size={12}/> ID: {activeWorkspace?.id}
                  </span>
                </h3>
 

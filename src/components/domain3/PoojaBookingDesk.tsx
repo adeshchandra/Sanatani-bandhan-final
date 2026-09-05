@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Flame, Plus, Search, Calendar, User, Video, CheckCircle2, Clock, X, Scan, List, ChevronLeft, ChevronRight, Printer, XCircle, Building2 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
+import { useScopedData } from '../../hooks/useScopedData';
 import { PoojaBookingRecord } from '../../types';
 import { useToast } from '../../context/ToastContext';
 import { MemberSearchSelect } from '../common/MemberSearchSelect';
@@ -113,7 +114,8 @@ export const PoojaBookingDesk: React.FC = () => {
   const { activeWorkspace } = useAuthWorkspace();
   const { checkGate, showUpsell, upsellModule, closeUpsell } = usePlanGate();
   
-  const { poojas, devotees, addPoojaBooking, updatePoojaStatus } = useData();
+  const { devotees, addPoojaBooking, updatePoojaStatus } = useData();
+  const poojas = useScopedData<PoojaBookingRecord>('pooja_bookings', {}, { orderBy: { field: 'bookingDate', direction: 'desc' } });
   const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState('');

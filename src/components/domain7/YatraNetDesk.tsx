@@ -355,7 +355,7 @@ export default function YatraNetDesk() {
                     </div>
                   </div>
                   {/* Admin Moderation */}
-                  {(currentUser as any)?.role === 'admin' && (
+                  {(currentUser as any)?.role === 'MANAGER' && (
                     <button 
                       onClick={() => handleHidePost(post.id)}
                       className="text-stone-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"

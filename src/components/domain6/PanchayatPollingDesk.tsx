@@ -61,7 +61,7 @@ export const PanchayatPollingDesk: React.FC = () => {
       showToast("You have already cast your vote on this resolution.", "error");
       return;
     }
-    voteOnResolution(id, inFavor);
+    voteOnResolution(id, inFavor ? 'favor' : 'against');
     setHasVotedLocally(prev => ({...prev, [id]: true}));
     showToast(inFavor ? "Vote Cast: IN FAVOR" : "Vote Cast: AGAINST", "success");
   };

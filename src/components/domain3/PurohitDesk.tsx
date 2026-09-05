@@ -22,7 +22,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
     communityId: activeWorkspace.id,
     uid: currentDevotee?.id || 'sys-admin',
     userName: currentDevotee?.name || currentDevotee?.fullName || 'Admin',
-    role: currentRole === 'admin' ? 'ADMIN' : 'MEMBER',
+    role: currentRole === 'MANAGER' ? 'MANAGER' : 'MEMBER',
     currency: { symbol: activeWorkspace.currencySymbol || '₹', code: activeWorkspace.currency || 'INR' }
   };
   
@@ -69,7 +69,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
   const [anushthanForm, setAnushthanForm] = useState({ yajamanId: '', pujaName: '', date: '', time: '', tithi: '', muhurat: '', status: 'INQUIRY', dakshinaEst: '' });
   const [samagriForm, setSamagriForm] = useState({ title: '', itemsText: '', notes: '' });
 
-  const isManagerOrAdmin = currentRole === 'admin' || currentRole === 'manager' || currentRole === 'SUPER_ADMIN';
+  const isManagerOrAdmin = currentRole === 'MANAGER' || currentRole === 'SUPER_ADMIN';
   const curSymbol = session?.currency?.symbol || '₹';
 
   const showToast = (message: string, type = 'success') => {

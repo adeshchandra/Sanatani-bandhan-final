@@ -155,7 +155,7 @@ export const AppStoreDesk: React.FC = () => {
                             mod.status === 'Installed' ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400' :
                             'bg-stone-950 border-stone-800 text-stone-500'
                           }`}>
-                            <Icon size={24} />
+                            <Icon className="w-6 h-6" />
                           </div>
                           <div className="pr-4">
                             <h3 className="font-bold text-stone-100 leading-tight mb-1">{mod.name}</h3>

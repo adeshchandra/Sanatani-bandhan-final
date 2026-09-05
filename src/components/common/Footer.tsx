@@ -15,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenTelemetry }) => {
           Made with ❤️ by <span className="text-[#FF9933] font-bold">TrackIQ Academy</span> • Universal Community Management
         </p>
         <div className="flex items-center gap-3">
-          {onOpenTelemetry && checkPermission(['head_admin', 'master_admin', 'superadmin']) && (
+          {onOpenTelemetry && checkPermission(['SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']) && (
             <button
               type="button"
               onClick={onOpenTelemetry}

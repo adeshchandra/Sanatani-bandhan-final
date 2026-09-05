@@ -19,6 +19,8 @@ import {
   Coins,
   ShieldCheck,
   Globe,
+  Compass,
+  Layers,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -27,6 +29,8 @@ import { useData } from '../../context/DataContext';
 import { calculatePanchang } from '../../utils/panchang';
 import { trackViewItem, trackShare } from '../../utils/gtm';
 import { useToast } from '../../context/ToastContext';
+import { MODULE_CATALOG } from '../common/Sidebar';
+import { isModuleAllowed } from '../../lib/workspaceRegistry';
 
 interface DashboardHomeProps {
   onSelectModule?: (id: string) => void;
@@ -142,6 +146,30 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
     showToast('Shloka with commentary copied to clipboard!', 'success');
   };
 
+  const featuredModules = React.useMemo(() => {
+    const available = MODULE_CATALOG.filter(m => {
+      if (['dashboard', 'devotees', 'treasury', 'poojaBooking', 'goshala', 'appStore', 'masterSettings', 'spiritualSettings'].includes(m.id)) return false;
+      if (!isModuleAllowed(activeWorkspace, m.id)) return false;
+      
+      let hasRole = true;
+      if (['bulkImport', 'campaigns', 'assets', 'sandeshBroadcast'].includes(m.id)) hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
+      else if (['inventory'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']);
+      else if (['mandirPuja', 'purohitDesk', 'purohitMarket', 'pitruShradh'].includes(m.id)) hasRole = checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']);
+      else if (['taxReceipts'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+      else if (['trusteeGovernance', 'sevadarRoster', 'crisis-command', 'socialWall'].includes(m.id)) hasRole = checkPermission(['TRUSTEE', 'MANAGER']);
+      
+      return hasRole;
+    });
+
+    // Shuffle array using Fisher-Yates
+    for (let i = available.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [available[i], available[j]] = [available[j], available[i]];
+    }
+    
+    return available.slice(0, 6);
+  }, [activeWorkspace, checkPermission]);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200 flex flex-col">
       {/* Top Banner */}
@@ -198,7 +226,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
       {/* 4 Key Executive KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
         {/* Metric 1 - Devotee Directory */}
-        {checkPermission(['trustee', 'accountant', 'manager', 'volunteer', 'head_admin']) && (
+        {checkPermission(['TRUSTEE', 'ACCOUNTANT', 'MANAGER', 'VOLUNTEER', 'SUPER_ADMIN']) && (
           <div
             onClick={() => handleNav('devotee-grid')}
             className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-indigo-300 transition-colors group"
@@ -212,7 +240,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         )}
 
         {/* Metric 2 - Net Treasury Fund */}
-        {checkPermission(['trustee', 'accountant', 'manager', 'head_admin']) && (
+        {checkPermission(['TRUSTEE', 'ACCOUNTANT', 'MANAGER', 'SUPER_ADMIN']) && (
           <div
             onClick={() => handleNav('treasury-ledger')}
             className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-emerald-300 transition-colors group"
@@ -228,7 +256,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         )}
 
         {/* Metric 3 - Reserved Sankalps */}
-        {checkPermission(['trustee', 'accountant', 'manager', 'purohit', 'head_admin']) && (
+        {checkPermission(['TRUSTEE', 'ACCOUNTANT', 'MANAGER', 'PUROHIT', 'SUPER_ADMIN']) && (
           <div
             onClick={() => handleNav('pooja-booking')}
             className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-rose-300 transition-colors group"
@@ -242,7 +270,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         )}
 
         {/* Metric 4 - Gau Seva Units */}
-        {checkPermission(['trustee', 'manager', 'volunteer', 'head_admin']) && (
+        {checkPermission(['TRUSTEE', 'MANAGER', 'VOLUNTEER', 'SUPER_ADMIN']) && (
           <div
             onClick={() => handleNav('gau-seva-goshala')}
             className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-amber-300 transition-colors group"
@@ -306,6 +334,61 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Discover Workspace Features */}
+          {featuredModules.length > 0 && (
+            <div className="rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-white">
+                <div>
+                  <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-indigo-600" />
+                    Discover Workspace Features
+                  </h2>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Explore powerful modules available in your ERP</p>
+                </div>
+                {checkPermission(['TRUSTEE']) && (
+                  <button
+                    onClick={() => handleNav('appStore')}
+                    className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-100/50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Layers className="w-3 h-3" />
+                    App Store
+                  </button>
+                )}
+              </div>
+              <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {featuredModules.map((mod) => {
+                  const Icon = mod.icon;
+                  return (
+                    <div
+                      key={mod.id}
+                      onClick={() => handleNav(mod.id)}
+                      className="group p-4 rounded-xl border border-slate-100 hover:border-indigo-200 bg-slate-50/50 hover:bg-indigo-50/30 transition-all cursor-pointer flex gap-3 items-start"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform group-hover:border-indigo-300 group-hover:text-indigo-600 text-slate-500">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold text-slate-800 group-hover:text-indigo-900 truncate mb-1">
+                          {t(mod.id) !== mod.id ? t(mod.id) : mod.name}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-medium text-slate-500 truncate">
+                            {mod.domainTitle}
+                          </span>
+                          {mod.badge && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-600 shrink-0">
+                              {mod.badge}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Right 1 Col */}
@@ -342,7 +425,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                 </button>
               )}
 
-              {checkPermission(['head_admin', 'manager', 'trustee']) && (
+              {checkPermission(['SUPER_ADMIN', 'MANAGER', 'TRUSTEE']) && (
                 <button
                   type="button"
                   id="dashboard-dharmic-ai-btn"
@@ -357,7 +440,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                 </button>
               )}
 
-              {checkPermission(['trustee', 'accountant', 'manager', 'purohit', 'head_admin']) && (
+              {checkPermission(['TRUSTEE', 'ACCOUNTANT', 'MANAGER', 'PUROHIT', 'SUPER_ADMIN']) && (
                 <button
                   type="button"
                   onClick={() => handleNav('pooja-booking')}
@@ -371,7 +454,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                 </button>
               )}
 
-              {checkPermission(['trustee', 'accountant', 'manager', 'head_admin']) && (
+              {checkPermission(['TRUSTEE', 'ACCOUNTANT', 'MANAGER', 'SUPER_ADMIN']) && (
                 <button
                   type="button"
                   onClick={() => handleNav('universal-csv')}
@@ -385,7 +468,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                 </button>
               )}
 
-              {checkPermission(['trustee', 'manager', 'head_admin']) && (
+              {checkPermission(['TRUSTEE', 'MANAGER', 'SUPER_ADMIN']) && (
                 <button
                   type="button"
                   onClick={() => handleNav('whatsapp-broadcaster')}
@@ -402,7 +485,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           </div>
           
           {/* Recent Double-Entry Transactions */}
-          {checkPermission(['trustee', 'accountant', 'manager', 'head_admin']) && (
+          {checkPermission(['TRUSTEE', 'ACCOUNTANT', 'MANAGER', 'SUPER_ADMIN']) && (
             <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex-1">
               <div className="flex items-center justify-between mb-4">
                 <div>

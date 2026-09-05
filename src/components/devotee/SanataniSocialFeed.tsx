@@ -124,7 +124,7 @@ export const STANDARD_CATEGORIES = [
   { key: 'announcement', label: '📢 Mandir Notices & Events', emoji: '📢', name: 'Notices' },
   { key: 'katha', label: '📜 Shloka, Katha & Sanskrit', emoji: '📜', name: 'Katha & Shloka' },
   { key: 'seva', label: '🐄 Goshala & Seva Drives', emoji: '🐄', name: 'Seva & Annadanam' },
-  { key: 'devotee', label: '🙏 Devotee Reflection', emoji: '🙏', name: 'Devotee Reflection' },
+  { key: 'DEVOTEE', label: '🙏 Devotee Reflection', emoji: '🙏', name: 'Devotee Reflection' },
   { key: 'bhajan', label: '🎵 Bhajan, Kirtan & Stotram', emoji: '🎵', name: 'Bhajan & Stotram' },
   { key: 'yajna', label: '🔥 Yajna, Havan & Sankalp', emoji: '🔥', name: 'Yajna & Sankalp' },
   { key: 'yatra', label: '🚩 Tirth Yatra & Pilgrimage', emoji: '🚩', name: 'Tirth Yatra' },
@@ -170,7 +170,7 @@ export const SanataniSocialFeed: React.FC = () => {
   // New Post Form State (Facebook Style)
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostTitle, setNewPostTitle] = useState('');
-  const [newPostCategory, setNewPostCategory] = useState<string>('devotee');
+  const [newPostCategory, setNewPostCategory] = useState<string>('DEVOTEE');
   const [customCategoryName, setCustomCategoryName] = useState('');
   const [customCategoryEmoji, setCustomCategoryEmoji] = useState('✨');
   const [newPostAudience, setNewPostAudience] = useState<PostAudience>('public');
@@ -470,7 +470,7 @@ export const SanataniSocialFeed: React.FC = () => {
     const newComment: FeedComment = {
       id: 'c_' + Date.now(),
       authorName: currentUser?.name || 'Devotee',
-      authorRole: (currentUser?.role === 'trustee' ? 'Trustee' : currentUser?.role === 'manager' ? 'Staff' : 'Devotee'),
+      authorRole: (currentUser?.role === 'TRUSTEE' ? 'Trustee' : currentUser?.role === 'MANAGER' ? 'Staff' : 'Devotee'),
       avatarLetter: (currentUser?.name || 'D').charAt(0).toUpperCase(),
       text,
       timestamp: 'Just now'
@@ -521,10 +521,10 @@ export const SanataniSocialFeed: React.FC = () => {
       id: 'post-' + Date.now(),
       workspaceId: activeWorkspace?.id || 'demo',
       authorName: currentUser?.name || 'Acharya Devotee',
-      authorRole: (currentUser?.role === 'trustee' ? 'Trustee' : currentUser?.role === 'manager' ? 'Trustee' : 'Devotee'),
+      authorRole: (currentUser?.role === 'TRUSTEE' ? 'Trustee' : currentUser?.role === 'MANAGER' ? 'Trustee' : 'Devotee'),
       authorCity: activeWorkspace?.city || 'Varanasi',
       avatarLetter: (currentUser?.name || 'D').charAt(0).toUpperCase(),
-      isOfficial: currentUser?.role === 'trustee' || currentUser?.role === 'manager',
+      isOfficial: currentUser?.role === 'TRUSTEE' || currentUser?.role === 'MANAGER',
       category: finalCategoryName,
       customCategoryName: isCustomCat ? customCategoryName.trim() : undefined,
       customCategoryEmoji: isCustomCat ? customCategoryEmoji : undefined,
@@ -550,7 +550,7 @@ export const SanataniSocialFeed: React.FC = () => {
     // Reset form
     setNewPostContent('');
     setNewPostTitle('');
-    setNewPostCategory('devotee');
+    setNewPostCategory('DEVOTEE');
     setCustomCategoryName('');
     setCustomCategoryEmoji('✨');
     setNewPostAudience('public');

@@ -31,7 +31,7 @@ export const PersonalAccountDesk: React.FC<{
 
   // Profile Edit State
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const profileStorageKey = `sanatani_profile_${currentUser?.id || 'devotee'}`;
+  const profileStorageKey = `sanatani_profile_${currentUser?.id || 'DEVOTEE'}`;
   
   const [profileData, setProfileData] = useState(() => {
     const defaultData = {
@@ -129,7 +129,7 @@ export const PersonalAccountDesk: React.FC<{
 
   // Non-AI Knowledge Base Query State
   const [nonAiSearch, setNonAiSearch] = useState('');
-  const [nonAiCategory, setNonAiCategory] = useState<'all' | 'devotee' | 'manager' | 'admin'>('all');
+  const [nonAiCategory, setNonAiCategory] = useState<'all' | 'DEVOTEE' | 'MANAGER' | 'MANAGER'>('all');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>('faq-1');
 
   // AI Chat Assistant State inside Account
@@ -182,7 +182,7 @@ export const PersonalAccountDesk: React.FC<{
         body: JSON.stringify({
           prompt: textToSend,
           customApiKey: customKey,
-          workspaceType: activeWorkspace?.type || 'Mandir',
+          workspaceType: activeWorkspace?.type || 'MANDIR',
           workspaceName: activeWorkspace?.name || 'Sanatan Mandir',
           language: language,
           activeModule: 'personal-account'
@@ -227,7 +227,7 @@ export const PersonalAccountDesk: React.FC<{
   const knowledgeBaseItems = [
     {
       id: 'faq-1',
-      category: 'devotee',
+      category: 'DEVOTEE',
       role: 'Devotee / Member',
       title: 'How do I book a Pooja, Havan, or Darshan Sankalp?',
       steps: [
@@ -242,7 +242,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-2',
-      category: 'devotee',
+      category: 'DEVOTEE',
       role: 'Devotee / Member',
       title: 'How do I download my 80G Tax Exemption Certificate for donations?',
       steps: [
@@ -256,7 +256,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-3',
-      category: 'devotee',
+      category: 'DEVOTEE',
       role: 'Devotee / Member',
       title: 'How to use the Daily Japa Counter & Personal Sadhana Tracker?',
       steps: [
@@ -271,7 +271,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-4',
-      category: 'manager',
+      category: 'MANAGER',
       role: 'Staff / Manager',
       title: 'How do I record and seal Hundi Cash collections?',
       steps: [
@@ -286,7 +286,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-5',
-      category: 'manager',
+      category: 'MANAGER',
       role: 'Staff / Manager',
       title: 'How to manage Daily Aarti Rosters & Volunteer Shifts?',
       steps: [
@@ -300,7 +300,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-6',
-      category: 'manager',
+      category: 'MANAGER',
       role: 'Staff / Manager',
       title: 'How to calculate Kitchen Ingredients for Large Annadanam Footfall?',
       steps: [
@@ -314,7 +314,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-7',
-      category: 'admin',
+      category: 'MANAGER',
       role: 'Trustee / Admin',
       title: 'How to configure Role-Based Permissions (RBAC) for Mandir Staff?',
       steps: [
@@ -328,7 +328,7 @@ export const PersonalAccountDesk: React.FC<{
     },
     {
       id: 'faq-8',
-      category: 'admin',
+      category: 'MANAGER',
       role: 'Trustee / Admin',
       title: 'How to perform Monthly Fiduciary Double-Entry Audit & Exports?',
       steps: [
@@ -403,7 +403,7 @@ export const PersonalAccountDesk: React.FC<{
 
             <button
               onClick={() => {
-                setViewMode('ADMIN');
+                setViewMode('MANAGER');
                 showToast(`Switched back to ${activeWorkspace?.name || 'Organisation'} Console 🙏`, 'success', 'Mode Changed');
               }}
               className="flex-1 sm:flex-none justify-center items-center flex gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-stone-950 text-[11px] sm:text-xs font-black transition-all shadow-md cursor-pointer border border-amber-300"
@@ -845,9 +845,9 @@ export const PersonalAccountDesk: React.FC<{
                   <div className="flex items-center gap-1.5 bg-stone-100 p-1 rounded-xl text-xs font-bold">
                     {[
                       { key: 'all', label: 'All SOPs' },
-                      { key: 'devotee', label: 'Devotee' },
-                      { key: 'manager', label: 'Manager' },
-                      { key: 'admin', label: 'Admin/Trustee' }
+                      { key: 'DEVOTEE', label: 'Devotee' },
+                      { key: 'MANAGER', label: 'Manager' },
+                      { key: 'MANAGER', label: 'Admin/Trustee' }
                     ].map((f, idx) => (
                       <button
                         key={`${f.key}-${idx}`}
@@ -898,9 +898,9 @@ export const PersonalAccountDesk: React.FC<{
                           >
                             <div className="flex items-center gap-3">
                               <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
-                                item.category === 'admin'
+                                item.category === 'MANAGER'
                                   ? 'bg-purple-100 text-purple-800'
-                                  : item.category === 'manager'
+                                  : item.category === 'MANAGER'
                                   ? 'bg-blue-100 text-blue-800'
                                   : 'bg-emerald-100 text-emerald-800'
                               }`}>
@@ -1124,26 +1124,26 @@ export const PersonalAccountDesk: React.FC<{
                 </div>
 
                 {/* Role Switcher if authorized */}
-                {(currentRole === 'head_admin' || currentRole === 'manager' || currentRole === 'trustee' || currentRole === 'master_admin') && (
+                {(currentRole === 'SUPER_ADMIN' || currentRole === 'MANAGER' || currentRole === 'TRUSTEE' ) && (
                   <div className="pt-4 border-t border-stone-200 space-y-2">
                     <label className="text-xs font-bold text-stone-700 uppercase tracking-wider">
                       Switch Role Mode
                     </label>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => switchRole('head_admin')}
+                        onClick={() => switchRole('SUPER_ADMIN')}
                         className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold"
                       >
                         Trustee / Head Admin
                       </button>
                       <button
-                        onClick={() => switchRole('manager')}
+                        onClick={() => switchRole('MANAGER')}
                         className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold"
                       >
                         Staff Manager
                       </button>
                       <button
-                        onClick={() => switchRole('devotee')}
+                        onClick={() => switchRole('DEVOTEE')}
                         className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-bold"
                       >
                         Devotee View

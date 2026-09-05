@@ -29,7 +29,7 @@ export const AuditLogDesk: React.FC = () => {
       id: 'log-101',
       timestamp: '2026-08-24 11:42:15',
       userEmail: 'adhyaksha@sanatanibandhan.org',
-      userRole: 'superadmin',
+      userRole: 'SUPER_ADMIN',
       action: 'BATCH_INGEST_DEVOTEES (150 rows processed)',
       module: 'Bulk CSV Ingestion Desk',
       ipAddress: '103.24.12.89',
@@ -40,7 +40,7 @@ export const AuditLogDesk: React.FC = () => {
       id: 'log-102',
       timestamp: '2026-08-24 10:15:30',
       userEmail: 'accountant@kashi-mandir.org',
-      userRole: 'accountant',
+      userRole: 'ACCOUNTANT',
       action: 'ISSUE_TAX_RECEIPT (Receipt #SB-80G-1082)',
       module: 'Section 80G Tax Desk',
       ipAddress: '49.36.142.11',
@@ -51,7 +51,7 @@ export const AuditLogDesk: React.FC = () => {
       id: 'log-103',
       timestamp: '2026-08-24 08:30:12',
       userEmail: 'priest@sanatanibandhan.org',
-      userRole: 'purohit',
+      userRole: 'PUROHIT',
       action: 'SANCTUM_VAULT_DEITY_CROWN_AUDIT',
       module: 'Fixed Asset Desk',
       ipAddress: '103.24.12.89',
@@ -62,7 +62,7 @@ export const AuditLogDesk: React.FC = () => {
       id: 'log-104',
       timestamp: '2026-08-23 21:10:00',
       userEmail: 'guest_user@ip-202.44.1.2',
-      userRole: 'anonymous',
+      userRole: 'ANONYMOUS',
       action: 'PIN_AUTH_FAILED (Attempt 1 for PIN: 9999)',
       module: 'Smart ID Pass Desk',
       ipAddress: '202.44.1.2',
@@ -141,7 +141,7 @@ export const AuditLogDesk: React.FC = () => {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(() => {
-            const elevatedRoles = ['trustee', 'superadmin', 'manager', 'master_admin', 'head_admin'];
+            const elevatedRoles = ['TRUSTEE', 'SUPER_ADMIN', 'MANAGER', 'SUPER_ADMIN', 'SUPER_ADMIN'];
             const elevatedUsers = devotees.filter(d => elevatedRoles.includes(d.role));
             // A non-admin user with trustee roles might be someone with a generic email or low seva index
             const suspiciousUsers = elevatedUsers.filter(d => d.sevaIndex < 100 || !d.email?.includes('@'));

@@ -1,43 +1,11 @@
-export type WorkspaceType =
-  | 'Mandir'
-  | 'Goshala'
-  | 'Sangha'
-  | 'Ashram'
-  | 'Gurukul'
-  | 'Satsang'
-  | 'Yoga'
-  | 'Trust'
-  | 'Vidyalaya'
-  | 'Purohit'
-  | 'Sangha'
-  | 'Ashram'
-  | 'Gurukul'
-  | 'Satsang'
-  | 'Yoga'
-  | 'Trust'
-  | 'Tirth'
-  | 'Samaj'
-  | 'AkshayaPatra'
-  | 'KashiKshetra'
-  | 'DharmadaTrust'
-  | 'MahotsavSamiti'
-  | 'PurohitSabha';
+export type WorkspaceType = 
+  | 'MANDIR' | 'GOSHALA' | 'SANGHA' | 'ASHRAM' | 'GURUKUL'
+  | 'SATSANG' | 'YOGA_CENTER' | 'TRUST' | 'VIDYALAYA' | 'PUROHIT_SABHA'
+  | 'TIRTH' | 'SAMAJ' | 'ANNADAN_TRUST' | 'KASHI_KSHETRA' | 'MAHOTSAV_SAMITI';
 
-export type UserRole =
-  | 'superadmin'
-  | 'trustee'
-  | 'accountant'
-  | 'purohit'
-  | 'volunteer'
-  | 'devotee'
-  | 'manager'
-  | 'head_admin'
-  | 'master_admin'
-  | 'anonymous'
-  | 'ADMIN'
-  | 'SUPER_ADMIN'
-  | 'MANAGER'
-  | 'admin';
+export type UserRole = 
+  | 'SUPER_ADMIN' | 'TRUSTEE' | 'ACCOUNTANT' | 'PUROHIT' 
+  | 'VOLUNTEER' | 'DEVOTEE' | 'MANAGER' | 'ANONYMOUS';
 
 export type AppLanguage = 'en' | 'bn' | 'hi' | 'sa';
 
@@ -93,7 +61,7 @@ export interface WorkspaceConfig {
   email?: string;
   sampradaya: string;
   kuladevata: string;
-  logoBase64?: string; bannerBase64?: string;
+  logoUrl?: string; bannerUrl?: string;
   taxExemptionNumber?: string; enabledModules?: string[];
   trustRegNumber?: string;
   pinRequired: boolean;
@@ -115,11 +83,12 @@ export interface DevoteeMember {
   gotra: string;
   pravara?: string;
   varnaKul?: string;
+  kuladevata?: string;
   culturalDistinction?: string;
   familyId?: string;
   isHeadOfFamily?: boolean;
-  avatarBase64?: string;
-  photoBase64?: string;
+  avatarUrl?: string;
+  photoUrl?: string;
   address: string;
   bloodGroup?: string;
   emergencyContact?: string;
@@ -197,7 +166,7 @@ export interface TreasuryTransaction {
   devoteeName?: string;
   paymentMode: 'UPI / QR' | 'Cash' | 'Bank Transfer' | 'Cheque' | 'Card' | string;
   referenceNo?: string;
-  memoImageBase64?: string; // Zero-cost compressed image
+  memoImageUrl?: string; // Zero-cost compressed image
   purpose: string;
   is80GEligible?: boolean;
   taxReceiptIssued?: boolean;

@@ -214,10 +214,10 @@ export const bulkIngestDevotees = (
 
     const fullName = row['Name'] || row['FullName'] || row['fullName'] || `Member ${index + 1}`;
     const gotra = row['Gotra'] || row['gotra'] || 'Kashyapa';
-    const rawRole = (row['Role'] || row['role'] || 'devotee').toLowerCase();
-    const role: UserRole = ['devotee', 'manager', 'head_admin', 'master_admin'].includes(rawRole)
+    const rawRole = (row['Role'] || row['role'] || 'DEVOTEE').toUpperCase();
+    const role: UserRole = ['DEVOTEE', 'MANAGER', 'SUPER_ADMIN', 'SUPER_ADMIN'].includes(rawRole)
       ? (rawRole as UserRole)
-      : 'devotee';
+      : 'DEVOTEE';
 
     const rawTier = row['Tier'] || row['tier'] || 'Sadharan';
     const sevaTier: SevaTier = ['Ratna', 'Vishesh', 'Kormi', 'Sadharan'].includes(rawTier)

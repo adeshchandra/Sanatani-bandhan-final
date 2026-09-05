@@ -135,7 +135,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 
     const threadId = `thread_${Date.now()}_${Math.random().toString(36).substring(2,9)}`;
     const currentAuthorId = currentDevotee ? currentDevotee.id : activeWorkspace.id + '_' + currentRole;
-    const currentAuthorName = currentDevotee ? currentDevotee.name : (currentRole === 'superadmin' ? 'TrackIQ Support' : 'Workspace Admin');
+    const currentAuthorName = currentDevotee ? currentDevotee.name : (currentRole === 'SUPER_ADMIN' ? 'TrackIQ Support' : 'Workspace Admin');
 
     const newThread: Omit<Thread, 'id'> = {
       title: newTitle.trim(),
@@ -167,7 +167,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
 
     const replyId = `reply_${Date.now()}_${Math.random().toString(36).substring(2,9)}`;
     const currentAuthorId = currentDevotee ? currentDevotee.id : activeWorkspace.id + '_' + currentRole;
-    const currentAuthorName = currentDevotee ? currentDevotee.name : (currentRole === 'superadmin' ? 'TrackIQ Support' : 'Workspace Admin');
+    const currentAuthorName = currentDevotee ? currentDevotee.name : (currentRole === 'SUPER_ADMIN' ? 'TrackIQ Support' : 'Workspace Admin');
 
     const newReply: Omit<Reply, 'id'> = {
       threadId: selectedThread.id,
@@ -175,7 +175,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       authorId: currentAuthorId,
       authorName: currentAuthorName,
       timestamp: Date.now(),
-      isOfficialTrackIQ: currentRole === 'superadmin',
+      isOfficialTrackIQ: currentRole === 'SUPER_ADMIN',
       isAcceptedAnswer: false
     };
 
@@ -195,7 +195,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
     const currentAuthorId = currentDevotee ? currentDevotee.id : activeWorkspace.id + '_' + currentRole;
     
     // Only the author of the thread can mark as resolved
-    if (selectedThread.authorId !== currentAuthorId && currentRole !== 'superadmin') {
+    if (selectedThread.authorId !== currentAuthorId && currentRole !== 'SUPER_ADMIN') {
       showToast('Only the original author can mark an answer as accepted.', 'error');
       return;
     }
@@ -443,7 +443,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   {/* Mark as accepted logic */}
                   {!reply.isAcceptedAnswer && selectedThread.status !== 'Resolved' && (
                     <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
-                      {(selectedThread.authorId === (currentDevotee ? currentDevotee.id : activeWorkspace.id + '_' + currentRole) || currentRole === 'superadmin') && (
+                      {(selectedThread.authorId === (currentDevotee ? currentDevotee.id : activeWorkspace.id + '_' + currentRole) || currentRole === 'SUPER_ADMIN') && (
                         <button 
                           onClick={() => handleAcceptAnswer(reply)}
                           className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg font-bold text-sm transition-colors border border-emerald-200"

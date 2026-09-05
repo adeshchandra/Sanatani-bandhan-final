@@ -13,16 +13,16 @@ export const WorkspaceSelectorDesk: React.FC = () => {
   const { showToast } = useToast();
 
   const domainTaxonomies: WorkspaceType[] = [
-    'Mandir',
-    'Goshala',
-    'Sangha',
-    'Ashram',
-    'AkshayaPatra',
-    'KashiKshetra',
-    'Gurukul',
-    'DharmadaTrust',
-    'MahotsavSamiti',
-    'PurohitSabha',
+    'MANDIR',
+    'GOSHALA',
+    'SANGHA',
+    'ASHRAM',
+    'ANNADAN_TRUST',
+    'KASHI_KSHETRA',
+    'GURUKUL',
+    'ANNADAN_TRUST',
+    'MAHOTSAV_SAMITI',
+    'PUROHIT_SABHA',
   ];
 
   const handleSelectType = (type: WorkspaceType) => {

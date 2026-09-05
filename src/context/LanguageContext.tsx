@@ -23,7 +23,7 @@ const TAXONOMY_MAP: Record<
     "crisis-command": "Crisis Command Center",
     dharmicAssistant: "Dharmic AI Query Desk",
 
-    Mandir: {
+    MANDIR: {
       workspaceLabel: "Mandir / Temple",
       directoryName: "Devotee Directory",
       memberTerm: "Bhaktas",
@@ -31,7 +31,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Temple Assets",
       inventoryTerm: "Bhandara & Store",
     },
-    Goshala: {
+    GOSHALA: {
       workspaceLabel: "Goshala",
       directoryName: "Gau Sevak Directory",
       memberTerm: "Gau Sevaks",
@@ -39,7 +39,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Gomata & Nandi Records",
       inventoryTerm: "Fodder & Medicine Store",
     },
-    Sangha: {
+    SANGHA: {
       workspaceLabel: "Sangha / Youth Org",
       directoryName: "Sangha Member Registry",
       memberTerm: "Sadasya",
@@ -47,7 +47,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Sangha Assets",
       inventoryTerm: "Logistics Store",
     },
-    Ashram: {
+    ASHRAM: {
       workspaceLabel: "Ashram / Matha",
       directoryName: "Sadhak Directory",
       memberTerm: "Sadhaks",
@@ -55,7 +55,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Ashram Estate",
       inventoryTerm: "Kitchen & Medicine Store",
     },
-    Gurukul: {
+    GURUKUL: {
       workspaceLabel: "Gurukul / Vidyapeeth",
       directoryName: "Vidyarthi Directory",
       memberTerm: "Vidyarthis",
@@ -63,7 +63,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Campus Assets",
       inventoryTerm: "Library & Shastric Supplies",
     },
-    Satsang: {
+    SATSANG: {
       workspaceLabel: "Satsang Kendra",
       directoryName: "Anuyayi Directory",
       memberTerm: "Anuyayis",
@@ -71,7 +71,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Kendra Assets",
       inventoryTerm: "Store Management",
     },
-    Yoga: {
+    YOGA_CENTER: {
       workspaceLabel: "Yoga Kendra",
       directoryName: "Practitioner Directory",
       memberTerm: "Sadhaks",
@@ -79,7 +79,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Wellness Equipment",
       inventoryTerm: "Store & Props",
     },
-    Trust: {
+    TRUST: {
       workspaceLabel: "Seva Trust",
       directoryName: "Sevadar Directory",
       memberTerm: "Sevadars",
@@ -87,7 +87,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Trust Assets",
       inventoryTerm: "Relief & Medical Store",
     },
-    Tirth: {
+    TIRTH: {
       workspaceLabel: "Tirth / Dham",
       directoryName: "Yatri Directory",
       memberTerm: "Yatris",
@@ -95,7 +95,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Dham Assets",
       inventoryTerm: "Guest Houses & Supplies",
     },
-    Samaj: {
+    SAMAJ: {
       workspaceLabel: "Samaj / Caste Sabha",
       directoryName: "Family Directory",
       memberTerm: "Jati Sadasya",
@@ -103,7 +103,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Samaj Bhawan Assets",
       inventoryTerm: "Event Supplies",
     },
-    AkshayaPatra: {
+    ANNADAN_TRUST: {
       workspaceLabel: "Annadanam & Kitchen Hub",
       directoryName: "Mahaprasad Beneficiary Log",
       memberTerm: "Annadata Patrons",
@@ -111,7 +111,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Kitchen & Vessel Assets",
       inventoryTerm: "Ration & Grain Silos",
     },
-    KashiKshetra: {
+    KASHI_KSHETRA: {
       workspaceLabel: "Kashi Kshetra & Mukti Dham",
       directoryName: "Pitru Moksha Roster",
       memberTerm: "Tirtha Sadhaks",
@@ -119,7 +119,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Ghat & Sanctum Assets",
       inventoryTerm: "Samagri & Pinda Dravya",
     },
-    DharmadaTrust: {
+    DharmadaTRUST: {
       workspaceLabel: "Dharmada Seva Trust",
       directoryName: "Trust Donor Registry",
       memberTerm: "Trustee Patrons",
@@ -127,7 +127,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Endowment Properties",
       inventoryTerm: "Seva Logistics & Relief",
     },
-    MahotsavSamiti: {
+    MAHOTSAV_SAMITI: {
       workspaceLabel: "Mahotsav & Utsav Samiti",
       directoryName: "Festival Committee Roster",
       memberTerm: "Utsav Karyakartas",
@@ -135,7 +135,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "Pandal & Sound Assets",
       inventoryTerm: "Decorations & Bhog Stores",
     },
-    PurohitSabha: {
+    PUROHIT_SABHA: {
       workspaceLabel: "Purohit & Vidwat Sabha",
       directoryName: "Vedic Scholar Registry",
       memberTerm: "Archakas & Acharyas",
@@ -148,7 +148,7 @@ const TAXONOMY_MAP: Record<
     "crisis-command": "आपातकालीन नियंत्रण कक्ष",
     dharmicAssistant: "धार्मिक एआई प्रश्न कक्ष",
 
-    Mandir: {
+    MANDIR: {
       workspaceLabel: "मंदिर / देवालय",
       directoryName: "भक्त नामावली",
       memberTerm: "भक्तगण",
@@ -156,7 +156,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "मंदिर देव संपदा",
       inventoryTerm: "भंडारा व सामग्री कक्ष",
     },
-    Goshala: {
+    GOSHALA: {
       workspaceLabel: "गोशाला",
       directoryName: "गोसेवक पंजिका",
       memberTerm: "गोसेवक",
@@ -164,7 +164,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "गोमाता व नंदी अभिलेख",
       inventoryTerm: "चारा एवं औषधि भंडार",
     },
-    Sangha: {
+    SANGHA: {
       workspaceLabel: "संघ / युवा संगठन",
       directoryName: "संघ सदस्य पंजिका",
       memberTerm: "स्वयंसेवक / सदस्य",
@@ -172,7 +172,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "संघ संपदा",
       inventoryTerm: "लॉजिस्टिक्स भंडार",
     },
-    Ashram: {
+    ASHRAM: {
       workspaceLabel: "आश्रम / मठ",
       directoryName: "साधक पंजिका",
       memberTerm: "साधक",
@@ -180,7 +180,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "आश्रम संपदा",
       inventoryTerm: "रसोई व औषधि भंडार",
     },
-    Gurukul: {
+    GURUKUL: {
       workspaceLabel: "गुरुकुल / विद्यापीठ",
       directoryName: "विद्यार्थी पंजिका",
       memberTerm: "विद्यार्थी / बटुक",
@@ -188,7 +188,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "परिसर संपदा",
       inventoryTerm: "पुस्तकालय व शास्त्रीय सामग्री",
     },
-    Satsang: {
+    SATSANG: {
       workspaceLabel: "सत्संग केंद्र",
       directoryName: "अनुयायी पंजिका",
       memberTerm: "अनुयायी",
@@ -196,7 +196,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "केंद्र संपदा",
       inventoryTerm: "सामग्री प्रबंधन",
     },
-    Yoga: {
+    YOGA_CENTER: {
       workspaceLabel: "योग केंद्र",
       directoryName: "योगाभ्यासी पंजिका",
       memberTerm: "साधक",
@@ -204,7 +204,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "स्वास्थ्य उपकरण",
       inventoryTerm: "योग साधन भंडार",
     },
-    Trust: {
+    TRUST: {
       workspaceLabel: "सेवा न्यास / ट्रस्ट",
       directoryName: "सेवादार पंजिका",
       memberTerm: "सेवादार",
@@ -212,7 +212,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "न्यास संपदा",
       inventoryTerm: "राहत व चिकित्सा सामग्री",
     },
-    Tirth: {
+    TIRTH: {
       workspaceLabel: "तीर्थ / धाम",
       directoryName: "यात्री पंजिका",
       memberTerm: "तीर्थयात्री",
@@ -220,7 +220,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "धाम संपदा",
       inventoryTerm: "अतिथि भवन व सामग्री",
     },
-    Samaj: {
+    SAMAJ: {
       workspaceLabel: "समाज / जाति सभा",
       directoryName: "परिवार पंजिका",
       memberTerm: "ज्ञाति सदस्य",
@@ -228,7 +228,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "समाज भवन संपदा",
       inventoryTerm: "समारोह सामग्री",
     },
-    AkshayaPatra: {
+    ANNADAN_TRUST: {
       workspaceLabel: "अन्नदान व महाप्रसाद केंद्र",
       directoryName: "अन्नदाता व लाभार्थी पंजिका",
       memberTerm: "अन्नदाता",
@@ -236,7 +236,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "पाकशाला एवं पात्र संपदा",
       inventoryTerm: "धान्य एवं रसद भंडार",
     },
-    KashiKshetra: {
+    KASHI_KSHETRA: {
       workspaceLabel: "काशी क्षेत्र व मुक्ति धाम",
       directoryName: "पितृ मोक्ष पंजिका",
       memberTerm: "तीर्थ साधक",
@@ -244,7 +244,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "घाट एवं देवस्थान संपदा",
       inventoryTerm: "पूजा सामग्री व पिण्ड द्रव्य",
     },
-    DharmadaTrust: {
+    DharmadaTRUST: {
       workspaceLabel: "धर्मदा सेवा न्यास",
       directoryName: "दाता एवं न्यासी पंजिका",
       memberTerm: "संरक्षक न्यासी",
@@ -252,7 +252,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "स्थायी परिसंपत्ति",
       inventoryTerm: "राहत व वितरण सामग्री",
     },
-    MahotsavSamiti: {
+    MAHOTSAV_SAMITI: {
       workspaceLabel: "महोत्सव व उत्सव समिति",
       directoryName: "उत्सव समिति पंजिका",
       memberTerm: "उत्सव कार्यकर्ता",
@@ -260,7 +260,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "मंडप व विद्युत सज्जा संपदा",
       inventoryTerm: "सज्जा व भोग भंडार",
     },
-    PurohitSabha: {
+    PUROHIT_SABHA: {
       workspaceLabel: "पुरोहित एवं विद्वत सभा",
       directoryName: "वैदिक विद्वान पंजिका",
       memberTerm: "अर्चक व आचार्य",
@@ -274,7 +274,7 @@ const TAXONOMY_MAP: Record<
     "crisis-command": "জরুরী কমান্ড সেন্টার",
     dharmicAssistant: "ধার্মিক এআই প্রশ্ন ডেস্ক",
 
-    Mandir: {
+    MANDIR: {
       workspaceLabel: "মন্দির / দেবস্থান",
       directoryName: "ভক্ত নির্দেশিকা",
       memberTerm: "ভক্তবৃন্দ",
@@ -282,7 +282,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "মন্দির দেবোত্তর সম্পত্তি",
       inventoryTerm: "ভাণ্ডার ও সামগ্রী কক্ষ",
     },
-    Goshala: {
+    GOSHALA: {
       workspaceLabel: "গোশালা",
       directoryName: "গোসেবক তালিকা",
       memberTerm: "গোসেবকবৃন্দ",
@@ -290,7 +290,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "গোমাতা ও নন্দী নথি",
       inventoryTerm: "গোখাদ্য ও ঔষধাগার",
     },
-    Sangha: {
+    SANGHA: {
       workspaceLabel: "সঙ্ঘ / যুব সংগঠন",
       directoryName: "সঙ্ঘ সদস্য রেজিস্ট্রি",
       memberTerm: "সদস্যবৃন্দ",
@@ -298,7 +298,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "সঙ্ঘের সম্পদ",
       inventoryTerm: "রসদ ভাণ্ডার",
     },
-    Ashram: {
+    ASHRAM: {
       workspaceLabel: "আশ্রম / মঠ",
       directoryName: "সাধক নির্দেশিকা",
       memberTerm: "সাধকগণ",
@@ -306,7 +306,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "আশ্রম ভূসম্পত্তি",
       inventoryTerm: "রান্নাঘর ও চিকিৎসালয়",
     },
-    Gurukul: {
+    GURUKUL: {
       workspaceLabel: "গুরুকুল / বিদ্যাপীঠ",
       directoryName: "শিক্ষার্থী নির্দেশিকা",
       memberTerm: "শিক্ষার্থীবৃন্দ",
@@ -314,7 +314,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "ক্যাম্পাস সম্পদ",
       inventoryTerm: "গ্রন্থাগার ও শাস্ত্রীয় রসদ",
     },
-    Satsang: {
+    SATSANG: {
       workspaceLabel: "সৎসঙ্গ কেন্দ্র",
       directoryName: "অনুযায়ী তালিকা",
       memberTerm: "অনুযায়ীগণ",
@@ -322,7 +322,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "কেন্দ্র সম্পদ",
       inventoryTerm: "ভাণ্ডার ব্যবস্থাপনা",
     },
-    Yoga: {
+    YOGA_CENTER: {
       workspaceLabel: "যোগ কেন্দ্র",
       directoryName: "যোগাভ্যাসী তালিকা",
       memberTerm: "সাধকবৃন্দ",
@@ -330,7 +330,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "সুস্থতা সরঞ্জাম",
       inventoryTerm: "যোগ সামগ্রী ভাণ্ডার",
     },
-    Trust: {
+    TRUST: {
       workspaceLabel: "সেবা ট্রাস্ট",
       directoryName: "সেবাদার তালিকা",
       memberTerm: "সেবাদারগণ",
@@ -338,7 +338,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "ট্রাস্ট সম্পদ",
       inventoryTerm: "ত্রাণ ও চিকিৎসা ভাণ্ডার",
     },
-    Tirth: {
+    TIRTH: {
       workspaceLabel: "তীর্থ / ধাম",
       directoryName: "যাত্রী নির্দেশিকা",
       memberTerm: "তীর্থযাত্রীগণ",
@@ -346,7 +346,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "ধাম সম্পদ",
       inventoryTerm: "অতিথি ভবন ও রসদ",
     },
-    Samaj: {
+    SAMAJ: {
       workspaceLabel: "সমাজ / জ্ঞাতি সভা",
       directoryName: "পরিবার নির্দেশিকা",
       memberTerm: "জ্ঞাতি সদস্যবৃন্দ",
@@ -354,7 +354,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "সমাজ ভবন সম্পদ",
       inventoryTerm: "অনুষ্ঠান সামগ্রী",
     },
-    AkshayaPatra: {
+    ANNADAN_TRUST: {
       workspaceLabel: "অন্নদান ও মহাপ্রসাদ কেন্দ্র",
       directoryName: "অন্নদাতা ও গ্রাহক তালিকা",
       memberTerm: "অন্নদাতাবৃন্দ",
@@ -362,7 +362,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "পাকশালা ও বাসনপত্র সম্পদ",
       inventoryTerm: "চাল-ডাল ও রসদ ভাণ্ডার",
     },
-    KashiKshetra: {
+    KASHI_KSHETRA: {
       workspaceLabel: "কাশী ক্ষেত্র ও মুক্তিধাম",
       directoryName: "পিতৃ মোক্ষ তালিকা",
       memberTerm: "তীর্থ সাধকগণ",
@@ -370,7 +370,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "ঘাট ও দেবালয় সম্পদ",
       inventoryTerm: "পূজা সামগ্রী ও পিণ্ড দ্রব্য",
     },
-    DharmadaTrust: {
+    DharmadaTRUST: {
       workspaceLabel: "ধর্মদা সেবা ট্রাস্ট",
       directoryName: "দাতা ও ট্রাস্টি রেজিস্ট্রি",
       memberTerm: "পৃষ্ঠপোষক ট্রাস্টি",
@@ -378,7 +378,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "স্থাবর সম্পত্তি",
       inventoryTerm: "ত্রাণ ও বিতরণ সামগ্রী",
     },
-    MahotsavSamiti: {
+    MAHOTSAV_SAMITI: {
       workspaceLabel: "মহোৎসব ও উৎসব সমিতি",
       directoryName: "উৎসব কমিটি তালিকা",
       memberTerm: "উৎসব কর্মী",
@@ -386,7 +386,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "মন্ডপ ও আলোকসজ্জা সম্পদ",
       inventoryTerm: "সজ্জা ও ভোগ ভাণ্ডার",
     },
-    PurohitSabha: {
+    PUROHIT_SABHA: {
       workspaceLabel: "পুরোহিত ও বিদ্বৎ সভা",
       directoryName: "বৈদিক পণ্ডিত রেজিস্ট্রি",
       memberTerm: "আচার্য ও অর্চকবৃন্দ",
@@ -396,7 +396,7 @@ const TAXONOMY_MAP: Record<
     },
   },
   sa: {
-    Mandir: {
+    MANDIR: {
       workspaceLabel: "मन्दिरम् / देवस्थानम्",
       directoryName: "भक्त-सूचिका",
       memberTerm: "भक्ताः",
@@ -404,7 +404,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "मन्दिर-सम्पत्तिः",
       inventoryTerm: "भाण्डागारः",
     },
-    Goshala: {
+    GOSHALA: {
       workspaceLabel: "गोशाला",
       directoryName: "गोसेवक-सूचिका",
       memberTerm: "गोसेवकाः",
@@ -412,7 +412,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "गोमाता च नन्दी",
       inventoryTerm: "तृण-भेषज-भाण्डागारः",
     },
-    Sangha: {
+    SANGHA: {
       workspaceLabel: "सङ्घः",
       directoryName: "सङ्घ-सदस्य-सूचिका",
       memberTerm: "सदस्याः",
@@ -420,7 +420,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "सङ्घ-सम्पत्तिः",
       inventoryTerm: "भाण्डागारः",
     },
-    Ashram: {
+    ASHRAM: {
       workspaceLabel: "आश्रमः / मठः",
       directoryName: "साधक-सूचिका",
       memberTerm: "साधकाः",
@@ -428,7 +428,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "आश्रम-सम्पत्तिः",
       inventoryTerm: "पाकशाला च चिकित्सालयः",
     },
-    Gurukul: {
+    GURUKUL: {
       workspaceLabel: "गुरुकुलम् / विद्यापीठम्",
       directoryName: "विद्यार्थि-सूचिका",
       memberTerm: "विद्यार्थिनः",
@@ -436,7 +436,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "परिसर-सम्पत्तिः",
       inventoryTerm: "पुस्तकालयः",
     },
-    Satsang: {
+    SATSANG: {
       workspaceLabel: "सत्सङ्ग-केन्द्रम्",
       directoryName: "अनुयायि-सूचिका",
       memberTerm: "अनुयायिनः",
@@ -444,7 +444,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "केन्द्र-सम्पत्तिः",
       inventoryTerm: "प्रबन्धन-भाण्डागारः",
     },
-    Yoga: {
+    YOGA_CENTER: {
       workspaceLabel: "योग-केन्द्रम्",
       directoryName: "अभ्यासि-सूचिका",
       memberTerm: "योग-साधकाः",
@@ -452,7 +452,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "उपकरण-सम्पत्तिः",
       inventoryTerm: "योग-सामग्री",
     },
-    Trust: {
+    TRUST: {
       workspaceLabel: "सेवा-न्यासः",
       directoryName: "सेवादार-सूचिका",
       memberTerm: "सेवादारकाः",
@@ -460,7 +460,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "न्यास-सम्पत्तिः",
       inventoryTerm: "चिकित्सा-भाण्डागारः",
     },
-    Tirth: {
+    TIRTH: {
       workspaceLabel: "तीर्थम् / धाम",
       directoryName: "यात्रि-सूचिका",
       memberTerm: "तीर्थयात्रिणः",
@@ -468,7 +468,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "धाम-सम्पत्तिः",
       inventoryTerm: "अतिथिभवनम्",
     },
-    Samaj: {
+    SAMAJ: {
       workspaceLabel: "समाजः",
       directoryName: "परिवार-सूचिका",
       memberTerm: "सदस्याः",
@@ -476,7 +476,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "समाजभवन-सम्पत्तिः",
       inventoryTerm: "अनुष्ठान-सामग्री",
     },
-    AkshayaPatra: {
+    ANNADAN_TRUST: {
       workspaceLabel: "अन्नदान-केन्द्रम्",
       directoryName: "अन्नदातृ-सूचिका",
       memberTerm: "अन्नदातारः",
@@ -484,7 +484,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "पाकशाला-सम्पत्तिः",
       inventoryTerm: "अन्न-भाण्डागारः",
     },
-    KashiKshetra: {
+    KASHI_KSHETRA: {
       workspaceLabel: "काशी-क्षेत्रम्",
       directoryName: "पितृ-मोक्ष-सूचिका",
       memberTerm: "तीर्थ-साधकाः",
@@ -492,7 +492,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "घाट-सम्पत्तिः",
       inventoryTerm: "पूजा-सामग्री",
     },
-    DharmadaTrust: {
+    DharmadaTRUST: {
       workspaceLabel: "धर्मदा-सेवा-न्यासः",
       directoryName: "दातृ-सूचिका",
       memberTerm: "न्यासिनः",
@@ -500,7 +500,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "सम्पत्तिः",
       inventoryTerm: "वितरण-सामग्री",
     },
-    MahotsavSamiti: {
+    MAHOTSAV_SAMITI: {
       workspaceLabel: "महोत्सव-समितिः",
       directoryName: "समिति-सूचिका",
       memberTerm: "कार्यकर्तारः",
@@ -508,7 +508,7 @@ const TAXONOMY_MAP: Record<
       assetsTerm: "मण्डप-सम्पत्तिः",
       inventoryTerm: "सज्जा-भाण्डागारः",
     },
-    PurohitSabha: {
+    PUROHIT_SABHA: {
       workspaceLabel: "पुरोहित-सभा",
       directoryName: "वैदिक-पण्डित-सूचिका",
       memberTerm: "आचार्याः",
@@ -564,7 +564,7 @@ const UI_DICTIONARY: Record<AppLanguage, Record<string, string>> = {
     vidyalaya: "Weekend Heritage School",
     satsang: "Satsang & Discourse",
     sanghaDrills: "Sangha & Shakha Mobilization",
-    sevaTrust: "Humanitarian Seva Trust",
+    sevaTRUST: "Humanitarian Seva Trust",
     granthLibrary: "Sacred Granth Library",
     matrimony: "Vivah Bandhan (Matchmaking)",
     utsavPanjika: "Festival Calendar & Passes",
@@ -642,7 +642,7 @@ const UI_DICTIONARY: Record<AppLanguage, Record<string, string>> = {
     vidyalaya: "साप्ताहिक संस्कार विद्यालय",
     satsang: "सत्संग व हरि कथा",
     sanghaDrills: "संघ शाखा व स्वयंसेवक संघटन",
-    sevaTrust: "मानव सेवा न्यास",
+    sevaTRUST: "मानव सेवा न्यास",
     granthLibrary: "पवित्र ग्रन्थ पुस्तकालय",
     matrimony: "विवाह बंधन (धार्मिक संबंध)",
     utsavPanjika: "उत्सव पंजिका व प्रवेश पास",
@@ -721,7 +721,7 @@ const UI_DICTIONARY: Record<AppLanguage, Record<string, string>> = {
     vidyalaya: "সাপ্তাহিক ঐতিহ্য বিদ্যালয়",
     satsang: "সৎসঙ্গ ও হরিকথা",
     sanghaDrills: "সঙ্ঘ শাখা ও স্বয়ংসেবক পরিচালনা",
-    sevaTrust: "মানবসেবা ট্রাস্ট",
+    sevaTRUST: "মানবসেবা ট্রাস্ট",
     granthLibrary: "পবিত্র গ্রন্থ পাঠাগার",
     matrimony: "বিবাহ বন্ধন (ধর্মীয় সম্বন্ধ)",
     utsavPanjika: "উৎসব পঞ্জিকা ও প্রবেশ পাস",
@@ -796,7 +796,7 @@ const UI_DICTIONARY: Record<AppLanguage, Record<string, string>> = {
     vidyalaya: "साप्ताहिक-विद्यालयः",
     satsang: "सत्सङ्गः",
     sanghaDrills: "सङ्घ-शाखा",
-    sevaTrust: "मानव-सेवा-न्यासः",
+    sevaTRUST: "मानव-सेवा-न्यासः",
     granthLibrary: "पवित्र-ग्रन्थालयः",
     matrimony: "विवाह-बन्धनम्",
     utsavPanjika: "उत्सव-पञ्चाङ्गम्",
@@ -895,7 +895,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
     const matrix =
       TAXONOMY_MAP[language]?.[workspaceType] ||
       TAXONOMY_MAP.en[workspaceType] ||
-      TAXONOMY_MAP.en.Mandir;
+      TAXONOMY_MAP.en.MANDIR;
     return {
       ...matrix,
       memberNoun: matrix.memberTerm,

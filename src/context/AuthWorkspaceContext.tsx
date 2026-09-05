@@ -10,7 +10,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-mandir',
     name: 'Sri Sanatan Dharma Mandir',
-    type: 'Mandir',
+    type: 'MANDIR',
     tagline: 'Preserving Sanatan Samskriti & Sacred Darshan',
     address: 'Mandir Marg, Sector 4',
     city: 'Varanasi',
@@ -30,7 +30,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-goshala',
     name: 'Surabhi Gau Seva Dham',
-    type: 'Goshala',
+    type: 'GOSHALA',
     tagline: 'Sanctuary for 500+ Indigenous Desi Gir & Sahiwal Gomata',
     address: 'Govardhan Parikrama Marg',
     city: 'Vrindavan',
@@ -50,7 +50,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-sangha',
     name: 'Bharat Dharma Raksha Sangha',
-    type: 'Sangha',
+    type: 'SANGHA',
     tagline: 'Youth Character Building, Shakha Discipline & Dharma Seva',
     address: 'Shivaji Marg, Keshav Kunj',
     city: 'Nagpur',
@@ -70,7 +70,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-ashram',
     name: 'Ananda Kutir Spiritual Ashram',
-    type: 'Ashram',
+    type: 'ASHRAM',
     tagline: 'Silent Meditation, Sadhana Retreats & Vedanta Study',
     address: 'Tapovan, Muni Ki Reti',
     city: 'Rishikesh',
@@ -90,7 +90,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-gurukul',
     name: 'Sandipani Veda Vidyapeeth',
-    type: 'Gurukul',
+    type: 'GURUKUL',
     tagline: 'Reviving Vedic Recitation, Grammar, Nyaya & Shastras',
     address: 'Narmada Ghat Road',
     city: 'Ujjain',
@@ -110,7 +110,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-satsang',
     name: 'Sri Krishna Chaitanya Satsang Kendra',
-    type: 'Satsang',
+    type: 'SATSANG',
     tagline: 'Harinam Sankirtan & Shrimad Bhagavatam Kathas',
     address: 'Mayapur Road',
     city: 'Nabadwip',
@@ -130,7 +130,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-yoga',
     name: 'Patanjali Yogashala & Wellness Kendra',
-    type: 'Yoga',
+    type: 'YOGA_CENTER',
     tagline: 'Authentic Ashtanga Yoga, Pranayama & Holistic Healing',
     address: 'Chamundi Hill Road',
     city: 'Mysuru',
@@ -150,7 +150,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-trust',
     name: 'Dharma Jagriti Seva Trust',
-    type: 'Trust',
+    type: 'TRUST',
     tagline: 'Disaster Relief, Free Medical Camps & Education Grants',
     address: 'Ring Road, Lajpat Nagar',
     city: 'New Delhi',
@@ -170,7 +170,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-tirth',
     name: 'Sri Somnath Yatri & Tirth Seva Kshetra',
-    type: 'Tirth',
+    type: 'TIRTH',
     tagline: 'Pilgrim Dharamshala, Pavitra Darshan & Pinda Daan Support',
     address: 'Prabhas Patan',
     city: 'Veraval',
@@ -190,7 +190,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-samaj',
     name: 'Akhil Bharatiya Gaur Brahman Mahasabha',
-    type: 'Samaj',
+    type: 'SAMAJ',
     tagline: 'Community Welfare, Gotra Vivah Bandhan & Samaj Bhawan',
     address: 'Civil Lines, Station Road',
     city: 'Jaipur',
@@ -210,12 +210,13 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
 ];
 
 interface AuthWorkspaceContextType {
-  viewMode: 'ADMIN' | 'MEMBER';
-  setViewMode: (mode: 'ADMIN' | 'MEMBER') => void;
+  viewMode: 'MANAGER' | 'MEMBER';
+  setViewMode: (mode: 'MANAGER' | 'MEMBER') => void;
   workspaces: WorkspaceConfig[];
   activeWorkspace: WorkspaceConfig;
   currentRole: UserRole;
   currentDevotee: DevoteeMember | null;
+  setCurrentDevotee: (devotee: DevoteeMember | null) => void;
   currentUser?: { id: string; name: string; role: UserRole };
   isAuthenticated: boolean;
   firebaseUser: any;
@@ -241,13 +242,13 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     return initialData.sanatani_workspaces || INITIAL_WORKSPACES;
   });
 
-  const [viewMode, setViewMode] = useState<'ADMIN' | 'MEMBER'>('MEMBER');
+  const [viewMode, setViewMode] = useState<'MANAGER' | 'MEMBER'>('MEMBER');
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => {
     return initialData.sanatani_active_workspace_id || 'ws-mandir';
   });
 
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
-    return initialData.sanatani_user_role || 'head_admin';
+    return initialData.sanatani_user_role || 'SUPER_ADMIN';
   });
 
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
@@ -265,9 +266,9 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
-            setCurrentRole(data.role || 'devotee');
+            setCurrentRole(data.role || 'DEVOTEE');
             setIsAuthenticated(true);
-            setViewMode(data.role === 'devotee' ? 'MEMBER' : 'ADMIN');
+            setViewMode('MANAGER');
           } else {
             setIsAuthenticated(true);
           }
@@ -277,7 +278,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       } else {
         setFirebaseUser(null);
         setIsAuthenticated(false);
-        setCurrentRole('devotee');
+        setCurrentRole('DEVOTEE');
         setCurrentDevotee(null);
       }
     });
@@ -357,18 +358,18 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const checkPermission = (allowedRoles: UserRole[]): boolean => {
-    const adminRoles = ['superadmin', 'master_admin', 'head_admin', 'SUPER_ADMIN', 'ADMIN', 'admin'];
+    const adminRoles = ['SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN', 'MANAGER', 'MANAGER'];
     if (adminRoles.includes(currentRole)) return true;
     
     // Auto-map legacy manager/trustee roles for standard check
-    const mappedRole = currentRole === 'MANAGER' ? 'manager' : currentRole;
+    const mappedRole = currentRole === 'MANAGER' ? 'MANAGER' : currentRole;
     return allowedRoles.includes(mappedRole as UserRole) || allowedRoles.includes(currentRole);
   };
 
   const loginWithPin = (pin: string, devoteeList: DevoteeMember[]): boolean => {
     // Admin Master Override PIN
     if (pin === '1008' || pin === activeWorkspace.adminPin) {
-      setCurrentRole('head_admin');
+      setCurrentRole('SUPER_ADMIN');
       setIsAuthenticated(true);
       return true;
     }
@@ -377,7 +378,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     const match = devoteeList.find((d) => d.pin === pin || d.phone.endsWith(pin));
     if (match) {
       setCurrentDevotee(match);
-      setCurrentRole(match.role || 'devotee');
+      setCurrentRole(match.role || 'DEVOTEE');
       setIsAuthenticated(true);
       set('sanatani_current_devotee', match);
       return true;
@@ -389,8 +390,8 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   const loginAsRole = (role: UserRole, customName?: string) => {
     setCurrentRole(role);
     setIsAuthenticated(true);
-    setViewMode(role === 'devotee' ? 'MEMBER' : 'ADMIN');
-    if (role === 'devotee') {
+    setViewMode('MANAGER');
+    if (role === 'DEVOTEE') {
       setCurrentDevotee({
         id: 'dev-demo-self',
         workspaceId: activeWorkspaceId,
@@ -399,7 +400,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         phone: '+91 98765 00108',
         email: 'anand@sanatan.org',
         pin: '1008',
-        role: 'devotee',
+        role: 'DEVOTEE',
         sevaIndex: 780,
         sevaTier: 'Vishesh',
         gotra: 'Kashyapa',
@@ -419,7 +420,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try { await signOut(auth); } catch(e) {}
-    setCurrentRole('devotee');
+    setCurrentRole('DEVOTEE');
     setCurrentDevotee(null);
     setIsAuthenticated(false);
     set('sanatani_current_devotee', null);
@@ -428,7 +429,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const saveCustomLogo = (base64: string) => {
     set(`sb_logo_${activeWorkspaceId}`, base64);
-    updateWorkspaceDetails({ logoBase64: base64 });
+    updateWorkspaceDetails({ logoUrl: base64 });
   };
 
   const addWorkspace = (newWorkspace: WorkspaceConfig) => {
@@ -463,6 +464,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         activeWorkspace,
         currentRole,
         currentDevotee,
+        setCurrentDevotee,
         currentUser,
         isAuthenticated,
         firebaseUser,

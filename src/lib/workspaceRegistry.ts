@@ -2,7 +2,7 @@ import { WorkspaceType } from '../types';
 
 export const workspaceRegistry: Record<WorkspaceType, string[]> = {
   // 🕉️ Mandir (Temple) - Strictly Rituals & Congregation
-  'Mandir': [
+  'MANDIR': [
     'dashboard', 'devotees', 'family', 'treasury', 'taxReceipts',
     'poojaBooking', 'mandirPuja', 'panchang', 'utsavPanjika',
     'sandeshBroadcast', 'socialWall', 'dharmicAssistant',
@@ -10,97 +10,87 @@ export const workspaceRegistry: Record<WorkspaceType, string[]> = {
   ],
 
   // 🐄 Goshala (Cow Shelter) - Focus on Livestock & Inventory
-  'Goshala': [
+  'GOSHALA': [
     'dashboard', 'devotees', 'guests', 'bulkImport', 'treasury', 'taxReceipts',
     'campaigns', 'assets', 'inventory', 'goshala',
     'sandeshBroadcast', 'dharmicAssistant', 'masterSettings'
   ],
 
   // 🚩 Sangha & Samaj (Community) - Focus on Mobilization & Voting
-  'Sangha': [
+  'SANGHA': [
     'dashboard', 'devotees', 'family', 'treasury', 'campaigns',
     'sanghaDrills', 'panchayatPolls', 'matrimony',
     'sandeshBroadcast', 'socialWall', 'dharmicAssistant', 'masterSettings'
   ],
-  'Samaj': [
+  'SAMAJ': [
     'dashboard', 'devotees', 'family', 'treasury', 'campaigns',
     'sanghaDrills', 'panchayatPolls', 'matrimony',
     'sandeshBroadcast', 'socialWall', 'dharmicAssistant', 'masterSettings'
   ],
 
   // 🧘 Ashram & Yoga (Spiritual Retreats) - Focus on Accommodation & Discourse
-  'Ashram': [
+  'ASHRAM': [
     'dashboard', 'devotees', 'guests', 'treasury',
     'ashramKutir', 'satsang', 'granthLibrary', 'shlokaFeed',
     'sandeshBroadcast', 'dharmicAssistant', 'masterSettings', 'spiritualSettings'
   ],
-  'Yoga': [
+  'YOGA_CENTER': [
     'dashboard', 'devotees', 'guests', 'treasury',
     'ashramKutir', 'satsang',
     'sandeshBroadcast', 'dharmicAssistant', 'masterSettings'
   ],
-  'Satsang': [
+  'SATSANG': [
     'dashboard', 'devotees', 'family', 'treasury',
     'satsang', 'granthLibrary', 'shlokaFeed',
     'sandeshBroadcast', 'socialWall', 'dharmicAssistant', 'masterSettings'
   ],
 
   // 📚 Gurukul & Vidyalaya (Education) - Focus on Students & Library
-  'Gurukul': [
+  'GURUKUL': [
     'dashboard', 'devotees', 'family', 'treasury', 'inventory',
     'gurukul', 'gurukulAcademy', 'vidyalaya', 'granthLibrary', 'goshala',
     'sandeshBroadcast', 'dharmicAssistant', 'masterSettings'
   ],
-  'Vidyalaya': [
+  'VIDYALAYA': [
     'dashboard', 'devotees', 'treasury', 'inventory',
     'vidyalaya', 'sandeshBroadcast', 'dharmicAssistant', 'masterSettings'
   ],
 
   // 📿 Purohit (Priests) - Strictly Ritual Execution
-  'Purohit': [
-    'dashboard', 'devotees', 'family', 'treasury',
-    'poojaBooking', 'purohitDesk', 'purohitMarket', 'pitruShradh', 'panchang',
-    'sandeshBroadcast', 'masterSettings'
-  ],
-  'PurohitSabha': [
+  'PUROHIT_SABHA': [
     'dashboard', 'devotees', 'family', 'treasury',
     'poojaBooking', 'purohitDesk', 'purohitMarket', 'pitruShradh', 'panchang',
     'panchayatPolls', 'sandeshBroadcast', 'masterSettings', 'trusteeGovernance'
   ],
 
   // 🤝 Trusts & Charities (Philanthropy) - Focus on Campaigns & Seva
-  'Trust': [
+  'TRUST': [
     'dashboard', 'devotees', 'guests', 'bulkImport', 'treasury', 'taxReceipts',
     'campaigns', 'karmaLedger', 'assets', 'sevaTrust', 'rakthaSeva', 'annadanam',
     'sandeshBroadcast', 'dharmaMarketing', 'trusteeGovernance', 'legalVault', 'masterSettings'
   ],
-  'DharmadaTrust': [
+  'ANNADAN_TRUST': [
     'dashboard', 'devotees', 'guests', 'bulkImport', 'treasury', 'taxReceipts',
-    'campaigns', 'assets', 'sevaTrust', 'annadanam',
-    'sandeshBroadcast', 'trusteeGovernance', 'legalVault', 'masterSettings'
-  ],
-  'AkshayaPatra': [
-    'dashboard', 'devotees', 'treasury', 'campaigns', 'inventory',
-    'sevaTrust', 'annadanam', 'rakthaSeva',
-    'sandeshBroadcast', 'trusteeGovernance', 'masterSettings', 'crisis-command'
+    'campaigns', 'assets', 'sevaTrust', 'annadanam', 'rakthaSeva', 'inventory',
+    'sandeshBroadcast', 'trusteeGovernance', 'legalVault', 'masterSettings', 'crisis-command'
   ],
 
   // 🏛️ Large Pilgrimage & Mahotsav (Massive Scale)
-  'KashiKshetra': [
+  'KASHI_KSHETRA': [
     'dashboard', 'devotees', 'guests', 'treasury', 'taxReceipts', 'campaigns',
     'poojaBooking', 'mandirPuja', 'purohitDesk', 'panchang',
     'dharamshala', 'annadanam', 'satsang', 'utsavPanjika',
     'sandeshBroadcast', 'socialWall', 'dharmicAssistant',
     'trusteeGovernance', 'sevadarRoster', 'crisis-command', 'masterSettings'
   ],
-  'Tirth': [
+  'TIRTH': [
     'dashboard', 'devotees', 'guests', 'treasury', 'taxReceipts', 'campaigns',
     'poojaBooking', 'mandirPuja', 'purohitDesk', 'panchang',
     'dharamshala', 'annadanam', 'utsavPanjika',
     'sandeshBroadcast', 'socialWall', 'dharmicAssistant',
     'trusteeGovernance', 'sevadarRoster', 'crisis-command', 'masterSettings'
   ],
-  'MahotsavSamiti': [
+  'MAHOTSAV_SAMITI': [
     'dashboard', 'devotees', 'family', 'treasury', 'campaigns',
     'sanghaDrills', 'panchayatPolls', 'utsavPanjika',
     'sandeshBroadcast', 'socialWall', 'trusteeGovernance', 'crisis-command', 'masterSettings'

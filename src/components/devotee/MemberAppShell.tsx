@@ -50,12 +50,12 @@ export default function MemberAppShell() {
 
   // Safe Switch Handler to safely transition back to Organisation View
   const handleSwitchToOrganisation = () => {
-    setViewMode('ADMIN');
+    setViewMode('MANAGER');
     showToast(`Switched back to ${activeWorkspace?.name || 'Organisation'} Console 🙏`, 'success', 'Mode Changed');
   };
 
   const handleNavigateFromAccount = (deskId: string) => {
-    if (deskId.includes('purohit') || deskId.includes('pooja')) {
+    if (deskId.includes('PUROHIT') || deskId.includes('pooja')) {
       setActiveTab('PUROHIT');
     } else if (deskId.includes('sadhana')) {
       setActiveTab('SADHANA');
@@ -242,7 +242,7 @@ export default function MemberAppShell() {
           <header className="bg-white border-b border-stone-200 px-4 py-2.5 flex items-center justify-between shrink-0 z-20 shadow-xs">
             <div className="flex items-center gap-3 min-w-0">
               <img 
-                src={activeWorkspace?.logoBase64 || '/logo.svg'} 
+                src={activeWorkspace?.logoUrl || '/logo.svg'} 
                 alt={activeWorkspace?.name || 'Sanatani Bandhan'} 
                 className="w-9 h-9 rounded-xl object-contain shadow-xs border border-stone-200 shrink-0 bg-white"
                 onError={(e) => { e.currentTarget.src = '/icon-192x192.png'; }}

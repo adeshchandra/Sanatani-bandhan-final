@@ -9,7 +9,6 @@ import { Layers, LayoutDashboard,
   Receipt,
   Target,
   Sparkles,
-  Layers,
   Package,
   Flame,
   Clock,
@@ -69,6 +68,7 @@ export interface NavItem {
 }
 
 export const MODULE_CATALOG: NavItem[] = [
+  { id: 'devotee-portal', name: 'My Devotee Portal', domain: 0, domainTitle: 'Personal', icon: UserCircle, badge: 'New' },
   // Domain 1: Core Command & CRM
   { id: 'dashboard', name: 'Command Center', domain: 1, domainTitle: 'Core Command & CRM', icon: LayoutDashboard },
   { id: 'devotees', name: 'Devotee & Member Directory', domain: 1, domainTitle: 'Core Command & CRM', icon: Users, badge: 'Dynamic' },
@@ -203,23 +203,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       // 2. Check RBAC permissions
       let hasRole = true;
-      if (m.id === 'bulkImport') hasRole = checkPermission(['manager', 'trustee']);
-      else if (['treasury', 'taxReceipts'].includes(m.id)) hasRole = checkPermission(['accountant', 'manager', 'trustee']);
-      else if (['campaigns', 'assets'].includes(m.id)) hasRole = checkPermission(['manager', 'trustee']);
-      else if (m.id === 'inventory') hasRole = checkPermission(['accountant', 'manager', 'trustee', 'volunteer']);
+      if (m.id === 'bulkImport') hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
+      else if (['treasury', 'taxReceipts'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+      else if (['campaigns', 'assets'].includes(m.id)) hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
+      else if (m.id === 'inventory') hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']);
       else if (['poojaBooking', 'mandirPuja', 'purohitDesk', 'purohitMarket', 'pitruShradh'].includes(m.id)) {
-        hasRole = checkPermission(['purohit', 'manager', 'trustee']);
+        hasRole = checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']);
       }
       else if (['sandeshBroadcast'].includes(m.id)) {
-        hasRole = checkPermission(['manager', 'trustee']);
+        hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
       }
       else if (['workspace-hub', 'masterSettings', 'appStore', 'spiritualSettings', 'panchayatPolls'].includes(m.id)) {
-        hasRole = checkPermission(['trustee']);
+        hasRole = checkPermission(['TRUSTEE']);
       }
       else if (['user-roles-rbac', 'trusteeGovernance', 'sevadarRoster', 'auditLog', 'legalVault', 'crisis-command', 'socialWall'].includes(m.id)) {
-        hasRole = checkPermission(['trustee', 'manager']);
+        hasRole = checkPermission(['TRUSTEE', 'MANAGER']);
       }
-      else if (['devotees', 'family', 'vanshavali', 'guests', 'karmaLedger', 'rakthaSeva', 'goshala', 'annadanam', 'ashramKutir', 'dharamshala', 'gurukul', 'gurukulAcademy', 'vidyalaya', 'satsang', 'sanghaDrills', 'sevaTrust', 'granthLibrary', 'matrimony', 'utsavPanjika', 'shlokaFeed', 'dharmicAssistant', 'dharmaMarketing', 'sadhana-karma', 'sanatani-vivah', 'yatraNet'].includes(m.id)) {
+      else if (['devotee-portal', 'devotees', 'family', 'vanshavali', 'guests', 'karmaLedger', 'rakthaSeva', 'goshala', 'annadanam', 'ashramKutir', 'dharamshala', 'gurukul', 'gurukulAcademy', 'vidyalaya', 'satsang', 'sanghaDrills', 'sevaTrust', 'granthLibrary', 'matrimony', 'utsavPanjika', 'shlokaFeed', 'dharmicAssistant', 'dharmaMarketing', 'sadhana-karma', 'sanatani-vivah', 'yatraNet'].includes(m.id)) {
         // These are open to all logged-in users in the organization view (devotee, volunteer, purohit, accountant, manager, trustee, superadmin)
         // No explicit restriction means `hasRole` stays true, but we list them for explicit 'perfect' RBAC mapping documentation.
         hasRole = true;
@@ -290,7 +290,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="h-16 px-4 flex items-center justify-between border-b border-stone-800 shrink-0 bg-stone-950/50">
           <div className="flex items-center gap-3 min-w-0 overflow-hidden">
             <img 
-              src={activeWorkspace?.logoBase64 || '/logo.svg'} 
+              src={activeWorkspace?.logoUrl || '/logo.svg'} 
               alt={activeWorkspace?.name || 'Sanatani Bandhan'} 
               className="w-8 h-8 rounded-lg object-contain bg-white/10 p-0.5 border border-amber-500/30 shrink-0"
               onError={(e) => { e.currentTarget.src = '/icon-192x192.png'; }}

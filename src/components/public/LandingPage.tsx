@@ -60,7 +60,7 @@ export const LandingPage: React.FC<{
   ];
 
   const WORKSPACES = [
-    'Mandir', 'Goshala', 'Sangha', 'Ashram', 'Gurukul', 'Satsang', 'Yoga', 'Trust', 'Tirth', 'Samaj'
+    'MANDIR', 'GOSHALA', 'SANGHA', 'ASHRAM', 'GURUKUL', 'SATSANG', 'YOGA_CENTER', 'TRUST', 'TIRTH', 'SAMAJ'
   ];
 
   return (

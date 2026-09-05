@@ -41,6 +41,7 @@ import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useWorkspaceTaxonomy } from '../../hooks/useWorkspaceTaxonomy';
 import { useData } from '../../context/DataContext';
+import { useScopedData } from '../../hooks/useScopedData';
 import { DevoteeMember, SevaTier, UserRole } from '../../types';
 import { exportToCSV } from '../../utils/csvEngine';
 import { generateDonationHistoryPDF, generateAnnualDonationSummaryPDF } from '../../utils/pdfGenerator';
@@ -57,12 +58,13 @@ export const DevoteeGrid: React.FC = () => {
   const { activeWorkspace, currentRole, currentDevotee, checkPermission } = useAuthWorkspace();
   const { checkGate, showUpsell, upsellModule, closeUpsell } = usePlanGate();
   
-  const canExport = checkPermission(['trustee', 'manager', 'head_admin', 'master_admin', 'superadmin']);
-  const canManage = checkPermission(['trustee', 'manager', 'head_admin', 'master_admin', 'superadmin']);
-  const canViewFinancials = checkPermission(['trustee', 'manager', 'accountant', 'head_admin', 'master_admin', 'superadmin']);
-  const canRegister = checkPermission(['trustee', 'manager', 'accountant', 'purohit', 'volunteer', 'head_admin', 'master_admin', 'superadmin']);
+  const canExport = checkPermission(['TRUSTEE', 'MANAGER', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
+  const canManage = checkPermission(['TRUSTEE', 'MANAGER', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
+  const canViewFinancials = checkPermission(['TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
+  const canRegister = checkPermission(['TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
 
-  const { devotees, treasury, poojas, addDevotee, updateDevotee, deleteDevotee } = useData();
+  const { treasury, poojas, addDevotee, updateDevotee, deleteDevotee } = useData();
+  const devotees = useScopedData<DevoteeMember>('devotees', {}, { orderBy: { field: 'fullName', direction: 'asc' } });
   const { showToast, confirm } = useToast();
 
   const taxonomy = useWorkspaceTaxonomy();
@@ -115,7 +117,7 @@ export const DevoteeGrid: React.FC = () => {
   const [medicalNotes, setMedicalNotes] = useState('');
   const [idCardValidThru, setIdCardValidThru] = useState('');
   const [sevaTier, setSevaTier] = useState<SevaTier>('Vishesh');
-  const [photoBase64, setPhotoBase64] = useState<string>('');
+  const [photoUrl, setPhotoUrl] = useState<string>('');
   const [qrModalDevotee, setQrModalDevotee] = useState<DevoteeMember | null>(null);
   const [standardA_QR, setStandardA_QR] = useState<string>('');
   const [standardB_QR, setStandardB_QR] = useState<string>('');
@@ -175,7 +177,7 @@ export const DevoteeGrid: React.FC = () => {
 
       const matchGroup =
         filterGroup === 'all' ||
-        (filterGroup === 'staff' && d.role && d.role !== 'devotee') ||
+        (filterGroup === 'staff' && d.role && d.role !== 'DEVOTEE') ||
         (filterGroup === 'donors' && ['Ratna', 'Vishesh'].includes(d.sevaTier)) ||
         (filterGroup === 'revoked' && d.pin === 'REVOKED');
       
@@ -243,7 +245,7 @@ export const DevoteeGrid: React.FC = () => {
     if (!file) return;
     try {
       const compressed = await compressAvatarImage(file);
-      setPhotoBase64(compressed);
+      setPhotoUrl(compressed);
       showToast('Profile photo compressed (<300px)', 'info');
     } catch (err: any) {
       showToast('Failed to compress avatar photo', 'error');
@@ -284,7 +286,7 @@ export const DevoteeGrid: React.FC = () => {
         address: address.trim() || undefined,
         birthDate: birthDate || undefined,
         sevaTier,
-        photoBase64: photoBase64 || editingDevotee.photoBase64,
+        photoUrl: photoUrl || editingDevotee.photoUrl,
         medicalNotes: medicalNotes.trim() || undefined,
       });
       setEditingDevotee(null);
@@ -301,7 +303,7 @@ export const DevoteeGrid: React.FC = () => {
         phone: phone.trim(),
         email: email.trim() || undefined,
         pin: Math.floor(1000 + Math.random() * 9000).toString(),
-        role: 'devotee',
+        role: 'DEVOTEE',
         sevaIndex: 350,
         sevaTier,
         gotra,
@@ -313,7 +315,7 @@ export const DevoteeGrid: React.FC = () => {
         activeStatus: 'Active',
         totalDonated: 0,
         volunteerHours: 0,
-        photoBase64: photoBase64 || undefined,
+        photoUrl: photoUrl || undefined,
         medicalNotes: medicalNotes.trim() || undefined,
       });
 
@@ -326,7 +328,7 @@ export const DevoteeGrid: React.FC = () => {
            phone: phone.trim(),
            email: email.trim() || undefined,
            pin: 'XXXX',
-           role: 'devotee' as const,
+           role: 'DEVOTEE' as const,
            sevaIndex: 350,
            sevaTier,
            gotra,
@@ -361,7 +363,7 @@ export const DevoteeGrid: React.FC = () => {
     setMedicalNotes('');
     setIdCardValidThru('');
     setSevaTier('Vishesh');
-    setPhotoBase64('');
+    setPhotoUrl('');
     setEditingDevotee(null);
   };
 
@@ -392,7 +394,7 @@ export const DevoteeGrid: React.FC = () => {
     setMedicalNotes(devotee.medicalNotes || '');
     setIdCardValidThru(devotee.idCardValidThru || '');
     setSevaTier(devotee.sevaTier);
-    setPhotoBase64(devotee.avatarBase64 || '');
+    setPhotoUrl(devotee.avatarUrl || '');
     setIsAddModalOpen(true);
   };
 
@@ -671,9 +673,9 @@ export const DevoteeGrid: React.FC = () => {
                         className="w-4 h-4 rounded border-stone-700 bg-stone-900/50 text-amber-500 focus:ring-amber-500/50 cursor-pointer"
                       />
                     </div>
-                    {devotee.photoBase64 ? (
+                    {devotee.photoUrl ? (
                       <img
-                        src={devotee.photoBase64}
+                        src={devotee.photoUrl}
                         alt={devotee.fullName}
                         className="w-11 h-11 rounded-xl object-cover border border-amber-500/40 shrink-0"
                         referrerPolicy="no-referrer"
@@ -696,7 +698,7 @@ export const DevoteeGrid: React.FC = () => {
                         <span className="text-[10px] text-stone-400 font-mono bg-stone-800/50 px-1.5 py-0.5 rounded border border-stone-700/50">
                           ID: {devotee.id}
                         </span>
-                        {devotee.role && devotee.role !== 'devotee' && (
+                        {devotee.role && devotee.role !== 'DEVOTEE' && (
                           <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30 flex items-center gap-1">
                             <Shield className="w-2.5 h-2.5" />
                             {devotee.role}
@@ -875,9 +877,9 @@ export const DevoteeGrid: React.FC = () => {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      {devotee.photoBase64 ? (
+                      {devotee.photoUrl ? (
                         <img
-                          src={devotee.photoBase64}
+                          src={devotee.photoUrl}
                           alt={devotee.fullName}
                           className="w-9 h-9 rounded-lg object-cover border border-stone-700 shrink-0"
                           referrerPolicy="no-referrer"
@@ -890,7 +892,7 @@ export const DevoteeGrid: React.FC = () => {
                       <div>
                         <div className="flex items-center gap-2">
                           <p className="font-bold text-stone-100">{devotee.fullName}</p>
-                          {devotee.role && devotee.role !== 'devotee' && (
+                          {devotee.role && devotee.role !== 'DEVOTEE' && (
                             <span className="text-[9px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/30">
                               {devotee.role}
                             </span>
@@ -973,9 +975,9 @@ export const DevoteeGrid: React.FC = () => {
             {/* Header */}
             <div className="p-5 border-b border-stone-800 flex items-center justify-between bg-stone-950/50">
               <div className="flex items-center gap-4">
-                {selectedDevotee.photoBase64 ? (
+                {selectedDevotee.photoUrl ? (
                   <img
-                    src={selectedDevotee.photoBase64}
+                    src={selectedDevotee.photoUrl}
                     alt={selectedDevotee.fullName}
                     className="w-14 h-14 rounded-2xl object-cover border border-stone-700"
                   />
@@ -1072,7 +1074,7 @@ export const DevoteeGrid: React.FC = () => {
                       <label className="block text-xs text-stone-400 mb-1.5 font-semibold">Change System Role</label>
                       <select
                         className="w-full bg-stone-900 border border-stone-700 rounded-xl px-3 py-2 text-sm text-stone-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        value={selectedDevotee.role || 'devotee'}
+                        value={selectedDevotee.role || 'DEVOTEE'}
                         disabled={selectedDevotee.id === currentDevotee?.id}
                         title={selectedDevotee.id === currentDevotee?.id ? "You cannot modify your own role" : "Modify system role"}
                         onChange={(e) => {
@@ -1081,13 +1083,13 @@ export const DevoteeGrid: React.FC = () => {
                            showToast(`Role updated to ${e.target.value}`, 'success');
                         }}
                       >
-                        <option value="devotee">Devotee (Standard)</option>
-                        <option value="volunteer">Volunteer (Sevadar)</option>
-                        <option value="purohit">Purohit / Priest</option>
-                        <option value="accountant">Accountant</option>
-                        <option value="manager">Manager</option>
-                        {currentRole === 'superadmin' || currentRole === 'head_admin' || currentRole === 'master_admin' ? (
-                           <option value="trustee">Trustee</option>
+                        <option value="DEVOTEE">Devotee (Standard)</option>
+                        <option value="VOLUNTEER">Volunteer (Sevadar)</option>
+                        <option value="PUROHIT">Purohit / Priest</option>
+                        <option value="ACCOUNTANT">Accountant</option>
+                        <option value="MANAGER">Manager</option>
+                        {currentRole === 'SUPER_ADMIN' ? (
+                           <option value="TRUSTEE">Trustee</option>
                         ) : null}
                       </select>
                       <p className="text-[10px] text-stone-500 mt-1.5">Roles grant distinct applet permissions.</p>
@@ -1349,7 +1351,9 @@ export const DevoteeGrid: React.FC = () => {
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:border-amber-500"
+                    disabled={!!editingDevotee}
+                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={editingDevotee ? "Phone is locked to maintain login integrity" : ""}
                   />
                 </div>
                 <div>
@@ -1358,7 +1362,9 @@ export const DevoteeGrid: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none"
+                    disabled={!!editingDevotee}
+                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={editingDevotee ? "Email is locked to maintain login integrity" : ""}
                   />
                 </div>
               </div>

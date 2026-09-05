@@ -28,6 +28,33 @@ export const getActiveWorkspaceLogo = async (workspaceId: string): Promise<strin
   return null;
 };
 
+
+/**
+ * Safely fetches an image from URL and converts to base64 for jsPDF
+ */
+const fetchImageAsBase64 = async (url: string): Promise<string | null> => {
+  if (url.startsWith('data:image/')) return url;
+  
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      } else {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+};
+
 /**
  * Helper to inspect Base64 image format safely for jsPDF
  */
@@ -69,9 +96,9 @@ export const generateDevoteeCardPDF = async (
   doc.setFillColor(180, 83, 9); // amber-700
   doc.rect(0, 0, 85.6, 22, 'F');
   
-  if (workspace.logoBase64) {
+  if (workspace.logoUrl) {
     try {
-      doc.addImage(workspace.logoBase64, 'PNG', 2, 2, 14, 14); // Very small logo top left
+      doc.addImage(workspace.logoUrl, 'PNG', 2, 2, 14, 14); // Very small logo top left
     } catch(e) {}
   }
 
@@ -87,18 +114,21 @@ export const generateDevoteeCardPDF = async (
 
   // Photo / Avatar box or custom photo
   const photoY = 26;
-  if (member.avatarBase64 && member.avatarBase64.startsWith('data:image/')) {
+  let drawn = false;
+  if (member.avatarUrl) {
     try {
-      const fmt = getImageFormat(member.avatarBase64);
-      doc.addImage(member.avatarBase64, fmt, 30.8, photoY, 24, 24);
+      const b64 = await fetchImageAsBase64(member.avatarUrl);
+      if (b64) {
+        const fmt = getImageFormat(b64);
+        doc.addImage(b64, fmt, 30.8, photoY, 24, 24);
+        drawn = true;
+      }
     } catch (e) {
-      doc.setFillColor(251, 191, 36);
-      doc.roundedRect(30.8, photoY, 24, 24, 2, 2, 'F');
-      doc.setTextColor(146, 64, 14);
-      doc.setFontSize(14);
-      doc.text('🕉️', 42.8, photoY + 14, { align: 'center' });
+      console.warn("Failed to load avatar for PDF", e);
     }
-  } else {
+  }
+  
+  if (!drawn) {
     doc.setFillColor(251, 191, 36);
     doc.roundedRect(30.8, photoY, 24, 24, 2, 2, 'F');
     doc.setTextColor(146, 64, 14);
@@ -194,9 +224,9 @@ export const generateBulkTaxReceiptsPDF = async (
     doc.setFillColor(254, 243, 199);
     doc.rect(11, 11, 188, 32, 'F');
     
-    if (workspace.logoBase64) {
+    if (workspace.logoUrl) {
       try {
-        doc.addImage(workspace.logoBase64, 'PNG', 15, 14, 24, 24);
+        doc.addImage(workspace.logoUrl, 'PNG', 15, 14, 24, 24);
       } catch(e) {}
     }
 
@@ -322,9 +352,9 @@ export const generateTaxReceiptPDF = async (
   doc.setFillColor(254, 243, 199);
   doc.rect(11, 11, 188, 32, 'F');
   
-  if (workspace.logoBase64) {
+  if (workspace.logoUrl) {
     try {
-      doc.addImage(workspace.logoBase64, 'PNG', 15, 14, 24, 24);
+      doc.addImage(workspace.logoUrl, 'PNG', 15, 14, 24, 24);
     } catch(e) {}
   }
 
@@ -443,9 +473,9 @@ export const generatePoojaSankalpPDF = async (
   doc.setFillColor(180, 83, 9);
   doc.rect(0, 0, 148, 22, 'F');
   
-  if (workspace.logoBase64) {
+  if (workspace.logoUrl) {
     try {
-      doc.addImage(workspace.logoBase64, 'PNG', 5, 4, 14, 14);
+      doc.addImage(workspace.logoUrl, 'PNG', 5, 4, 14, 14);
     } catch(e) {}
   }
 

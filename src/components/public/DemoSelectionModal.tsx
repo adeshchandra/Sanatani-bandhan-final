@@ -11,8 +11,8 @@ interface DemoSelectionModalProps {
 }
 
 const ORG_TYPES: WorkspaceType[] = [
-  'Mandir', 'Goshala', 'Sangha', 'Ashram', 'Gurukul',
-  'DharmadaTrust', 'MahotsavSamiti', 'PurohitSabha', 'KashiKshetra', 'AkshayaPatra'
+  'MANDIR', 'GOSHALA', 'SANGHA', 'ASHRAM', 'GURUKUL',
+  'ANNADAN_TRUST', 'MAHOTSAV_SAMITI', 'PUROHIT_SABHA', 'KASHI_KSHETRA', 'ANNADAN_TRUST'
 ];
 
 export const DemoSelectionModal: React.FC<DemoSelectionModalProps> = ({ isOpen, onClose, onSelect }) => {

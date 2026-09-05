@@ -47,7 +47,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
       setPaymentMode('UPI / QR');
       setReferenceNo('');
       setPurpose('');
-      setMemoImageBase64('');
+      setMemoImageUrl('');
     }
   }, [isOpen, prefilledDevoteeId, prefilledDevoteeName]);
   const [amount, setAmount] = useState<number | ''>(1100);
@@ -57,7 +57,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
   const [purpose, setPurpose] = useState('General Mandir Seva & Deepam');
   const [handledBy, setHandledBy] = useState('Treasury Sevadar');
   const [is80GEligible, setIs80GEligible] = useState(true);
-  const [memoImageBase64, setMemoImageBase64] = useState<string>('');
+  const [memoImageUrl, setMemoImageUrl] = useState<string>('');
   const [isCompressing, setIsCompressing] = useState(false);
   const [upiQrCodeUrl, setUpiQrCodeUrl] = useState<string>('');
 
@@ -86,7 +86,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
     try {
       setIsCompressing(true);
       const compressed = await compressExpenseMemo(file);
-      setMemoImageBase64(compressed);
+      setMemoImageUrl(compressed);
       showToast('Receipt securely uploaded to Cloud Storage', 'info');
     } catch (err: any) {
       showToast('Failed to compress receipt image', 'error');
@@ -123,7 +123,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
       referenceNo: referenceNo.trim() || undefined,
       purpose: purpose.trim(),
       is80GEligible,
-      memoImageBase64: memoImageBase64 || undefined,
+      memoImageUrl: memoImageUrl || undefined,
     };
 
     addTreasuryTransaction(newTx);
@@ -349,7 +349,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
                   onChange={handleMemoUpload}
                   className="w-full text-xs text-stone-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-stone-800 file:text-stone-300 hover:file:bg-stone-700 cursor-pointer"
                 />
-                {memoImageBase64 && (
+                {memoImageUrl && (
                   <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> Memo compressed and attached
                   </p>

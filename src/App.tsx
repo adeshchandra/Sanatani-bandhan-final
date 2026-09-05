@@ -105,6 +105,11 @@ const AppContent: React.FC = () => {
   const { checkPermission, activeWorkspace, currentRole, viewMode } = useAuthWorkspace();
   const { showToast } = useToast();
   const [activeModule, setActiveModule] = useState<string>('dashboard');
+  React.useEffect(() => {
+    if (currentRole === 'DEVOTEE' && activeModule === 'dashboard') {
+      setActiveModule('devotee-portal');
+    }
+  }, [currentRole, activeModule]);
 
   React.useEffect(() => {
     const handleNavigate = (e: any) => {
@@ -137,6 +142,8 @@ const AppContent: React.FC = () => {
 
   const renderActiveDesk = () => {
     switch (activeModule) {
+      case 'devotee-portal':
+        return <DevoteePortal />;
       case 'dashboard':
         return (
           <DashboardHome
@@ -163,44 +170,44 @@ const AppContent: React.FC = () => {
         return <RakthaSevaDesk />;
       case 'bulkImport':
       case 'universal-csv':
-        return checkPermission(['manager', 'trustee']) ? <BulkImportDesk /> : <RestrictedAccess />;
+        return checkPermission(['MANAGER', 'TRUSTEE']) ? <BulkImportDesk /> : <RestrictedAccess />;
 
       // Domain 2
       case 'treasury':
       case 'treasury-ledger':
-        return checkPermission(['accountant', 'manager', 'trustee']) ? <TreasuryLedgerDesk onOpenQuickPay={() => setIsQuickChandaOpen(true)} /> : <RestrictedAccess />;
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <TreasuryLedgerDesk onOpenQuickPay={() => setIsQuickChandaOpen(true)} /> : <RestrictedAccess />;
       case 'taxReceipts':
       case 'tax-receipt-80g':
-        return checkPermission(['accountant', 'manager', 'trustee']) ? <TaxReceiptDesk /> : <RestrictedAccess />;
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <TaxReceiptDesk /> : <RestrictedAccess />;
       case 'campaigns':
       case 'mandir-campaigns':
-        return checkPermission(['manager', 'trustee']) ? <MandirCampaignsDesk /> : <RestrictedAccess />;
+        return checkPermission(['MANAGER', 'TRUSTEE']) ? <MandirCampaignsDesk /> : <RestrictedAccess />;
       case 'karmaLedger':
       case 'karma-ledger':
         return <KarmaLedgerDesk />;
       case 'assets':
       case 'asset-register':
-        return checkPermission(['manager', 'trustee']) ? <AssetInventoryDesk /> : <RestrictedAccess />;
+        return checkPermission(['MANAGER', 'TRUSTEE']) ? <AssetInventoryDesk /> : <RestrictedAccess />;
       case 'inventory':
       case 'store-inventory':
-        return checkPermission(['accountant', 'manager', 'trustee', 'volunteer']) ? <InventoryDesk /> : <RestrictedAccess />;
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']) ? <InventoryDesk /> : <RestrictedAccess />;
 
       // Domain 3
       case 'poojaBooking':
       case 'pooja-booking':
-        return checkPermission(['purohit', 'manager', 'trustee']) ? <PoojaBookingDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PoojaBookingDesk /> : <RestrictedAccess />;
       case 'mandirPuja':
       case 'aarti-roster':
-        return checkPermission(['purohit', 'manager', 'trustee']) ? <MandirPujaDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <MandirPujaDesk /> : <RestrictedAccess />;
       case 'purohitDesk':
       case 'purohit-desk':
-        return checkPermission(['purohit', 'manager', 'trustee']) ? <PurohitDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitDesk /> : <RestrictedAccess />;
       case 'purohitMarket':
       case 'purohit-marketplace':
-        return checkPermission(['purohit', 'manager', 'trustee']) ? <PurohitMarketDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitMarketDesk /> : <RestrictedAccess />;
       case 'pitruShradh':
       case 'pitru-shradh':
-        return checkPermission(['purohit', 'manager', 'trustee']) ? <PitruShradhDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PitruShradhDesk /> : <RestrictedAccess />;
       case 'panchang':
       case 'panchang-muhurat':
         return <PanchangMuhuratDesk />;
@@ -231,7 +238,7 @@ const AppContent: React.FC = () => {
       // Domain 5
       case 'sandeshBroadcast':
       case 'whatsapp-broadcaster':
-        return checkPermission(['manager', 'trustee']) ? <WhatsAppBroadcasterDesk /> : <RestrictedAccess />;
+        return checkPermission(['MANAGER', 'TRUSTEE']) ? <WhatsAppBroadcasterDesk /> : <RestrictedAccess />;
       case 'utsavPanjika':
       case 'events-utsav':
         return <VedicCalendarEventsDesk />;
@@ -258,25 +265,25 @@ const AppContent: React.FC = () => {
 
       // Domain 6
       case 'workspace-hub':
-        return checkPermission(['trustee']) ? <WorkspaceSelectorDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE']) ? <WorkspaceSelectorDesk /> : <RestrictedAccess />;
       case 'user-roles-rbac':
       case 'trusteeGovernance':
-        return checkPermission(['trustee', 'manager']) ? <UserRolesDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE', 'MANAGER']) ? <UserRolesDesk /> : <RestrictedAccess />;
       case 'security-audit-log':
       case 'legalVault':
       case 'auditLog':
-        return checkPermission(['trustee', 'manager']) ? <AuditLogDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE', 'MANAGER']) ? <AuditLogDesk /> : <RestrictedAccess />;
       case 'sevadarRoster':
-        return checkPermission(['trustee', 'manager']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE', 'MANAGER']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
       case 'appStore':
-        return checkPermission(['trustee']) ? <AppStoreDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE']) ? <AppStoreDesk /> : <RestrictedAccess />;
       case 'masterSettings':
       case 'socialWall':
-        return checkPermission(['trustee']) ? <MasterSettingsDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE']) ? <MasterSettingsDesk /> : <RestrictedAccess />;
       case 'panchayatPolls':
-        return checkPermission(['trustee', 'manager']) ? <PanchayatPollingDesk /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE', 'MANAGER']) ? <PanchayatPollingDesk /> : <RestrictedAccess />;
       case 'crisis-command':
-        return checkPermission(['trustee', 'manager']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
+        return checkPermission(['TRUSTEE', 'MANAGER']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
 
       case 'spiritualSettings':
       case 'platformBroadcast':
@@ -458,7 +465,7 @@ const AppRouter: React.FC = () => {
     switchWorkspace(demoId);
     
     // Inject test user session
-    loginAsRole('head_admin', 'Demo User');
+    loginAsRole('SUPER_ADMIN', 'Demo User');
     if (seedDemoData) {
       seedDemoData(demoId, type);
     }

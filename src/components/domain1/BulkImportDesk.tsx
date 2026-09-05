@@ -57,7 +57,7 @@ export const BulkImportDesk: React.FC = () => {
         phone: r.phone,
         email: r.email,
         pin: r.pin,
-        role: 'devotee',
+        role: 'DEVOTEE',
         sevaIndex: 300,
         sevaTier: (r.sevaTier as any) || 'Vishesh',
         gotra: r.gotra,

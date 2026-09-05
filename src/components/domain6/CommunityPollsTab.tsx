@@ -16,7 +16,7 @@ import { pushToDataLayer } from '../../utils/gtm';
 import { usePlanGate } from '../../hooks/usePlanGate';
 
 let generatePollReportPdf: any = null;
-import('../../utils/pdfGenerator').then(mod => { generatePollReportPdf = mod.generatePollReportPdf }).catch(() => {});
+import('../../utils/pdfGenerator').then(mod => { generatePollReportPdf = (mod as any).generatePollReportPdf }).catch(() => {});
 
 export const CommunityPollsTab: React.FC = () => {
   const { activeWorkspace, currentUser, currentRole } = useAuthWorkspace();
@@ -45,7 +45,7 @@ export const CommunityPollsTab: React.FC = () => {
     endDate: '', endTime: '', options: ['', '']
   });
 
-  const isManagerOrAdmin = ['ADMIN', 'SUPER_ADMIN', 'MANAGER'].includes(currentRole || '');
+  const isManagerOrAdmin = ['MANAGER', 'SUPER_ADMIN', 'MANAGER'].includes(currentRole || '');
   const isOnline = navigator.onLine;
 
   const showToastMsg = (message: string, type = 'success') => {
@@ -128,6 +128,14 @@ export const CommunityPollsTab: React.FC = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getCountdown = (dateString: string) => {
+    const d = new Date(dateString).getTime() - new Date().getTime();
+    if (d <= 0) return "Ended";
+    const h = Math.floor(d / 3600000);
+    const m = Math.floor((d % 3600000) / 60000);
+    return `${h}h ${m}m left`;
   };
 
   const handleVote = async (pollId: string, optionId: string) => {
@@ -281,7 +289,7 @@ export const CommunityPollsTab: React.FC = () => {
 
     activePolls.forEach(p => {
       const eligibleCount = p.targetAudience === 'MANAGERS' 
-        ? devotees.filter(m => ['MANAGER', 'ADMIN', 'SUPER_ADMIN'].includes(m.role)).length 
+        ? devotees.filter(m => ['MANAGER', 'MANAGER', 'SUPER_ADMIN'].includes(m.role)).length 
         : devotees.length;
       const votesCast = p.votedUsers ? Object.keys(p.votedUsers).length : 0;
       totalEligibleActive += eligibleCount;
