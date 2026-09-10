@@ -121,20 +121,20 @@ export const InventoryDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full bg-saffron-500/10 border border-saffron-500/30 text-saffron-400 text-[10px] font-bold uppercase tracking-wider">
               Bhandara & Pooja Samagri Store
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               {inventory.length} Tracked Consumables
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             Store & Consumables Inventory Desk
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Monitor stock levels of Desi Ghee, Bhimseni Camphor, Akshat rice, and automatic reorder alerts
           </p>
         </div>
@@ -151,7 +151,7 @@ export const InventoryDesk: React.FC = () => {
           <button
             type="button"
             onClick={exportToPDF}
-            className="px-4 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 font-bold text-xs flex items-center gap-1.5 shadow-lg transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-temple-800 hover:bg-temple-700 border border-temple-700 text-temple-200 font-bold text-xs flex items-center gap-1.5 shadow-lg transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Export PDF</span>
@@ -159,7 +159,7 @@ export const InventoryDesk: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-saffron-600/20 transition-all cursor-pointer"
           >
           <Plus className="w-4 h-4" />
           <span>Add Stock Item</span>
@@ -175,17 +175,17 @@ export const InventoryDesk: React.FC = () => {
           return (
             <div
               key={`${item.id}-${idx}`}
-              className={`bg-stone-900/90 border rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4 transition-all ${
-                isLow ? 'border-amber-500/60 bg-amber-950/10' : 'border-stone-800'
+              className={`bg-temple-900/90 border rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4 transition-all ${
+                isLow ? 'border-saffron-500/60 bg-saffron-950/10' : 'border-temple-800'
               }`}
             >
               <div>
-                <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800">
+                <div className="flex items-start justify-between gap-2 pb-3 border-b border-temple-800">
                   <div>
-                    <span className="text-[10px] font-bold uppercase text-amber-400">
+                    <span className="text-[10px] font-bold uppercase text-saffron-400">
                       {item.category}
                     </span>
-                    <h3 className="font-extrabold text-sm text-stone-100 mt-0.5">{item.itemName}</h3>
+                    <h3 className="font-extrabold text-sm text-temple-100 mt-0.5">{item.itemName}</h3>
                   </div>
                   {isLow ? (
                     <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold animate-pulse">
@@ -200,37 +200,37 @@ export const InventoryDesk: React.FC = () => {
                   )}
                 </div>
 
-                <div className="py-2 space-y-1 text-xs text-stone-300">
+                <div className="py-2 space-y-1 text-xs text-temple-300">
                   <p>
-                    <span className="text-stone-400">Min Reorder Level:</span>{' '}
-                    <span className="font-mono text-stone-200">
+                    <span className="text-temple-400">Min Reorder Level:</span>{' '}
+                    <span className="font-mono text-temple-200">
                       {item.minReorderLevel} {item.unit}
                     </span>
                   </p>
                   <p>
-                    <span className="text-stone-400">Cost per unit:</span>{' '}
-                    <span className="font-mono text-amber-400">₹{item.costPerUnit}</span>
+                    <span className="text-temple-400">Cost per unit:</span>{' '}
+                    <span className="font-mono text-saffron-400">₹{item.costPerUnit}</span>
                   </p>
                   {item.supplierName && (
-                    <p className="text-[11px] text-stone-400 truncate">
+                    <p className="text-[11px] text-temple-400 truncate">
                       Supplier: {item.supplierName}
                     </p>
                   )}
                 </div>
 
                 <div className={`p-3 rounded-xl flex items-center justify-between ${
-                  isLow ? 'bg-rose-950/40 border border-rose-500/50' : 'bg-stone-950/60 border border-stone-800'
+                  isLow ? 'bg-rose-950/40 border border-rose-500/50' : 'bg-temple-950/60 border border-temple-800'
                 }`}>
                   <div>
-                    <p className={`text-[10px] font-semibold uppercase ${isLow ? 'text-rose-400' : 'text-stone-400'}`}>Current Stock</p>
-                    <p className={`text-xl font-black ${isLow ? 'text-rose-500' : 'text-stone-100'}`}>
-                      {item.currentStock} <span className={`text-xs font-normal ${isLow ? 'text-rose-400' : 'text-amber-400'}`}>{item.unit}</span>
+                    <p className={`text-[10px] font-semibold uppercase ${isLow ? 'text-rose-400' : 'text-temple-400'}`}>Current Stock</p>
+                    <p className={`text-xl font-black ${isLow ? 'text-rose-500' : 'text-temple-100'}`}>
+                      {item.currentStock} <span className={`text-xs font-normal ${isLow ? 'text-rose-400' : 'text-saffron-400'}`}>{item.unit}</span>
                     </p>
                   </div>
                   {isLow ? (
                     <AlertTriangle className="w-5 h-5 text-rose-500 opacity-80" />
                   ) : (
-                    <Package className="w-5 h-5 text-amber-400 opacity-80" />
+                    <Package className="w-5 h-5 text-saffron-400 opacity-80" />
                   )}
                 </div>
               </div>
@@ -241,7 +241,7 @@ export const InventoryDesk: React.FC = () => {
                   setEditingStockItem(item);
                   setNewStockVal(item.currentStock);
                 }}
-                className="w-full py-1.5 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-200 text-xs font-semibold"
+                className="w-full py-1.5 rounded-xl bg-temple-800 hover:bg-temple-750 border border-temple-700 text-temple-200 text-xs font-semibold"
               >
                 Update Stock Count
               </button>
@@ -252,10 +252,10 @@ export const InventoryDesk: React.FC = () => {
 
       {/* Update Stock Modal */}
       {editingStockItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md">
-          <div className="bg-stone-900 border border-stone-700 rounded-2xl max-w-sm w-full p-5 text-stone-100 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/80 backdrop-blur-md">
+          <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-sm w-full p-5 text-temple-100 shadow-2xl">
             <h4 className="font-bold text-sm mb-1">Update Stock for {editingStockItem.itemName}</h4>
-            <p className="text-xs text-stone-400 mb-4">Unit: {editingStockItem.unit}</p>
+            <p className="text-xs text-temple-400 mb-4">Unit: {editingStockItem.unit}</p>
 
             <form onSubmit={handleUpdateStock} className="space-y-3">
               <input
@@ -264,20 +264,20 @@ export const InventoryDesk: React.FC = () => {
                 min="0"
                 value={newStockVal}
                 onChange={(e) => setNewStockVal(Number(e.target.value))}
-                className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-sm font-bold text-amber-400"
+                className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-sm font-bold text-saffron-400"
               />
 
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setEditingStockItem(null)}
-                  className="px-3 py-1.5 rounded-xl bg-stone-800 text-stone-300 text-xs"
+                  className="px-3 py-1.5 rounded-xl bg-temple-800 text-temple-300 text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs"
+                  className="px-4 py-1.5 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold text-xs"
                 >
                   Save Stock
                 </button>
@@ -289,14 +289,14 @@ export const InventoryDesk: React.FC = () => {
 
       {/* Add Item Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md">
-          <div className="bg-stone-900 border border-stone-700 rounded-2xl max-w-md w-full p-6 text-stone-100 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-800 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/80 backdrop-blur-md">
+          <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-md w-full p-6 text-temple-100 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-temple-800 mb-4">
               <h3 className="font-bold text-sm">Add New Store Consumable</h3>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-stone-400 hover:text-stone-100"
+                className="text-temple-400 hover:text-temple-100"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -304,24 +304,24 @@ export const InventoryDesk: React.FC = () => {
 
             <form onSubmit={handleAddItem} className="space-y-3 text-xs">
               <div>
-                <label className="block text-stone-300 font-semibold mb-1">Item Name *</label>
+                <label className="block text-temple-300 font-semibold mb-1">Item Name *</label>
                 <input
                   type="text"
                   required
                   value={itemName}
                   onChange={(e) => setItemName(e.target.value)}
                   placeholder="e.g. Pure Desi Cow Ghee"
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                  className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Category</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Category</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as any)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   >
                     <option>Ghee & Oils</option>
                     <option>Camphor & Dhoop</option>
@@ -333,11 +333,11 @@ export const InventoryDesk: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Unit</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Unit</label>
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as any)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   >
                     <option value="kg">kg</option>
                     <option value="liters">liters</option>
@@ -349,57 +349,57 @@ export const InventoryDesk: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Initial Stock</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Initial Stock</label>
                   <input
                     type="number"
                     value={currentStock}
                     onChange={(e) => setCurrentStock(Number(e.target.value))}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Min Reorder</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Min Reorder</label>
                   <input
                     type="number"
                     value={minReorderLevel}
                     onChange={(e) => setMinReorderLevel(Number(e.target.value))}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Cost/Unit (₹)</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Cost/Unit (₹)</label>
                   <input
                     type="number"
                     value={costPerUnit}
                     onChange={(e) => setCostPerUnit(Number(e.target.value))}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-stone-300 font-semibold mb-1">Supplier Name</label>
+                <label className="block text-temple-300 font-semibold mb-1">Supplier Name</label>
                 <input
                   type="text"
                   value={supplierName}
                   onChange={(e) => setSupplierName(e.target.value)}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                  className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-temple-800">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-stone-800 text-stone-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-temple-800 text-temple-300 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold"
+                  className="px-5 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold"
                 >
                   Add Item
                 </button>

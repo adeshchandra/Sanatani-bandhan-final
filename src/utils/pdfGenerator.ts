@@ -69,58 +69,62 @@ const getImageFormat = (base64String: string): 'JPEG' | 'PNG' | 'WEBP' => {
  */
 export const generateDevoteeCardPDF = async (
   member: DevoteeMember,
-  workspace: WorkspaceConfig
-): Promise<void> => {
+  workspace: WorkspaceConfig,
+  mode: 'save' | 'bloburl' = 'save'
+): Promise<string | void> => {
+  // CR80 Standard ID Card vertical (54 mm x 86 mm)
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: [85.6, 120], // Smart ID card dimensions
+    format: [54, 86], 
   });
-
 
   const docRef = generateCryptoDocRef('CARD');
   const qrData = generateSecureQRToken(member);
 
   const qrDataUrl = await QRCode.toDataURL(qrData, {
-    margin: 1,
+    margin: 0,
     width: 200,
-    color: { dark: '#92400E', light: '#FFFBEB' },
+    color: { dark: '#000000', light: '#FFFFFF' },
   });
 
+  // Base background
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 54, 86, 'F');
 
-  // Background gradient-style border
-  doc.setFillColor(254, 243, 199); // amber-100
-  doc.rect(0, 0, 85.6, 120, 'F');
-
-  // Header band
-  doc.setFillColor(180, 83, 9); // amber-700
-  doc.rect(0, 0, 85.6, 22, 'F');
+  // Top Accent Banner (Deep Amber/Saffron)
+  doc.setFillColor(217, 119, 6); 
+  doc.rect(0, 0, 54, 15, 'F');
   
-  if (workspace.logoUrl) {
-    try {
-      doc.addImage(workspace.logoUrl, 'PNG', 2, 2, 14, 14); // Very small logo top left
-    } catch(e) {}
-  }
+  // Secondary thin gold line
+  doc.setFillColor(251, 191, 36); 
+  doc.rect(0, 15, 54, 1.5, 'F');
 
+  // Header Text
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.text(workspace.name.toUpperCase(), 42.8, 8, { align: 'center' });
-
+  doc.setFontSize(8);
+  doc.text(workspace.name.toUpperCase().substring(0, 30), 27, 7, { align: 'center' });
+  
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.text(workspace.tagline || 'Sanatani Bandhan Verified Member', 42.8, 13, { align: 'center' });
-  doc.text(`SAMPRADAYA: ${workspace.sampradaya || 'Sanatan Dharma'}`, 42.8, 18, { align: 'center' });
+  doc.setFontSize(5);
+  doc.text('OFFICIAL IDENTITY CARD', 27, 11, { align: 'center' });
 
-  // Photo / Avatar box or custom photo
-  const photoY = 26;
+  // Photo Box
+  const photoY = 21;
+  const photoSize = 22;
+  const photoX = (54 - photoSize) / 2;
+  
   let drawn = false;
   if (member.avatarUrl) {
     try {
       const b64 = await fetchImageAsBase64(member.avatarUrl);
       if (b64) {
         const fmt = getImageFormat(b64);
-        doc.addImage(b64, fmt, 30.8, photoY, 24, 24);
+        doc.addImage(b64, fmt, photoX, photoY, photoSize, photoSize);
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.3);
+        doc.rect(photoX, photoY, photoSize, photoSize);
         drawn = true;
       }
     } catch (e) {
@@ -129,59 +133,87 @@ export const generateDevoteeCardPDF = async (
   }
   
   if (!drawn) {
-    doc.setFillColor(251, 191, 36);
-    doc.roundedRect(30.8, photoY, 24, 24, 2, 2, 'F');
-    doc.setTextColor(146, 64, 14);
+    // Elegant fallback avatar box (no emojis which break in jsPDF)
+    doc.setFillColor(243, 244, 246);
+    doc.rect(photoX, photoY, photoSize, photoSize, 'F');
+    doc.setDrawColor(209, 213, 219);
+    doc.setLineWidth(0.3);
+    doc.rect(photoX, photoY, photoSize, photoSize);
+    
+    doc.setTextColor(156, 163, 175);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text('🕉️', 42.8, photoY + 15, { align: 'center' });
+    const initial = member.fullName.charAt(0).toUpperCase();
+    doc.text(initial, 27, photoY + 14, { align: 'center' });
   }
 
-  // Member details
-  doc.setTextColor(31, 41, 55);
+  // Name & Identity
+  doc.setTextColor(17, 24, 39); 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text(member.fullName, 42.8, 55, { align: 'center' });
+  doc.setFontSize(10);
+  doc.text(member.fullName.substring(0, 25), 27, 49, { align: 'center' });
 
   if (member.spiritualName) {
     doc.setFont('helvetica', 'italic');
-    doc.setFontSize(8);
-    doc.setTextColor(180, 83, 9);
-    doc.text(`(${member.spiritualName})`, 42.8, 59, { align: 'center' });
+    doc.setFontSize(6);
+    doc.setTextColor(217, 119, 6);
+    doc.text(`"${member.spiritualName}"`, 27, 52.5, { align: 'center' });
   }
 
-  // Seva Tier badge
-  doc.setFillColor(217, 119, 6);
-  doc.roundedRect(26.8, 62, 32, 5.5, 1, 1, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.text(`SEVA: ${member.sevaTier.toUpperCase()} (${member.sevaIndex} pts)`, 42.8, 66, { align: 'center' });
-
-  // Gotra & ID Metadata
-  doc.setTextColor(75, 85, 99);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6);
-  doc.text(`Gotra: ${member.gotra || 'Kashyapa'}  •  Kul: ${member.varnaKul || 'Sanatan'}  •  Blood: ${member.bloodGroup || 'N/A'}`, 42.8, 70, { align: 'center' });
-  doc.text(`Member ID: ${member.id}  •  Emg: ${member.emergencyPhone || 'N/A'}`, 42.8, 74, { align: 'center' });
+  // Metadata Details Box
+  const startY = member.spiritualName ? 55 : 53;
   
-  doc.setFontSize(5.5);
-  const issueDate = member.idCardIssuedOn || member.joinedDate || new Date().toISOString().slice(0, 10);
-  const validThru = member.idCardValidThru || 'Lifetime';
-  doc.text(`Issued: ${issueDate}  •  Valid Thru: ${validThru}`, 42.8, 78, { align: 'center' });
+  doc.setFillColor(249, 250, 251); 
+  doc.rect(4, startY, 46, 13, 'F');
+  doc.setDrawColor(229, 231, 235);
+  doc.setLineWidth(0.2);
+  doc.rect(4, startY, 46, 13);
+  
+  doc.setTextColor(75, 85, 99);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(4.5);
+  
+  // Row 1
+  doc.text('ID NUMBER:', 6, startY + 4);
+  doc.setFont('helvetica', 'normal');
+  doc.text(member.id.substring(0, 15).toUpperCase(), 20, startY + 4);
 
-  // QR Code Stamp
-  doc.addImage(qrDataUrl, 'PNG', 28.8, 80, 28, 28);
+  // Row 2
+  doc.setFont('helvetica', 'bold');
+  doc.text('PHONE:', 6, startY + 7.5);
+  doc.setFont('helvetica', 'normal');
+  doc.text(member.phone || 'N/A', 20, startY + 7.5);
 
+  // Row 3
+  doc.setFont('helvetica', 'bold');
+  doc.text('BLOOD GRP:', 6, startY + 11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(member.bloodGroup || 'N/A', 20, startY + 11);
 
-  // Footer & Crypto Ref
-  doc.setFontSize(5);
+  // QR Code
+  doc.addImage(qrDataUrl, 'PNG', 4, 70, 13, 13);
+
+  // Footer / Auth
   doc.setTextColor(107, 114, 128);
-  doc.text('Scan for Gate Pass & Offline Identity Verification', 42.8, 111, { align: 'center' });
-  doc.text(docRef, 42.8, 114, { align: 'center' });
-  doc.text('Made with ❤️ by TrackIQ Academy • Universal Community Management', 42.8, 117, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(4);
+  doc.text('Scan for Verification', 10.5, 85, { align: 'center' });
+  
+  // Signature Line
+  doc.setDrawColor(156, 163, 175);
+  doc.setLineWidth(0.2);
+  doc.line(30, 80, 50, 80);
+  doc.text('Authorized Signature', 40, 83, { align: 'center' });
 
-  doc.save(`${member.fullName.replace(/\s+/g, '_')}_SmartCard.pdf`);
+  // Security strip at bottom
+  doc.setFillColor(217, 119, 6);
+  doc.rect(0, 85, 54, 1, 'F');
+
+  if (mode === 'bloburl') {
+    return doc.output('bloburl');
+  } else {
+    doc.save(`${member.fullName.replace(/\s+/g, '_')}_ID_Card.pdf`);
+  }
 };
 
 /**
@@ -326,10 +358,10 @@ export const generateBulkTaxReceiptsPDF = async (
 export const generateTaxReceiptPDF = async (
   tx: TreasuryTransaction,
   workspace: WorkspaceConfig,
-  returnType: 'save' | 'blob' = 'save',
+  returnType: 'save' | 'blob' | 'bloburl' = 'save',
   isCopy: boolean = false,
   devoteePan: string = ''
-): Promise<void | Blob> => {
+): Promise<void | Blob | string> => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -459,6 +491,8 @@ export const generateTaxReceiptPDF = async (
 
   if (returnType === 'blob') {
     return doc.output('blob');
+  } else if (returnType === 'bloburl') {
+    return doc.output('bloburl');
   }
   doc.save(`80G_Receipt_${tx.id}.pdf`);
 };

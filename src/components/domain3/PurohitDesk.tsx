@@ -296,7 +296,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
   const filteredSamagri = samagri.filter(s => (s.title || '').toLowerCase().includes(searchTerm.toLowerCase()));
   const filteredPurohits = purohits.filter(p => (p.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || (p.specialization || '').toLowerCase().includes(searchTerm.toLowerCase()));
 
-  if (loading) return <div className="flex justify-center p-20 text-orange-500"><Loader2 size={40} className="animate-spin" /></div>;
+  if (loading) return <div className="flex justify-center p-20 text-saffron-500"><Loader2 size={40} className="animate-spin" /></div>;
 
   return (
     <div className="space-y-6 fade-in pb-12 relative w-full flex flex-col min-h-[90vh]">
@@ -314,7 +314,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {confirmDialog && createPortal(
         <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-8 animate-in zoom-in-95 ring-1 ring-white/20 text-center border-t-4 border-orange-500">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-8 animate-in zoom-in-95 ring-1 ring-white/20 text-center border-t-4 border-saffron-500">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${confirmDialog.isDanger ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
               {confirmDialog.isDanger ? <AlertTriangle size={32}/> : <BellRing size={32}/>}
             </div>
@@ -333,7 +333,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
       <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 ring-1 ring-black/5">
         <div className="w-full lg:w-auto">
           <h2 className="text-2xl sm:text-3xl font-black text-gray-900 flex items-center gap-3 tracking-tight">
-            <Flame className="text-orange-500" size={28} /> {safeTranslate('purohit_desk_title', 'My Ritual Diary')}
+            <Flame className="text-saffron-500" size={28} /> {safeTranslate('purohit_desk_title', 'My Ritual Diary')}
           </h2>
           <p className="text-[10px] sm:text-xs text-gray-500 font-bold mt-1 uppercase tracking-widest flex items-center gap-1.5">
              <ScrollText size={14}/> {safeTranslate('purohit_desk_subtitle', 'Manage Rituals, Yajamans, and your Mandali.')}
@@ -346,7 +346,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
           </button>
 
           {isManagerOrAdmin && (
-            <button onClick={() => setModalType(activeTab)} className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-5 py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg transition-all hover:-translate-y-0.5 shrink-0">
+            <button onClick={() => setModalType(activeTab)} className="w-full sm:w-auto bg-gradient-to-r from-saffron-500 to-red-600 hover:from-saffron-600 hover:to-red-700 text-white px-5 py-3.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg transition-all hover:-translate-y-0.5 shrink-0">
               <Plus size={16}/> 
               {activeTab === 'ANUSHTHAN' ? safeTranslate('btn_schedule_puja', 'Schedule Puja') : 
                activeTab === 'YAJAMAN' ? safeTranslate('btn_add_yajaman', 'Add Yajaman') : 
@@ -358,9 +358,9 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
       </div>
 
       {showGuide && (
-        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 p-5 rounded-2xl shadow-inner relative animate-in slide-in-from-top-2">
-          <button onClick={() => setShowGuide(false)} className="absolute top-4 right-4 text-orange-400 hover:text-orange-700"><X size={18}/></button>
-          <h3 className="text-sm font-black text-orange-900 flex items-center gap-2 mb-2 uppercase tracking-widest"><Lightbulb size={18} className="text-orange-500"/> {safeTranslate('purohit_protocol', 'Scholar Protocol')}</h3>
+        <div className="bg-gradient-to-r from-saffron-50 to-saffron-50 border border-saffron-200 p-5 rounded-2xl shadow-inner relative animate-in slide-in-from-top-2">
+          <button onClick={() => setShowGuide(false)} className="absolute top-4 right-4 text-saffron-400 hover:text-saffron-700"><X size={18}/></button>
+          <h3 className="text-sm font-black text-saffron-900 flex items-center gap-2 mb-2 uppercase tracking-widest"><Lightbulb size={18} className="text-saffron-500"/> {safeTranslate('purohit_protocol', 'Scholar Protocol')}</h3>
           <p className="text-xs font-bold text-gray-700 leading-relaxed max-w-4xl">
             {safeTranslate('purohit_protocol_desc', 'Manage your spiritual practice efficiently. Anushthan: Track upcoming Pujas and generate personalized Sankalps. Yajaman: Maintain lineage records (Gotra, Nakshatra) for families. Samagri: Save item lists and dispatch them via WhatsApp. Mandali: Track your assistant priests.')}
           </p>
@@ -369,25 +369,25 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       <div className="flex flex-col lg:flex-row justify-between items-center gap-4 bg-gray-50 p-2 sm:p-3 rounded-2xl border border-gray-200 shadow-sm">
         <div className="flex w-full lg:w-auto bg-gray-200/80 p-1.5 rounded-xl overflow-x-auto scrollbar-hide">
-          <button onClick={() => setActiveTab('ANUSHTHAN')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'ANUSHTHAN' ? 'bg-white text-orange-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
+          <button onClick={() => setActiveTab('ANUSHTHAN')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'ANUSHTHAN' ? 'bg-white text-saffron-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
             <CalendarDays size={14}/> {safeTranslate('anushthan', 'Rituals')}
           </button>
-          <button onClick={() => setActiveTab('YAJAMAN')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'YAJAMAN' ? 'bg-white text-orange-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
+          <button onClick={() => setActiveTab('YAJAMAN')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'YAJAMAN' ? 'bg-white text-saffron-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
             <Users size={14}/> {safeTranslate('yajaman', 'Yajaman')}
           </button>
-          <button onClick={() => setActiveTab('SAMAGRI')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'SAMAGRI' ? 'bg-white text-orange-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
+          <button onClick={() => setActiveTab('SAMAGRI')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'SAMAGRI' ? 'bg-white text-saffron-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
             <BookOpen size={14}/> {safeTranslate('samagri', 'Samagri')}
           </button>
-          <button onClick={() => setActiveTab('MANDALI')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'MANDALI' ? 'bg-white text-orange-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
+          <button onClick={() => setActiveTab('MANDALI')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'MANDALI' ? 'bg-white text-saffron-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
             <UserCheck size={14}/> {safeTranslate('mandali', 'Mandali')}
           </button>
-          <button onClick={() => setActiveTab('APPLICATIONS')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'APPLICATIONS' ? 'bg-white text-orange-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
+          <button onClick={() => setActiveTab('APPLICATIONS')} className={`flex-1 sm:w-32 py-2.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 whitespace-nowrap px-3 ${activeTab === 'APPLICATIONS' ? 'bg-white text-saffron-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:bg-gray-200'}`}>
             <Award size={14}/> Apps {applications.filter(a => a.status === 'PENDING').length > 0 && <span className="bg-red-500 text-white rounded-full px-1.5 py-0.5 text-[8px]">{applications.filter(a => a.status === 'PENDING').length}</span>}
           </button>
         </div>
         <div className="relative w-full lg:w-80">
           <Search size={14} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input type="text" placeholder={safeTranslate('search_records', "Search records...")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-xl text-xs font-bold outline-none focus:border-orange-500 shadow-sm transition-colors" />
+          <input type="text" placeholder={safeTranslate('search_records', "Search records...")} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white border border-gray-200 rounded-xl text-xs font-bold outline-none focus:border-saffron-500 shadow-sm transition-colors" />
         </div>
       </div>
 
@@ -395,13 +395,13 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 animate-in fade-in">
           {filteredAnushthans.length > 0 ? filteredAnushthans.map((anu, idx) => (
             <div key={`${anu.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm hover:shadow-lg p-6 flex flex-col group transition-all duration-300 relative overflow-hidden ring-1 ring-black/5">
-               <div className={`absolute top-0 left-0 w-1.5 h-full ${anu.status === 'COMPLETED' ? 'bg-green-500' : anu.status === 'BOOKED' ? 'bg-blue-500' : 'bg-orange-500'}`}></div>
+               <div className={`absolute top-0 left-0 w-1.5 h-full ${anu.status === 'COMPLETED' ? 'bg-green-500' : anu.status === 'BOOKED' ? 'bg-blue-500' : 'bg-saffron-500'}`}></div>
                <div className="flex justify-between items-start mb-5 border-b border-gray-100 pb-4 pl-3">
                  <div>
-                   <h3 className="text-xl font-black text-gray-900 tracking-tight group-hover:text-orange-500 transition-colors">{anu.pujaName}</h3>
+                   <h3 className="text-xl font-black text-gray-900 tracking-tight group-hover:text-saffron-500 transition-colors">{anu.pujaName}</h3>
                    <p className="text-xs font-bold text-gray-500 mt-1 flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded w-fit border border-gray-100"><User size={12} className="text-gray-400"/> {anu.yajamanName}</p>
                  </div>
-                 <select value={anu.status} onChange={(e) => updateAnushthanStatus(anu.id, e.target.value)} className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border outline-none cursor-pointer shadow-sm appearance-none ${anu.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-200' : anu.status === 'BOOKED' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                 <select value={anu.status} onChange={(e) => updateAnushthanStatus(anu.id, e.target.value)} className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border outline-none cursor-pointer shadow-sm appearance-none ${anu.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-200' : anu.status === 'BOOKED' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-saffron-50 text-saffron-700 border-saffron-200'}`}>
                     <option value="INQUIRY">{safeTranslate('status_inquiry', 'Inquiry')}</option>
                     <option value="BOOKED">{safeTranslate('status_booked', 'Booked')}</option>
                     <option value="COMPLETED">{safeTranslate('status_completed', 'Completed')}</option>
@@ -424,7 +424,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                     <Banknote size={14}/> {curSymbol}{anu.dakshinaEst || '0'}
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => openSankalpGenerator(anu)} className="flex items-center gap-1.5 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 text-orange-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors border border-orange-200 shadow-sm">
+                    <button onClick={() => openSankalpGenerator(anu)} className="flex items-center gap-1.5 bg-gradient-to-r from-saffron-50 to-saffron-50 hover:from-saffron-100 hover:to-saffron-100 text-saffron-700 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors border border-saffron-200 shadow-sm">
                       <Sparkles size={12}/> {safeTranslate('sankalp', 'Sankalp')}
                     </button>
                     {isManagerOrAdmin && <button onClick={() => handleDelete(anu.id, 'purohit_anushthans', anu.pujaName)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-100"><Trash2 size={16}/></button>}
@@ -433,7 +433,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
             </div>
           )) : (
             <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
-              <CalendarDays size={48} className="mx-auto mb-4 opacity-20 text-orange-500"/>
+              <CalendarDays size={48} className="mx-auto mb-4 opacity-20 text-saffron-500"/>
               <p className="text-xl font-black text-gray-800 mb-1">{safeTranslate('no_rituals_scheduled', 'No Rituals Scheduled')}</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Click + Schedule Puja to add one.</p>
             </div>
@@ -450,7 +450,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest mb-3 inline-block border shadow-sm ${app.status === 'PENDING' ? 'bg-orange-50 text-orange-700 border-orange-200' : app.status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                        <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest mb-3 inline-block border shadow-sm ${app.status === 'PENDING' ? 'bg-saffron-50 text-saffron-700 border-saffron-200' : app.status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
                           {app.status}
                         </span>
                         <h4 className="text-lg font-black text-gray-900">{app.name}</h4>
@@ -509,11 +509,11 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
       {activeTab === 'YAJAMAN' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in">
           {filteredYajamans.length > 0 ? filteredYajamans.map((yjm, idx) => (
-            <div key={`${yjm.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg hover:border-orange-200 transition-all duration-300">
+            <div key={`${yjm.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg hover:border-saffron-200 transition-all duration-300">
                <div className="flex items-center gap-4 mb-5">
-                 <div className="w-14 h-14 bg-gradient-to-br from-orange-50 to-orange-100 text-orange-500 rounded-full flex items-center justify-center font-black text-xl border border-orange-200 shadow-inner shrink-0">{yjm.name.charAt(0)}</div>
+                 <div className="w-14 h-14 bg-gradient-to-br from-saffron-50 to-saffron-100 text-saffron-500 rounded-full flex items-center justify-center font-black text-xl border border-saffron-200 shadow-inner shrink-0">{yjm.name.charAt(0)}</div>
                  <div className="min-w-0">
-                   <h3 className="text-lg font-black text-gray-900 truncate group-hover:text-orange-500 transition-colors">{yjm.name}</h3>
+                   <h3 className="text-lg font-black text-gray-900 truncate group-hover:text-saffron-500 transition-colors">{yjm.name}</h3>
                    <p className="text-[10px] font-mono font-bold text-gray-500 tracking-widest">{yjm.phone}</p>
                  </div>
                </div>
@@ -532,7 +532,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
             </div>
           )) : (
             <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
-              <Users size={48} className="mx-auto mb-4 opacity-20 text-orange-500"/>
+              <Users size={48} className="mx-auto mb-4 opacity-20 text-saffron-500"/>
               <p className="text-xl font-black text-gray-800 mb-1">{safeTranslate('no_yajamans', 'No Yajamans Added')}</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Click + Add Yajaman to build your CRM.</p>
             </div>
@@ -544,7 +544,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in">
           {filteredSamagri.length > 0 ? filteredSamagri.map((sam, idx) => (
             <div key={`${sam.id}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 flex flex-col group hover:shadow-lg transition-all duration-300 relative overflow-hidden ring-1 ring-black/5">
-               <div className="absolute top-0 left-0 w-full h-1 bg-orange-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+               <div className="absolute top-0 left-0 w-full h-1 bg-saffron-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
                <h3 className="text-lg font-black text-gray-900 mb-3 truncate border-b border-gray-100 pb-3">{sam.title}</h3>
                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mb-5 flex-1 shadow-inner relative">
                  <div className="absolute top-2 right-2 opacity-5"><BookOpen size={64}/></div>
@@ -559,7 +559,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
             </div>
           )) : (
             <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
-              <BookOpen size={48} className="mx-auto mb-4 opacity-20 text-orange-500"/>
+              <BookOpen size={48} className="mx-auto mb-4 opacity-20 text-saffron-500"/>
               <p className="text-xl font-black text-gray-800 mb-1">{safeTranslate('no_samagri', 'No Samagri Templates')}</p>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Create reusable item lists for rituals.</p>
             </div>
@@ -570,17 +570,17 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
       {activeTab === 'MANDALI' && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in">
           {filteredPurohits.length > 0 ? filteredPurohits.map((purohit, idx) => (
-            <div key={`${purohit.purohitId}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-5 hover:shadow-lg hover:border-orange-200 transition-all duration-300 flex flex-col justify-between group">
+            <div key={`${purohit.purohitId}-${idx}`} className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-5 hover:shadow-lg hover:border-saffron-200 transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
-                  <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm ${purohit.availabilityStatus === 'AVAILABLE' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                  <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border shadow-sm ${purohit.availabilityStatus === 'AVAILABLE' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-saffron-50 text-saffron-700 border-saffron-200'}`}>
                     {purohit.availabilityStatus.replace('_', ' ')}
                   </span>
                   <span className="text-[10px] font-black uppercase tracking-widest text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100 shadow-sm">{purohit.experienceYears} Yrs Exp.</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-gray-900 group-hover:text-orange-500 transition-colors flex items-center gap-2">{purohit.name} {purohit.verifiedBadge && <span title="Verified Purohit"><ShieldCheck size={20} className="text-blue-500" /></span>}</h3>
-                  <p className="text-[10px] font-black text-orange-500 mt-2 bg-orange-50 inline-block px-2.5 py-1.5 rounded-lg border border-orange-100 uppercase tracking-widest">{purohit.specialization}</p>
+                  <h3 className="text-xl font-black text-gray-900 group-hover:text-saffron-500 transition-colors flex items-center gap-2">{purohit.name} {purohit.verifiedBadge && <span title="Verified Purohit"><ShieldCheck size={20} className="text-blue-500" /></span>}</h3>
+                  <p className="text-[10px] font-black text-saffron-500 mt-2 bg-saffron-50 inline-block px-2.5 py-1.5 rounded-lg border border-saffron-100 uppercase tracking-widest">{purohit.specialization}</p>
                 </div>
                 <div className="space-y-2 text-xs text-gray-700 font-bold bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-inner">
                   <p className="flex items-center gap-2"><Phone size={14} className="text-gray-400"/> {purohit.phone}</p>
@@ -598,7 +598,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
             </div>
           )) : (
             <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm">
-              <UserCheck size={48} className="mx-auto mb-4 opacity-20 text-orange-500"/>
+              <UserCheck size={48} className="mx-auto mb-4 opacity-20 text-saffron-500"/>
               <p className="text-xl font-black text-gray-800 mb-1">{safeTranslate('no_purohits', 'No Mandali Profiles Found')}</p>
             </div>
           )}
@@ -607,16 +607,16 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {sankalpPreview && createPortal(
         <div className="fixed inset-0 bg-gray-950/80 backdrop-blur-md z-[10000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 border-t-4 border-orange-500 ring-1 ring-white/20">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 border-t-4 border-saffron-500 ring-1 ring-white/20">
             <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="text-lg font-black text-gray-900 flex items-center gap-2"><Sparkles className="text-orange-500" size={20}/> {sankalpPreview.title}</h3>
+              <h3 className="text-lg font-black text-gray-900 flex items-center gap-2"><Sparkles className="text-saffron-500" size={20}/> {sankalpPreview.title}</h3>
               <button onClick={() => setSankalpPreview(null)} className="p-2.5 bg-white border border-gray-200 rounded-full hover:bg-gray-100 text-gray-500 transition-colors shadow-sm"><X size={16}/></button>
             </div>
 
             <div className="p-6">
-              <div className="bg-[#fff9ed] border border-amber-200 p-8 rounded-2xl mb-6 shadow-inner relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><Sparkles size={100} className="text-amber-600"/></div>
-                <p className="text-sm font-bold text-amber-950 leading-loose whitespace-pre-wrap font-devanagari relative z-10 text-center tracking-wide">{sankalpPreview.text}</p>
+              <div className="bg-[#fff9ed] border border-saffron-200 p-8 rounded-2xl mb-6 shadow-inner relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><Sparkles size={100} className="text-saffron-600"/></div>
+                <p className="text-sm font-bold text-saffron-950 leading-loose whitespace-pre-wrap font-devanagari relative z-10 text-center tracking-wide">{sankalpPreview.text}</p>
               </div>
 
               <button 
@@ -624,7 +624,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                   navigator.clipboard.writeText(sankalpPreview.text); 
                   showToast(safeTranslate('sankalp_copied', "Sankalp copied to clipboard!")); 
                 }} 
-                className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 flex justify-center items-center gap-2"
+                className="w-full bg-gradient-to-r from-saffron-500 to-red-600 hover:from-saffron-600 hover:to-red-700 text-white font-black py-4 rounded-xl text-xs uppercase tracking-widest shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5 flex justify-center items-center gap-2"
               >
                 <Copy size={16}/> {safeTranslate('copy_sankalp', 'Copy Sankalp Text')}
               </button>
@@ -635,13 +635,13 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
 
       {modalType && createPortal(
         <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[9999] flex items-center justify-center p-2 sm:p-4 pt-safe pb-safe">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border-t-4 border-orange-500 flex flex-col max-h-[95dvh] sm:max-h-[90vh] animate-in zoom-in-95 ring-1 ring-white/20">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border-t-4 border-saffron-500 flex flex-col max-h-[95dvh] sm:max-h-[90vh] animate-in zoom-in-95 ring-1 ring-white/20">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 shrink-0">
               <h3 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-                {modalType === 'ANUSHTHAN' ? <><CalendarDays className="text-orange-500" size={24}/> {safeTranslate('schedule_puja', 'Schedule Ritual')}</> : 
-                 modalType === 'YAJAMAN' ? <><Users className="text-orange-500" size={24}/> {safeTranslate('add_yajaman', 'Add Yajaman')}</> : 
-                 modalType === 'SAMAGRI' ? <><BookOpen className="text-orange-500" size={24}/> {safeTranslate('create_samagri', 'Create Template')}</> : 
-                 <><UserPlus className="text-orange-500" size={24}/> {safeTranslate('add_mandali', 'Add to Mandali')}</>}
+                {modalType === 'ANUSHTHAN' ? <><CalendarDays className="text-saffron-500" size={24}/> {safeTranslate('schedule_puja', 'Schedule Ritual')}</> : 
+                 modalType === 'YAJAMAN' ? <><Users className="text-saffron-500" size={24}/> {safeTranslate('add_yajaman', 'Add Yajaman')}</> : 
+                 modalType === 'SAMAGRI' ? <><BookOpen className="text-saffron-500" size={24}/> {safeTranslate('create_samagri', 'Create Template')}</> : 
+                 <><UserPlus className="text-saffron-500" size={24}/> {safeTranslate('add_mandali', 'Add to Mandali')}</>}
               </h3>
               <button onClick={() => setModalType(null)} className="p-2.5 rounded-full bg-white border border-gray-200 hover:bg-gray-100 text-gray-500 transition-colors shadow-sm"><X size={18}/></button>
             </div>
@@ -653,33 +653,33 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('full_name', 'Full Name')} *</label>
-                      <input type="text" required value={yajamanForm.name} onChange={e=>setYajamanForm({...yajamanForm, name: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" placeholder="e.g. Anand Sharma"/>
+                      <input type="text" required value={yajamanForm.name} onChange={e=>setYajamanForm({...yajamanForm, name: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" placeholder="e.g. Anand Sharma"/>
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('phone_number', 'Phone Number')} *</label>
-                      <input type="tel" required value={yajamanForm.phone} onChange={e=>setYajamanForm({...yajamanForm, phone: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" placeholder="+91..."/>
+                      <input type="tel" required value={yajamanForm.phone} onChange={e=>setYajamanForm({...yajamanForm, phone: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" placeholder="+91..."/>
                     </div>
                   </div>
 
-                  <div className="bg-orange-50/50 border border-orange-200 p-6 rounded-3xl space-y-4 shadow-inner relative overflow-hidden">
+                  <div className="bg-saffron-50/50 border border-saffron-200 p-6 rounded-3xl space-y-4 shadow-inner relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><ShieldCheck size={100}/></div>
-                    <p className="text-[10px] font-black text-orange-800 uppercase tracking-widest border-b border-orange-100 pb-3 flex items-center gap-1.5 relative z-10"><ShieldCheck size={14}/> {safeTranslate('vedic_lineage', 'Vedic Lineage')}</p>
+                    <p className="text-[10px] font-black text-saffron-800 uppercase tracking-widest border-b border-saffron-100 pb-3 flex items-center gap-1.5 relative z-10"><ShieldCheck size={14}/> {safeTranslate('vedic_lineage', 'Vedic Lineage')}</p>
                     <div className="grid grid-cols-2 gap-5 relative z-10">
                       <div>
                         <label className="block text-[10px] font-bold text-gray-600 mb-1.5">{safeTranslate('gotra', 'Gotra')}</label>
-                        <input type="text" value={yajamanForm.gotra} onChange={e=>setYajamanForm({...yajamanForm, gotra: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-orange-500 shadow-sm transition-all" placeholder="Kashyap"/>
+                        <input type="text" value={yajamanForm.gotra} onChange={e=>setYajamanForm({...yajamanForm, gotra: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-saffron-500 shadow-sm transition-all" placeholder="Kashyap"/>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-600 mb-1.5">{safeTranslate('nakshatra', 'Nakshatra')}</label>
-                        <input type="text" value={yajamanForm.nakshatra} onChange={e=>setYajamanForm({...yajamanForm, nakshatra: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-orange-500 shadow-sm transition-all" placeholder="Rohini"/>
+                        <input type="text" value={yajamanForm.nakshatra} onChange={e=>setYajamanForm({...yajamanForm, nakshatra: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-saffron-500 shadow-sm transition-all" placeholder="Rohini"/>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-600 mb-1.5">{safeTranslate('rashi', 'Rashi')}</label>
-                        <input type="text" value={yajamanForm.rashi} onChange={e=>setYajamanForm({...yajamanForm, rashi: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-orange-500 shadow-sm transition-all" placeholder="Vrishabha"/>
+                        <input type="text" value={yajamanForm.rashi} onChange={e=>setYajamanForm({...yajamanForm, rashi: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-saffron-500 shadow-sm transition-all" placeholder="Vrishabha"/>
                       </div>
                       <div>
                         <label className="block text-[10px] font-bold text-gray-600 mb-1.5">{safeTranslate('kuladevata', 'Kuladevata')}</label>
-                        <input type="text" value={yajamanForm.kuladevata} onChange={e=>setYajamanForm({...yajamanForm, kuladevata: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-orange-500 shadow-sm transition-all" placeholder="Sri Venkateshwara"/>
+                        <input type="text" value={yajamanForm.kuladevata} onChange={e=>setYajamanForm({...yajamanForm, kuladevata: e.target.value})} className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold outline-none focus:border-saffron-500 shadow-sm transition-all" placeholder="Sri Venkateshwara"/>
                       </div>
                     </div>
                   </div>
@@ -693,36 +693,36 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                 <form onSubmit={handleSaveAnushthan} className="space-y-6">
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('select_yajaman', 'Select Yajaman')} *</label>
-                    <select required value={anushthanForm.yajamanId} onChange={e=>setAnushthanForm({...anushthanForm, yajamanId: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm appearance-none">
+                    <select required value={anushthanForm.yajamanId} onChange={e=>setAnushthanForm({...anushthanForm, yajamanId: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none cursor-pointer focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm appearance-none">
                       <option value="" disabled>{safeTranslate('choose_client', 'Choose existing client...')}</option>
                       {yajamans.map((y, idx) => <option key={`${y.id}-${idx}`} value={y.id}>{y.name} ({y.phone})</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('ritual_name', 'Ritual / Puja Name')} *</label>
-                    <input type="text" required value={anushthanForm.pujaName} onChange={e=>setAnushthanForm({...anushthanForm, pujaName: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" placeholder="e.g. Satyanarayan Vrat"/>
+                    <input type="text" required value={anushthanForm.pujaName} onChange={e=>setAnushthanForm({...anushthanForm, pujaName: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" placeholder="e.g. Satyanarayan Vrat"/>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('date', 'Date')} *</label>
-                      <input type="date" required value={anushthanForm.date} onChange={e=>setAnushthanForm({...anushthanForm, date: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm cursor-pointer"/>
+                      <input type="date" required value={anushthanForm.date} onChange={e=>setAnushthanForm({...anushthanForm, date: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm cursor-pointer"/>
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('time', 'Time')}</label>
-                      <input type="time" value={anushthanForm.time} onChange={e=>setAnushthanForm({...anushthanForm, time: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm cursor-pointer"/>
+                      <input type="time" value={anushthanForm.time} onChange={e=>setAnushthanForm({...anushthanForm, time: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm cursor-pointer"/>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('tithi', 'Tithi')}</label>
-                      <input type="text" value={anushthanForm.tithi} onChange={e=>setAnushthanForm({...anushthanForm, tithi: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" placeholder="e.g. Purnima"/>
+                      <input type="text" value={anushthanForm.tithi} onChange={e=>setAnushthanForm({...anushthanForm, tithi: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" placeholder="e.g. Purnima"/>
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-green-700 uppercase tracking-widest mb-1.5">{safeTranslate('dakshina_est', 'Dakshina Est.')} ({curSymbol})</label>
                       <input type="number" value={anushthanForm.dakshinaEst} onChange={e=>setAnushthanForm({...anushthanForm, dakshinaEst: e.target.value})} className="w-full p-4 bg-green-50/50 border border-green-300 text-green-800 rounded-xl text-lg font-black outline-none focus:ring-4 focus:ring-green-100 transition-all shadow-sm" placeholder="0"/>
                     </div>
                   </div>
-                  <button type="submit" disabled={submitting} className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:-translate-y-0.5 mt-4 flex justify-center items-center gap-2 disabled:opacity-50">
+                  <button type="submit" disabled={submitting} className="w-full py-4 bg-gradient-to-r from-saffron-500 to-red-600 hover:from-saffron-600 hover:to-red-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:-translate-y-0.5 mt-4 flex justify-center items-center gap-2 disabled:opacity-50">
                     {submitting ? <Loader2 size={16} className="animate-spin"/> : <CheckCircle2 size={16}/>} {safeTranslate('btn_schedule_puja', 'Schedule Ritual')}
                   </button>
                 </form>
@@ -732,11 +732,11 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                 <form onSubmit={handleSaveSamagri} className="space-y-6">
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('template_title', 'Template Title')} *</label>
-                    <input type="text" required value={samagriForm.title} onChange={e=>setSamagriForm({...samagriForm, title: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" placeholder="e.g. Griha Pravesh Items"/>
+                    <input type="text" required value={samagriForm.title} onChange={e=>setSamagriForm({...samagriForm, title: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" placeholder="e.g. Griha Pravesh Items"/>
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('samagri_list', 'Samagri List (Items)')} *</label>
-                    <textarea required rows={8} value={samagriForm.itemsText} onChange={e=>setSamagriForm({...samagriForm, itemsText: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none resize-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm leading-relaxed" placeholder="1. Haldi 50g&#10;2. Kumkum 50g&#10;3. Ghee 1L..."/>
+                    <textarea required rows={8} value={samagriForm.itemsText} onChange={e=>setSamagriForm({...samagriForm, itemsText: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none resize-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm leading-relaxed" placeholder="1. Haldi 50g&#10;2. Kumkum 50g&#10;3. Ghee 1L..."/>
                   </div>
                   <button type="submit" disabled={submitting} className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:-translate-y-0.5 mt-4 flex justify-center items-center gap-2 disabled:opacity-50">
                     {submitting ? <Loader2 size={16} className="animate-spin"/> : <CheckCircle2 size={16}/>} {safeTranslate('btn_save_template', 'Save Template')}
@@ -748,25 +748,25 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
                 <form onSubmit={handleSavePurohit} className="space-y-6">
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('full_name', 'Full Name')} *</label>
-                    <input type="text" required value={purohitForm.name} onChange={e=>setPurohitForm({...purohitForm, name: e.target.value})} placeholder="e.g. Pandit Ramkishore Shastri" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" />
+                    <input type="text" required value={purohitForm.name} onChange={e=>setPurohitForm({...purohitForm, name: e.target.value})} placeholder="e.g. Pandit Ramkishore Shastri" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('phone_number', 'Phone Number')} *</label>
-                      <input type="tel" required value={purohitForm.phone} onChange={e=>setPurohitForm({...purohitForm, phone: e.target.value})} placeholder="017..." className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" />
+                      <input type="tel" required value={purohitForm.phone} onChange={e=>setPurohitForm({...purohitForm, phone: e.target.value})} placeholder="017..." className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('exp_years', 'Experience (Years)')}</label>
-                      <input type="number" value={purohitForm.experienceYears} onChange={e=>setPurohitForm({...purohitForm, experienceYears: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" />
+                      <input type="number" value={purohitForm.experienceYears} onChange={e=>setPurohitForm({...purohitForm, experienceYears: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" />
                     </div>
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('specialization', 'Specialization / Expertise')}</label>
-                    <input type="text" value={purohitForm.specialization} onChange={e=>setPurohitForm({...purohitForm, specialization: e.target.value})} placeholder="e.g. Vedic Rituals, Vivah Sanskar, Rudrabhishek" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" />
+                    <input type="text" value={purohitForm.specialization} onChange={e=>setPurohitForm({...purohitForm, specialization: e.target.value})} placeholder="e.g. Vedic Rituals, Vivah Sanskar, Rudrabhishek" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{safeTranslate('full_address', 'Full Address')}</label>
-                    <input type="text" value={purohitForm.address} onChange={e=>setPurohitForm({...purohitForm, address: e.target.value})} placeholder="Mandir Premises / Quarters" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 transition-all shadow-sm" />
+                    <input type="text" value={purohitForm.address} onChange={e=>setPurohitForm({...purohitForm, address: e.target.value})} placeholder="Mandir Premises / Quarters" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 transition-all shadow-sm" />
                   </div>
                   <button type="submit" disabled={submitting} className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:-translate-y-0.5 mt-4 flex justify-center items-center gap-2 disabled:opacity-50">
                     {submitting ? <Loader2 size={16} className="animate-spin"/> : <CheckCircle2 size={16}/>} {safeTranslate('btn_save_purohit', 'Save Mandali Profile')}
@@ -779,7 +779,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
       )}
 
       <div className="pt-12 pb-6 text-center opacity-70 border-t border-gray-200 mt-auto text-xs font-bold text-gray-500 shrink-0">
-        Made with <Heart size={12} className="text-red-500 fill-current inline"/> by <span className="font-black text-orange-500">TrackIQ Academy</span> • Purohit Desk
+        Made with <Heart size={12} className="text-red-500 fill-current inline"/> by <span className="font-black text-saffron-500">TrackIQ Academy</span> • Purohit Desk
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
   contextType,
   onClose
 }) => {
-  const { session } = useAuthWorkspace();
+  const { currentUser: session } = useAuthWorkspace();
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastTypingTime = useRef<number>(0);
 
-  const chatId = [session?.uid, recipientId].sort().join('_');
+  const chatId = [session?.id, recipientId].sort().join('_');
 
   useEffect(() => {
     if (!recipientId) return;
@@ -48,13 +48,13 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
 
 
   useEffect(() => {
-    if (!session?.uid || !recipientId) return;
+    if (!session?.id || !recipientId) return;
 
     // Ensure chat document exists
     setDoc(doc(db, 'chats', chatId), {
-      participants: [session.uid, recipientId],
+      participants: [session.id, recipientId],
       participantNames: {
-        [session.uid]: session.user?.name || 'User',
+        [session.id]: session.name || 'User',
         [recipientId]: recipientName
       },
       updatedAt: serverTimestamp()
@@ -92,42 +92,42 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value);
     
-    if (!session?.uid) return;
+    if (!session?.id) return;
 
     const now = Date.now();
     if (now - lastTypingTime.current > 2000) {
       lastTypingTime.current = now;
       setDoc(doc(db, 'chats', chatId), {
-        [`typing.${session.uid}`]: true
+        [`typing.${session.id}`]: true
       }, { merge: true });
     }
 
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(() => {
       setDoc(doc(db, 'chats', chatId), {
-        [`typing.${session.uid}`]: false
+        [`typing.${session.id}`]: false
       }, { merge: true });
     }, 2500);
   };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !session?.uid) return;
+    if (!newMessage.trim() || !session?.id) return;
 
     const msg = newMessage.trim();
     setNewMessage('');
 
     await addDoc(collection(db, 'chats', chatId, 'messages'), {
       text: msg,
-      senderId: session.uid,
-      senderName: session.user?.name || 'User',
+      senderId: session.id,
+      senderName: session.name || 'User',
       timestamp: serverTimestamp()
     });
     
     setDoc(doc(db, 'chats', chatId), {
       updatedAt: serverTimestamp(),
       lastMessage: msg,
-      [`typing.${session.uid}`]: false
+      [`typing.${session.id}`]: false
     }, { merge: true });
     
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -148,19 +148,19 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-stone-50 border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+    <div className="flex flex-col h-full bg-temple-50 border border-temple-200 rounded-2xl overflow-hidden shadow-sm">
       {/* Chat Header */}
-      <div className="bg-white border-b border-stone-200 p-4 flex items-center justify-between shadow-sm z-10">
+      <div className="bg-white border-b border-temple-200 p-4 flex items-center justify-between shadow-sm z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 border border-amber-200 flex items-center justify-center text-amber-700 shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-saffron-100 to-saffron-100 border border-saffron-200 flex items-center justify-center text-saffron-700 shadow-sm">
             <User size={18} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-black text-stone-800 text-sm">{recipientName}</h3>
+              <h3 className="font-black text-temple-800 text-sm">{recipientName}</h3>
               <div className="flex items-center gap-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${isRecipientOnline ? 'bg-emerald-500 animate-pulse' : 'bg-stone-300'}`}></span>
-                <span className={`text-[9px] font-bold uppercase tracking-widest ${isRecipientOnline ? 'text-emerald-600' : 'text-stone-400'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${isRecipientOnline ? 'bg-emerald-500 animate-pulse' : 'bg-temple-300'}`}></span>
+                <span className={`text-[9px] font-bold uppercase tracking-widest ${isRecipientOnline ? 'text-emerald-600' : 'text-temple-400'}`}>
                   {isRecipientOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
@@ -176,7 +176,7 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
             <span className="text-[10px] font-black uppercase tracking-widest hidden sm:block">WhatsApp</span>
           </button>
           {onClose && (
-            <button onClick={onClose} className="p-2 bg-stone-100 text-stone-600 hover:bg-stone-200 rounded-xl transition-colors">
+            <button onClick={onClose} className="p-2 bg-temple-100 text-temple-600 hover:bg-temple-200 rounded-xl transition-colors">
               <X size={16} />
             </button>
           )}
@@ -184,12 +184,12 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-temple-50 custom-scrollbar">
         <div className="text-center mb-6">
-          <span className="bg-stone-200/50 text-stone-500 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+          <span className="bg-temple-200/50 text-temple-500 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
             Chat Started with {recipientName}
           </span>
-          <p className="text-xs text-stone-400 font-medium mt-3 max-w-xs mx-auto">
+          <p className="text-xs text-temple-400 font-medium mt-3 max-w-xs mx-auto">
             {contextType === 'PUROHIT' && 'Discuss muhurats, dakshina, and ritual preparations directly.'}
             {contextType === 'VIVAH' && 'Respectful communication is monitored for community safety.'}
             {contextType === 'SOCIAL' && 'Connect and network securely within the community.'}
@@ -198,26 +198,26 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
 
         {loading ? (
           <div className="flex justify-center items-center py-8">
-            <Loader2 className="w-5 h-5 text-stone-400 animate-spin" />
+            <Loader2 className="w-5 h-5 text-temple-400 animate-spin" />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-10 opacity-50">
-            <MessageSquare size={32} className="text-stone-300 mb-3" />
-            <p className="text-sm font-bold text-stone-500">No messages yet</p>
-            <p className="text-xs text-stone-400 mt-1">Send a message to start the conversation</p>
+            <MessageSquare size={32} className="text-temple-300 mb-3" />
+            <p className="text-sm font-bold text-temple-500">No messages yet</p>
+            <p className="text-xs text-temple-400 mt-1">Send a message to start the conversation</p>
           </div>
         ) : (
           messages.map((msg) => {
-            const isMe = msg.senderId === session?.uid;
+            const isMe = msg.senderId === session?.id;
             return (
               <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] rounded-2xl p-3 ${
                   isMe 
-                    ? 'bg-amber-500 text-white rounded-tr-sm shadow-sm' 
-                    : 'bg-white text-stone-800 border border-stone-200 rounded-tl-sm shadow-sm'
+                    ? 'bg-saffron-500 text-white rounded-tr-sm shadow-sm' 
+                    : 'bg-white text-temple-800 border border-temple-200 rounded-tl-sm shadow-sm'
                 }`}>
                   <p className="text-sm">{msg.text}</p>
-                  <p className={`text-[9px] mt-1.5 font-bold ${isMe ? 'text-amber-200' : 'text-stone-400'}`}>
+                  <p className={`text-[9px] mt-1.5 font-bold ${isMe ? 'text-saffron-200' : 'text-temple-400'}`}>
                     {msg.timestamp?.toDate ? msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                   </p>
                 </div>
@@ -227,10 +227,10 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
         )}
                 {isRecipientTyping && (
           <div className="flex justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white text-stone-500 border border-stone-200 rounded-2xl rounded-tl-sm shadow-sm p-4 py-3 flex items-center gap-1.5 w-fit">
-              <span className="w-1.5 h-1.5 bg-stone-400 rounded-full animate-bounce"></span>
-              <span className="w-1.5 h-1.5 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></span>
-              <span className="w-1.5 h-1.5 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></span>
+            <div className="bg-white text-temple-500 border border-temple-200 rounded-2xl rounded-tl-sm shadow-sm p-4 py-3 flex items-center gap-1.5 w-fit">
+              <span className="w-1.5 h-1.5 bg-temple-400 rounded-full animate-bounce"></span>
+              <span className="w-1.5 h-1.5 bg-temple-400 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></span>
+              <span className="w-1.5 h-1.5 bg-temple-400 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></span>
             </div>
           </div>
         )}
@@ -238,24 +238,24 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
       </div>
 
       {/* Chat Input */}
-      <div className="bg-white border-t border-stone-200 p-3">
+      <div className="bg-white border-t border-temple-200 p-3">
         <form onSubmit={handleSend} className="flex items-center gap-2 relative">
           <input
             type="text"
             value={newMessage}
             onChange={handleInputChange}
             placeholder="Type your message..."
-            className="flex-1 bg-stone-50 border border-stone-200 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all shadow-inner"
+            className="flex-1 bg-temple-50 border border-temple-200 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:border-transparent transition-all shadow-inner"
           />
           <button 
             type="submit" 
             disabled={!newMessage.trim()}
-            className="absolute right-1.5 top-1.5 bottom-1.5 aspect-square bg-amber-500 hover:bg-amber-600 disabled:bg-stone-300 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm"
+            className="absolute right-1.5 top-1.5 bottom-1.5 aspect-square bg-saffron-500 hover:bg-saffron-600 disabled:bg-temple-300 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm"
           >
             <Send size={16} className={newMessage.trim() ? 'ml-0.5' : ''} />
           </button>
         </form>
-        <p className="text-center mt-2 text-[9px] font-bold text-stone-400 flex items-center justify-center gap-1">
+        <p className="text-center mt-2 text-[9px] font-bold text-temple-400 flex items-center justify-center gap-1">
           <ShieldCheck size={10} /> Protected by Sanatani Security
         </p>
       </div>

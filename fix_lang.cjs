@@ -1,14 +1,34 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/context/LanguageContext.tsx', 'utf8');
+let content = fs.readFileSync('src/context/LanguageContext.tsx', 'utf8');
 
-const newTranslations = {
-  live_scan: { en: 'Live Scan', hi: 'लाइव स्कैन', bn: 'লাইভ স্ক্যান' },
-  upload_qr: { en: 'Upload Image', hi: 'छवि अपलोड करें', bn: 'ছবি আপলোড করুন' },
-  qr_instruction: { en: 'Use your Smart Pass to auto-login', hi: 'ऑटो-लॉगिन के लिए अपने स्मार्ट पास का उपयोग करें', bn: 'অটো-লগইনের জন্য আপনার স্মার্ট পাস ব্যবহার করুন' },
-  qr_autologin_success: { en: 'QR Auto-Login Successful!', hi: 'क्यूआर ऑटो-लॉगिन सफल!', bn: 'কিউআর অটো-লগইন সফল!' }
-};
+const oldCode = `  const getTaxonomy = (workspaceType: WorkspaceType): TaxonomyMatrix => {
+    const matrix =
+      TAXONOMY_MAP[language]?.[workspaceType] ||
+      TAXONOMY_MAP.en[workspaceType] ||
+      TAXONOMY_MAP.en.Mandir;
+    return {
+      ...matrix,
+      memberNoun: matrix.memberTerm,
+      kartaNoun: matrix.memberTerm,
+      offeringNoun: matrix.fundsTerm,
+    };
+  };`;
 
-// We need to inject these into the `translations` object in LanguageContext.tsx
-// It has English, Hindi, Bengali objects.
+const newCode = `  const getTaxonomy = (workspaceType: WorkspaceType): TaxonomyMatrix => {
+    const key = (workspaceType || 'MANDIR').toUpperCase() as WorkspaceType;
+    let matrix = TAXONOMY_MAP[language]?.[key] || TAXONOMY_MAP.en[key] || TAXONOMY_MAP.en.MANDIR as any;
+    
+    if (typeof matrix === 'string' || !matrix) {
+      matrix = TAXONOMY_MAP.en.MANDIR as any;
+    }
 
-// Since LanguageContext might be structured in a specific way, I'll just check it first.
+    return {
+      ...matrix,
+      memberNoun: matrix?.memberTerm || 'Bhaktas',
+      kartaNoun: matrix?.memberTerm || 'Bhaktas',
+      offeringNoun: matrix?.fundsTerm || 'Chanda',
+    };
+  };`;
+
+content = content.replace(oldCode, newCode);
+fs.writeFileSync('src/context/LanguageContext.tsx', content);

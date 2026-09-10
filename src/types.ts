@@ -1,11 +1,24 @@
-export type WorkspaceType = 
-  | 'MANDIR' | 'GOSHALA' | 'SANGHA' | 'ASHRAM' | 'GURUKUL'
-  | 'SATSANG' | 'YOGA_CENTER' | 'TRUST' | 'VIDYALAYA' | 'PUROHIT_SABHA'
-  | 'TIRTH' | 'SAMAJ' | 'ANNADAN_TRUST' | 'KASHI_KSHETRA' | 'MAHOTSAV_SAMITI';
+export type WorkspaceType =
+  | 'Mandir' | 'Goshala' | 'Sangha' | 'Ashram' | 'Gurukul'
+  | 'Satsang' | 'Yoga' | 'Trust' | 'Vidyalaya' | 'Purohit'
+  | 'Tirth' | 'Samaj' | 'AkshayaPatra' | 'KashiKshetra'
+  | 'DharmadaTrust' | 'MahotsavSamiti' | 'PurohitSabha';
 
 export type UserRole = 
   | 'SUPER_ADMIN' | 'TRUSTEE' | 'ACCOUNTANT' | 'PUROHIT' 
   | 'VOLUNTEER' | 'DEVOTEE' | 'MANAGER' | 'ANONYMOUS';
+
+export const ROLE_MIGRATION_MAP: Record<string, UserRole> = {
+  'admin': 'SUPER_ADMIN', 'ADMIN': 'SUPER_ADMIN', 'superadmin': 'SUPER_ADMIN',
+  'SUPER_ADMIN': 'SUPER_ADMIN', 'head_admin': 'SUPER_ADMIN', 'master_admin': 'SUPER_ADMIN',
+  'trustee': 'TRUSTEE', 'TRUSTEE': 'TRUSTEE',
+  'accountant': 'ACCOUNTANT', 'ACCOUNTANT': 'ACCOUNTANT',
+  'purohit': 'PUROHIT', 'PUROHIT': 'PUROHIT',
+  'volunteer': 'VOLUNTEER', 'VOLUNTEER': 'VOLUNTEER',
+  'devotee': 'DEVOTEE', 'DEVOTEE': 'DEVOTEE',
+  'manager': 'MANAGER', 'MANAGER': 'MANAGER',
+  'anonymous': 'ANONYMOUS', 'ANONYMOUS': 'ANONYMOUS',
+};
 
 export type AppLanguage = 'en' | 'bn' | 'hi' | 'sa';
 
@@ -435,4 +448,16 @@ export interface TelemetryEventLog {
   timestamp: string;
   event: string;
   payload: Record<string, any>;
+}
+
+
+export interface ConsentRecord {
+  id: string;
+  devoteeId: string;
+  workspaceId: string;
+  purpose: string[];
+  grantedAt: string;
+  expiresAt?: string;
+  withdrawnAt?: string;
+  version: string;
 }

@@ -263,16 +263,16 @@ export const CommunityPollsTab: React.FC = () => {
       <div className="mt-4 mb-2 w-full flex flex-col gap-1.5">
         <div className="flex justify-between items-center">
           <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-            <Timer size={12} className={isUrgent ? 'text-orange-500 animate-pulse' : 'text-blue-500'} />
+            <Timer size={12} className={isUrgent ? 'text-saffron-500 animate-pulse' : 'text-blue-500'} />
             Poll Deadline
           </span>
-          <span className={`text-[10px] font-black tracking-wide ${isUrgent ? 'text-orange-500' : 'text-gray-700'}`}>
+          <span className={`text-[10px] font-black tracking-wide ${isUrgent ? 'text-saffron-500' : 'text-gray-700'}`}>
             {timeText}
           </span>
         </div>
         <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden shadow-inner border border-gray-200/50">
           <div 
-            className={`h-full rounded-full transition-all duration-1000 ${isUrgent ? 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]' : 'bg-blue-500'}`}
+            className={`h-full rounded-full transition-all duration-1000 ${isUrgent ? 'bg-saffron-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]' : 'bg-blue-500'}`}
             style={{ width: `${percentLeft}%` }}
           ></div>
         </div>
@@ -323,7 +323,7 @@ export const CommunityPollsTab: React.FC = () => {
   }, [polls, activePolls, concludedPolls, devotees, isManagerOrAdmin]);
 
 
-  if (loading) return <div className="flex justify-center p-20 text-orange-500"><Loader2 size={40} className="animate-spin" /></div>;
+  if (loading) return <div className="flex justify-center p-20 text-saffron-500"><Loader2 size={40} className="animate-spin" /></div>;
 
   return (
     <div className="bg-white p-4 sm:p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col h-full w-full relative space-y-6 sm:space-y-8 animate-in fade-in ring-1 ring-black/5 min-h-[90vh]">
@@ -337,11 +337,11 @@ export const CommunityPollsTab: React.FC = () => {
       {/* GLOBAL CUSTOM TOAST ENGINE */}
       {toast && createPortal(
         <div className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-[10000] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-in slide-in-from-top-4 ${toast.type === 'error' ? 'bg-red-900' : 'bg-gray-900'} text-white`}>
-           <div className={`p-2 rounded-full shrink-0 ${toast.type === 'offline' ? 'bg-orange-500/20 text-orange-500' : toast.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
+           <div className={`p-2 rounded-full shrink-0 ${toast.type === 'offline' ? 'bg-saffron-500/20 text-saffron-500' : toast.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`}>
              {toast.type === 'offline' ? <WifiOff size={20}/> : toast.type === 'error' ? <AlertTriangle size={20}/> : <CheckCircle2 size={20}/>}
            </div>
            <div>
-             <p className={`text-xs font-black uppercase tracking-widest mb-0.5 ${toast.type === 'offline' ? 'text-orange-400' : toast.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+             <p className={`text-xs font-black uppercase tracking-widest mb-0.5 ${toast.type === 'offline' ? 'text-saffron-400' : toast.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
                {toast.type === 'offline' ? 'Offline Cache' : toast.type === 'error' ? 'Error' : 'Success'}
              </p>
              <p className="text-sm font-bold">{toast.message}</p>
@@ -353,7 +353,7 @@ export const CommunityPollsTab: React.FC = () => {
       {/* CONFIRMATION DIALOG PORTAL */}
       {confirmDialog && createPortal(
         <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-8 animate-in zoom-in-95 ring-1 ring-white/20 text-center border-t-4 border-orange-500">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-8 animate-in zoom-in-95 ring-1 ring-white/20 text-center border-t-4 border-saffron-500">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner ${confirmDialog.isDanger ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
               {confirmDialog.isDanger ? <AlertTriangle size={32}/> : <CheckCircle2 size={32}/>}
             </div>
@@ -374,7 +374,7 @@ export const CommunityPollsTab: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-gray-100 pb-6">
         <div>
           <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 tracking-tight">
-            <BarChart3 className="text-orange-500" size={26} /> {t('nav_polls') || 'Community Voting'}
+            <BarChart3 className="text-saffron-500" size={26} /> {t('nav_polls') || 'Community Voting'}
           </h2>
           <p className="text-xs text-gray-500 font-bold mt-1 uppercase tracking-widest">
             Cryptographic decision making & consensus tracking.
@@ -394,7 +394,7 @@ export const CommunityPollsTab: React.FC = () => {
           <div className="flex w-full sm:w-auto bg-gray-100 p-1.5 rounded-2xl shadow-inner border border-gray-200">
             <button 
               onClick={() => setActiveTab('ACTIVE')} 
-              className={`flex-1 sm:w-auto px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === 'ACTIVE' ? 'bg-white text-orange-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-800'}`}
+              className={`flex-1 sm:w-auto px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeTab === 'ACTIVE' ? 'bg-white text-saffron-500 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-800'}`}
             >
               <PieChart size={14}/> Active ({activePolls.length})
             </button>
@@ -493,7 +493,7 @@ export const CommunityPollsTab: React.FC = () => {
               }
 
               return (
-                <div key={poll.id} className={`bg-white rounded-3xl p-6 sm:p-8 shadow-sm border transition-all duration-300 ring-1 ring-black/5 flex flex-col justify-between group ${poll.status === 'ACTIVE' ? 'border-orange-200 hover:shadow-md hover:border-orange-300' : 'border-gray-200 opacity-90'}`}>
+                <div key={poll.id} className={`bg-white rounded-3xl p-6 sm:p-8 shadow-sm border transition-all duration-300 ring-1 ring-black/5 flex flex-col justify-between group ${poll.status === 'ACTIVE' ? 'border-saffron-200 hover:shadow-md hover:border-saffron-300' : 'border-gray-200 opacity-90'}`}>
 
                    <div>
                      <div className="flex justify-between items-start mb-4">
@@ -503,7 +503,7 @@ export const CommunityPollsTab: React.FC = () => {
                            {poll.targetAudience === 'MANAGERS' ? 'Committee Only' : 'Public Poll'}
                          </span>
                          {poll.status === 'ACTIVE' ? (
-                           <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border bg-orange-50 text-orange-600 border-orange-200 flex items-center gap-1.5 shadow-sm">
+                           <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border bg-saffron-50 text-saffron-600 border-saffron-200 flex items-center gap-1.5 shadow-sm">
                              <Timer size={12}/> {getCountdown(poll.expiresAt)}
                            </span>
                          ) : (
@@ -535,10 +535,10 @@ export const CommunityPollsTab: React.FC = () => {
                             <button 
                               key={opt.id} 
                               onClick={() => handleVote(poll.id, opt.id)}
-                              className="w-full text-left p-4 rounded-xl border-2 border-gray-100 hover:border-orange-500 hover:bg-orange-50/50 hover:shadow-sm transition-all flex justify-between items-center group/btn"
+                              className="w-full text-left p-4 rounded-xl border-2 border-gray-100 hover:border-saffron-500 hover:bg-saffron-50/50 hover:shadow-sm transition-all flex justify-between items-center group/btn"
                             >
-                              <span className="text-sm font-black text-gray-700 group-hover/btn:text-orange-500 transition-colors">{opt.text}</span>
-                              <div className="w-5 h-5 rounded-full border-2 border-gray-300 group-hover/btn:border-orange-500 transition-colors"></div>
+                              <span className="text-sm font-black text-gray-700 group-hover/btn:text-saffron-500 transition-colors">{opt.text}</span>
+                              <div className="w-5 h-5 rounded-full border-2 border-gray-300 group-hover/btn:border-saffron-500 transition-colors"></div>
                             </button>
                           );
                        }
@@ -546,24 +546,24 @@ export const CommunityPollsTab: React.FC = () => {
                        return (
                          <div key={opt.id} className="relative w-full bg-gray-50 border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                            <div 
-                             className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out opacity-80 ${isWinner ? 'bg-green-200 border-r-4 border-green-500' : isMyChoice ? 'bg-orange-200 border-r-4 border-orange-500' : 'bg-gray-200 border-r-4 border-gray-300'}`}
+                             className={`absolute top-0 left-0 h-full transition-all duration-1000 ease-out opacity-80 ${isWinner ? 'bg-green-200 border-r-4 border-green-500' : isMyChoice ? 'bg-saffron-200 border-r-4 border-saffron-500' : 'bg-gray-200 border-r-4 border-gray-300'}`}
                              style={{ width: `${percentage}%` }}
                            ></div>
 
                            <div className="relative z-10 p-4 flex justify-between items-center">
                              <div className="flex items-center gap-2">
-                               <span className={`text-sm font-black ${isWinner ? 'text-green-900' : isMyChoice ? 'text-orange-900' : 'text-gray-800'}`}>
+                               <span className={`text-sm font-black ${isWinner ? 'text-green-900' : isMyChoice ? 'text-saffron-900' : 'text-gray-800'}`}>
                                  {opt.text}
                                </span>
                                {isMyChoice && (
-                                 <span className="bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-sm">Your Vote</span>
+                                 <span className="bg-saffron-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-sm">Your Vote</span>
                                )}
                                {isWinner && (
                                  <span className="bg-green-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-sm flex items-center gap-1"><Award size={12}/> Winner</span>
                                )}
                              </div>
                              <div className="text-right">
-                               <span className={`text-sm font-black ${isWinner ? 'text-green-800' : isMyChoice ? 'text-orange-800' : 'text-gray-700'}`}>{percentage}%</span>
+                               <span className={`text-sm font-black ${isWinner ? 'text-green-800' : isMyChoice ? 'text-saffron-800' : 'text-gray-700'}`}>{percentage}%</span>
                                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{opt.votes} Votes</p>
                              </div>
                            </div>
@@ -603,7 +603,7 @@ export const CommunityPollsTab: React.FC = () => {
 
                            {poll.status === 'ACTIVE' && (
                              <>
-                               <button onClick={() => handleSendReminder(poll)} className="flex-1 sm:flex-none bg-orange-50 hover:bg-orange-600 hover:text-white text-orange-600 border border-orange-200 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex justify-center items-center gap-1.5 shadow-sm hover:shadow-md" title="Remind Unvoted Members">
+                               <button onClick={() => handleSendReminder(poll)} className="flex-1 sm:flex-none bg-saffron-50 hover:bg-saffron-600 hover:text-white text-saffron-600 border border-saffron-200 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex justify-center items-center gap-1.5 shadow-sm hover:shadow-md" title="Remind Unvoted Members">
                                  <BellRing size={14}/> Remind
                                </button>
                                <button onClick={() => { setConcludeData({ id: poll.id, title: poll.title, note: '' }); setShowConcludeModal(true); }} className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-800 hover:text-white text-gray-600 border border-gray-200 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex justify-center items-center gap-1.5 shadow-sm hover:shadow-md">
@@ -624,7 +624,7 @@ export const CommunityPollsTab: React.FC = () => {
           </div>
         ) : (
           <div className="text-center p-16 text-gray-400 font-bold bg-white rounded-3xl border border-dashed border-gray-300 shadow-sm flex flex-col items-center justify-center h-64">
-            <BarChart2 size={48} className="mx-auto mb-4 opacity-30 text-orange-500" />
+            <BarChart2 size={48} className="mx-auto mb-4 opacity-30 text-saffron-500" />
             <p className="text-lg sm:text-xl font-black text-gray-900 mb-2">No {activeTab.toLowerCase()} polls available.</p>
             <p className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500">
               {isManagerOrAdmin ? "Click 'Launch Poll' to start a community vote." : "Wait for the committee to announce a new vote."}
@@ -636,17 +636,17 @@ export const CommunityPollsTab: React.FC = () => {
       {/* FOOTER CREDIT */}
       <div className="pt-8 pb-4 flex flex-col items-center justify-center text-center opacity-70 border-t border-gray-200 mt-auto shrink-0">
          <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500 mb-1">
-           Made with <Heart size={12} className="text-red-500 fill-current"/> by <span className="font-black text-orange-500">TrackIQ Academy</span>
+           Made with <Heart size={12} className="text-red-500 fill-current"/> by <span className="font-black text-saffron-500">TrackIQ Academy</span>
          </div>
          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">© {new Date().getFullYear()} Sanatani Bandhan. Enterprise Edition.</p>
       </div>
 
       {showCreateModal && createPortal(
         <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[10000] flex items-center justify-center p-4 pt-safe pb-safe">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 fade-in border-t-4 border-orange-500 ring-1 ring-white/20 max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 fade-in border-t-4 border-saffron-500 ring-1 ring-white/20 max-h-[90vh] flex flex-col">
              <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4 shrink-0">
                <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                 <BarChart2 className="text-orange-500" size={24}/> Launch New Poll
+                 <BarChart2 className="text-saffron-500" size={24}/> Launch New Poll
                </h3>
                <button onClick={() => setShowCreateModal(false)} className="bg-gray-100 hover:bg-gray-200 p-2.5 rounded-full text-gray-500 transition-colors shadow-sm"><X size={16}/></button>
              </div>
@@ -657,7 +657,7 @@ export const CommunityPollsTab: React.FC = () => {
                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Poll Question / Title *</label>
                    <input 
                      type="text" required value={pollForm.title} onChange={e=>setPollForm({...pollForm, title: e.target.value})} 
-                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm" 
+                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm" 
                      placeholder="e.g. What color should we paint the new Mandir gates?" 
                    />
                  </div>
@@ -665,25 +665,25 @@ export const CommunityPollsTab: React.FC = () => {
                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Description / Context (Optional)</label>
                    <textarea 
                      rows={2} value={pollForm.description} onChange={e=>setPollForm({...pollForm, description: e.target.value})} 
-                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-50 outline-none transition-all resize-none shadow-sm" 
+                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-saffron-500 focus:ring-4 focus:ring-saffron-50 outline-none transition-all resize-none shadow-sm" 
                      placeholder="Provide extra details to help voters decide..."
                    ></textarea>
                  </div>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <div>
                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><CalendarDays size={12}/> End Date *</label>
-                     <input type="date" required value={pollForm.endDate} onChange={e=>setPollForm({...pollForm, endDate: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none transition-all shadow-sm text-gray-700 cursor-pointer" />
+                     <input type="date" required value={pollForm.endDate} onChange={e=>setPollForm({...pollForm, endDate: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-saffron-500 outline-none transition-all shadow-sm text-gray-700 cursor-pointer" />
                    </div>
                    <div>
                      <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Clock size={12}/> Time (Optional)</label>
-                     <input type="time" value={pollForm.endTime} onChange={e=>setPollForm({...pollForm, endTime: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none transition-all shadow-sm text-gray-700 cursor-pointer" />
+                     <input type="time" value={pollForm.endTime} onChange={e=>setPollForm({...pollForm, endTime: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-saffron-500 outline-none transition-all shadow-sm text-gray-700 cursor-pointer" />
                    </div>
                  </div>
                  <div>
                    <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><ShieldCheck size={12}/> Voting Audience</label>
                    <select 
                      value={pollForm.targetAudience} onChange={e=>setPollForm({...pollForm, targetAudience: e.target.value})} 
-                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none transition-all appearance-none cursor-pointer shadow-sm"
+                     className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-saffron-500 outline-none transition-all appearance-none cursor-pointer shadow-sm"
                    >
                      <option value="ALL_MEMBERS">Public (All Devotees & Members)</option>
                      <option value="MANAGERS">Internal (Only Admins & Managers)</option>
@@ -695,11 +695,11 @@ export const CommunityPollsTab: React.FC = () => {
                    <div className="space-y-3">
                      {pollForm.options.map((opt, index) => (
                        <div key={index} className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-[11px] font-black shrink-0 shadow-inner border border-orange-100">{index + 1}</div>
+                         <div className="w-8 h-8 rounded-full bg-saffron-50 text-saffron-500 flex items-center justify-center text-[11px] font-black shrink-0 shadow-inner border border-saffron-100">{index + 1}</div>
                          <input 
                            type="text" required={index < 2} 
                            value={opt} onChange={(e) => handleOptionChange(index, e.target.value)}
-                           className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-orange-500 outline-none shadow-sm transition-colors" 
+                           className="w-full p-3.5 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:bg-white focus:border-saffron-500 outline-none shadow-sm transition-colors" 
                            placeholder={`Option ${index + 1}`}
                          />
                          {index >= 2 && (
@@ -711,7 +711,7 @@ export const CommunityPollsTab: React.FC = () => {
                      ))}
                    </div>
                    {pollForm.options.length < 5 && (
-                     <button type="button" onClick={handleAddOption} className="mt-4 text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center justify-center w-full gap-1 hover:text-orange-700 transition-colors bg-orange-50 hover:bg-orange-100 p-3.5 rounded-xl border border-orange-200 shadow-sm">
+                     <button type="button" onClick={handleAddOption} className="mt-4 text-[10px] font-black text-saffron-500 uppercase tracking-widest flex items-center justify-center w-full gap-1 hover:text-saffron-700 transition-colors bg-saffron-50 hover:bg-saffron-100 p-3.5 rounded-xl border border-saffron-200 shadow-sm">
                        <Plus size={14}/> Add Another Option
                      </button>
                    )}

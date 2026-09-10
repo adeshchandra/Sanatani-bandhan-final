@@ -1,14 +1,15 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/components/public/PortalLogin.tsx', 'utf8');
+let content = fs.readFileSync('src/context/DataContext.tsx', 'utf8');
 
-code = code.replace(
-  `import { auth, signInWithEmailAndPassword, sendPasswordResetEmail } from '../../firebase';`,
-  `import { auth, googleProvider, signInWithPopup, signInWithEmailAndPassword, sendPasswordResetEmail } from '../../firebase';`
-);
+// Remove the top line added by our script earlier
+content = content.replace("import { collection, addDoc, serverTimestamp } from 'firebase/firestore';\n", "");
 
-code = code.replace(
-  `import { auth, googleProvider, signInWithPopup } from '../../firebase';`,
-  ``
-);
+// Ensure addDoc and serverTimestamp are in the main import
+if (!content.includes('addDoc') || !content.includes('serverTimestamp')) {
+    content = content.replace(
+        "import { doc, setDoc, deleteDoc, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';",
+        "import { doc, setDoc, deleteDoc, collection, onSnapshot, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';"
+    );
+}
 
-fs.writeFileSync('src/components/public/PortalLogin.tsx', code);
+fs.writeFileSync('src/context/DataContext.tsx', content);

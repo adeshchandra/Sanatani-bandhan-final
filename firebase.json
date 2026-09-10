@@ -1,5 +1,6 @@
 {
   "firestore": {
+    "database": "ai-studio-sanatanibandhanr-b854c292-1fcf-4250-ac0a-3c8b7b289f68",
     "rules": "firestore.rules"
   },
   "emulators": {

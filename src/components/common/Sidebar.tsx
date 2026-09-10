@@ -275,7 +275,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Overlay Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-stone-950/70 backdrop-blur-xs lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-temple-950/70 backdrop-blur-xs lg:hidden transition-opacity"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -284,25 +284,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Main Sidebar Component */}
       <aside
         id="main-sidebar"
-        className={`fixed lg:static top-0 bottom-0 left-0 z-40 bg-stone-900 text-stone-300 flex flex-col shrink-0 transition-all duration-300 ease-in-out border-r border-stone-800 shadow-xl lg:translate-x-0 ${
+        className={`fixed lg:static top-0 bottom-0 left-0 z-40 bg-temple-900 text-temple-300 flex flex-col shrink-0 transition-all duration-300 ease-in-out border-r border-temple-800 shadow-xl lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } ${isCollapsed ? 'lg:w-[72px]' : 'w-72 sm:w-80 lg:w-72'}`}
       >
         {/* Top Header Bar for Sidebar */}
-        <div className="h-16 px-4 flex items-center justify-between border-b border-stone-800 shrink-0 bg-stone-950/50">
+        <div className="h-16 px-4 flex items-center justify-between border-b border-temple-800 shrink-0 bg-temple-950/50">
           <div className="flex items-center gap-3 min-w-0 overflow-hidden">
             <img 
-              src={activeWorkspace?.logoUrl || '/logo.svg'} 
+              src={activeWorkspace?.logoUrl || '/logo.png'} 
               alt={activeWorkspace?.name || 'Sanatani Bandhan'} 
-              className="w-8 h-8 rounded-lg object-contain bg-white/10 p-0.5 border border-amber-500/30 shrink-0"
+              className="w-8 h-8 rounded-lg object-contain bg-white/10 p-0.5 border border-saffron-500/30 shrink-0"
               onError={(e) => { e.currentTarget.src = '/icon-192x192.png'; }}
             />
             {!isCollapsed && (
               <div className="min-w-0">
-                <span className="text-xs font-black uppercase tracking-wider text-amber-400 truncate block">
+                <span className="text-xs font-black uppercase tracking-wider text-saffron-400 truncate block">
                   {activeWorkspace?.name || 'Organisation'}
                 </span>
-                <span className="text-[10px] text-stone-500 font-bold uppercase tracking-widest block">
+                <span className="text-[10px] text-temple-500 font-bold uppercase tracking-widest block">
                   46 Desks Console
                 </span>
               </div>
@@ -315,10 +315,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                className="hidden lg:flex p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+                className="hidden lg:flex p-1.5 rounded-lg text-temple-400 hover:text-white hover:bg-temple-800 transition-colors"
                 title={isCollapsed ? 'Expand Sidebar (280px)' : 'Collapse Sidebar to Icon Rail (72px)'}
               >
-                {isCollapsed ? <PanelLeftOpen className="w-4 h-4 text-amber-400" /> : <PanelLeftClose className="w-4 h-4" />}
+                {isCollapsed ? <PanelLeftOpen className="w-4 h-4 text-saffron-400" /> : <PanelLeftClose className="w-4 h-4" />}
               </button>
             )}
 
@@ -326,7 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="lg:hidden p-2 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+              className="lg:hidden p-2 rounded-lg text-temple-400 hover:text-white hover:bg-temple-800 transition-colors"
               title="Close Menu"
             >
               <X className="w-5 h-5" />
@@ -336,27 +336,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Quick Switch to Personal View Banner / Button */}
         {!isCollapsed && (
-          <div className="p-3 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-transparent border-b border-stone-800">
+          <div className="p-3 bg-gradient-to-r from-saffron-500/10 via-saffron-500/10 to-transparent border-b border-temple-800">
             <button
               id="sidebar-btn-switch-personal"
               onClick={handleSwitchToPersonal}
-              className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-stone-950 rounded-xl font-bold text-xs shadow-md transition-all border border-amber-400 cursor-pointer group"
+              className="w-full flex items-center justify-between px-3 py-2 bg-gradient-to-r from-saffron-500 to-saffron-600 hover:from-saffron-600 hover:to-saffron-700 text-temple-950 rounded-xl font-bold text-xs shadow-md transition-all border border-saffron-400 cursor-pointer group"
             >
               <div className="flex items-center gap-2">
-                <UserCircle className="w-4 h-4 text-stone-950" />
+                <UserCircle className="w-4 h-4 text-temple-950" />
                 <span className="font-extrabold">Switch to Personal View</span>
               </div>
-              <ArrowLeftRight className="w-3.5 h-3.5 text-stone-950 group-hover:rotate-180 transition-transform duration-300" />
+              <ArrowLeftRight className="w-3.5 h-3.5 text-temple-950 group-hover:rotate-180 transition-transform duration-300" />
             </button>
           </div>
         )}
 
         {/* Collapsed Rail Quick Switch Icon */}
         {isCollapsed && (
-          <div className="p-2 border-b border-stone-800 flex justify-center">
+          <div className="p-2 border-b border-temple-800 flex justify-center">
             <button
               onClick={handleSwitchToPersonal}
-              className="w-10 h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 flex items-center justify-center shadow-md transition-transform hover:scale-105 cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-saffron-500 hover:bg-saffron-600 text-temple-950 flex items-center justify-center shadow-md transition-transform hover:scale-105 cursor-pointer"
               title="Switch to Personal Devotee View"
             >
               <UserCircle className="w-5 h-5" />
@@ -366,23 +366,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Search & Domain Filter Pills (Expanded Mode Only) */}
         {!isCollapsed && (
-          <div className="p-3 border-b border-stone-800 space-y-2 shrink-0 bg-stone-900/60">
+          <div className="p-3 border-b border-temple-800 space-y-2 shrink-0 bg-temple-900/60">
             {/* Search Input */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-2.5" />
+              <Search className="w-3.5 h-3.5 text-temple-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 id="sidebar-module-search"
                 placeholder="Search desks (e.g. 80G, Pooja, Goshala)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-stone-800/80 border border-stone-700 rounded-xl pl-9 pr-8 py-1.5 text-xs text-stone-100 placeholder-stone-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                className="w-full bg-temple-800/80 border border-temple-700 rounded-xl pl-9 pr-8 py-1.5 text-xs text-temple-100 placeholder-temple-400 focus:outline-none focus:border-saffron-500 focus:ring-1 focus:ring-saffron-500 transition-all"
               />
               {searchTerm && (
                 <button
                   type="button"
                   onClick={() => setSearchTerm('')}
-                  className="absolute right-2.5 top-2.5 text-stone-400 hover:text-white"
+                  className="absolute right-2.5 top-2.5 text-temple-400 hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -399,8 +399,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => setSelectedDomainFilter(pill.domain)}
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide shrink-0 transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-amber-500 text-stone-950 font-black shadow-xs'
-                        : 'bg-stone-800 text-stone-400 hover:bg-stone-700 hover:text-stone-200'
+                        ? 'bg-saffron-500 text-temple-950 font-black shadow-xs'
+                        : 'bg-temple-800 text-temple-400 hover:bg-temple-700 hover:text-temple-200'
                     }`}
                   >
                     {pill.label}
@@ -423,21 +423,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     type="button"
                     onClick={() => toggleDomain(group.domain)}
-                    className="w-full flex items-center justify-between text-[11px] font-bold text-stone-400 hover:text-amber-400 uppercase tracking-wider px-2 py-1 mb-1 rounded-lg transition-colors cursor-pointer"
+                    className="w-full flex items-center justify-between text-[11px] font-bold text-temple-400 hover:text-saffron-400 uppercase tracking-wider px-2 py-1 mb-1 rounded-lg transition-colors cursor-pointer"
                   >
                     <span className="truncate flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-saffron-500"></span>
                       {group.title}
                     </span>
                     <div className="flex items-center gap-1 shrink-0">
-                      <span className="text-[10px] bg-stone-800 text-stone-400 px-1.5 py-0.2 rounded-md font-mono">
+                      <span className="text-[10px] bg-temple-800 text-temple-400 px-1.5 py-0.2 rounded-md font-mono">
                         {group.items.length}
                       </span>
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isDomainCollapsed ? '-rotate-90' : 'rotate-0'}`} />
                     </div>
                   </button>
                 ) : (
-                  <div className="my-2 border-t border-stone-800/80 mx-2" />
+                  <div className="my-2 border-t border-temple-800/80 mx-2" />
                 )}
 
                 {/* Items in Domain */}
@@ -466,14 +466,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               isCollapsed ? 'justify-center p-2.5' : 'justify-between px-3 py-2'
                             } ${
                               isActive
-                                ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/10 text-amber-400 border border-amber-500/40 font-bold shadow-xs'
-                                : 'text-stone-300 hover:bg-stone-800/70 hover:text-white border border-transparent'
+                                ? 'bg-gradient-to-r from-saffron-500/20 to-saffron-500/10 text-saffron-400 border border-saffron-500/40 font-bold shadow-xs'
+                                : 'text-temple-300 hover:bg-temple-800/70 hover:text-white border border-transparent'
                             }`}
                           >
                             <div className={`flex items-center gap-3 truncate ${isCollapsed ? 'justify-center' : ''}`}>
                               <Icon
                                 className={`w-4 h-4 shrink-0 transition-colors ${
-                                  isActive ? 'text-amber-400 stroke-[2.2]' : 'text-stone-400'
+                                  isActive ? 'text-saffron-400 stroke-[2.2]' : 'text-temple-400'
                                 }`}
                               />
                               {!isCollapsed && (
@@ -484,8 +484,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             {!isCollapsed && item.badge && (
                               <span className={`ml-2 text-[9px] font-black px-1.5 py-0.5 rounded-md shrink-0 ${
                                 isActive
-                                  ? 'bg-amber-500 text-stone-950'
-                                  : 'bg-stone-800 text-stone-400 border border-stone-700'
+                                  ? 'bg-saffron-500 text-temple-950'
+                                  : 'bg-temple-800 text-temple-400 border border-temple-700'
                               }`}>
                                 {item.badge}
                               </span>
@@ -504,41 +504,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Bottom Status / Vedic Note Footer */}
         {!isCollapsed && (
-          <div className="p-3 border-t border-stone-800 bg-stone-950/60 shrink-0 text-center flex flex-col gap-2">
+          <div className="p-3 border-t border-temple-800 bg-temple-950/60 shrink-0 text-center flex flex-col gap-2">
             <div className={`p-2 rounded-xl border shadow-inner flex items-center justify-between transition-colors ${
               !isOnline ? 'bg-red-950/30 border-red-900/50' :
-              pendingSyncCount > 0 ? 'bg-amber-950/30 border-amber-900/50' :
+              pendingSyncCount > 0 ? 'bg-saffron-950/30 border-saffron-900/50' :
               'bg-emerald-950/20 border-emerald-900/30'
             }`}>
               <div className="flex items-center gap-2">
                 {!isOnline ? (
                   <CloudOff className="w-3.5 h-3.5 text-red-500" />
                 ) : pendingSyncCount > 0 ? (
-                  <RefreshCcw className="w-3.5 h-3.5 text-amber-500 animate-spin" />
+                  <RefreshCcw className="w-3.5 h-3.5 text-saffron-500 animate-spin" />
                 ) : (
                   <Wifi className="w-3.5 h-3.5 text-emerald-500" />
                 )}
                 <span className={`text-[10px] font-bold ${
                   !isOnline ? 'text-red-400' :
-                  pendingSyncCount > 0 ? 'text-amber-400' :
+                  pendingSyncCount > 0 ? 'text-saffron-400' :
                   'text-emerald-500'
                 }`}>
                   {!isOnline ? 'OFFLINE' : pendingSyncCount > 0 ? 'SYNCING...' : 'ONLINE'}
                 </span>
               </div>
               {pendingSyncCount > 0 && (
-                <span className="bg-stone-950 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold text-amber-500">
+                <span className="bg-temple-950 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold text-saffron-500">
                   {pendingSyncCount} pending
                 </span>
               )}
             </div>
 
-            <div className="p-2.5 bg-stone-900/90 rounded-xl border border-stone-800 shadow-inner">
+            <div className="p-2.5 bg-temple-900/90 rounded-xl border border-temple-800 shadow-inner">
 
-              <p className="text-[10px] uppercase font-bold text-amber-500 tracking-wider mb-0.5">
+              <p className="text-[10px] uppercase font-bold text-saffron-500 tracking-wider mb-0.5">
                 Vedic Workspace v2.4
               </p>
-              <p className="text-[11px] font-serif text-stone-400 italic truncate">
+              <p className="text-[11px] font-serif text-temple-400 italic truncate">
                 "Dharmo Rakshati Rakshitah"
               </p>
             </div>

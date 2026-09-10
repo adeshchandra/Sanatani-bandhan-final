@@ -11,8 +11,8 @@ interface DemoSelectionModalProps {
 }
 
 const ORG_TYPES: WorkspaceType[] = [
-  'MANDIR', 'GOSHALA', 'SANGHA', 'ASHRAM', 'GURUKUL',
-  'ANNADAN_TRUST', 'MAHOTSAV_SAMITI', 'PUROHIT_SABHA', 'KASHI_KSHETRA', 'ANNADAN_TRUST'
+  'Mandir', 'Goshala', 'Sangha', 'Ashram', 'Gurukul',
+  'AkshayaPatra', 'MahotsavSamiti', 'PurohitSabha', 'KashiKshetra', 'AkshayaPatra'
 ];
 
 export const DemoSelectionModal: React.FC<DemoSelectionModalProps> = ({ isOpen, onClose, onSelect }) => {
@@ -46,12 +46,12 @@ export const DemoSelectionModal: React.FC<DemoSelectionModalProps> = ({ isOpen, 
                 onClick={() => setSelected(type)}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   selected === type 
-                    ? 'border-[#FF9933] bg-orange-50 ring-2 ring-[#FF9933]/20' 
-                    : 'border-slate-200 bg-white hover:border-[#FF9933]/30 hover:bg-orange-50/30'
+                    ? 'border-saffron-500 bg-saffron-50 ring-2 ring-saffron-500/20' 
+                    : 'border-slate-200 bg-white hover:border-saffron-500/30 hover:bg-saffron-50/30'
                 }`}
               >
-                <Building2 className={`w-6 h-6 mb-2 ${selected === type ? 'text-[#FF9933]' : 'text-slate-400'}`} />
-                <p className={`text-sm font-bold ${selected === type ? 'text-orange-900' : 'text-slate-700'}`}>{type}</p>
+                <Building2 className={`w-6 h-6 mb-2 ${selected === type ? 'text-saffron-500' : 'text-slate-400'}`} />
+                <p className={`text-sm font-bold ${selected === type ? 'text-saffron-900' : 'text-slate-700'}`}>{type}</p>
               </button>
             ))}
           </div>
@@ -63,7 +63,7 @@ export const DemoSelectionModal: React.FC<DemoSelectionModalProps> = ({ isOpen, 
             onClick={() => selected && onSelect(selected)}
             className={`px-8 py-3 rounded-xl font-bold transition-all shadow-md flex items-center gap-2 ${
               selected 
-                ? 'bg-[#FF9933] hover:bg-orange-600 text-white shadow-orange-500/25' 
+                ? 'bg-saffron-500 hover:bg-saffron-600 text-white shadow-saffron-500/25' 
                 : 'bg-slate-100 text-slate-400 cursor-not-allowed'
             }`}
           >

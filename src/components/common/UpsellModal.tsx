@@ -20,7 +20,7 @@ export const UpsellModal: React.FC<UpsellModalProps> = ({ isOpen, onClose, onUpg
       <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-300">
         
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-stone-900 to-stone-800 p-8 text-center border-b border-stone-700">
+        <div className="relative bg-gradient-to-r from-temple-900 to-temple-800 p-8 text-center border-b border-temple-700">
           <button 
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors"
@@ -28,14 +28,14 @@ export const UpsellModal: React.FC<UpsellModalProps> = ({ isOpen, onClose, onUpg
             <X className="w-5 h-5" />
           </button>
           
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20 border border-white/20">
+          <div className="w-16 h-16 bg-gradient-to-br from-saffron-400 to-saffron-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-saffron-500/20 border border-white/20">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             {safeTranslate('upsell_title', 'Namaskar! 🙏 You\'ve Discovered the Power of Sanatani Bandhan', 'নমস্কার! 🙏 আপনি সনাতনী বন্ধনের শক্তি আবিষ্কার করেছেন', 'नमस्कार! 🙏 आपने सनातनी बंधन की शक्ति की खोज की है')}
           </h2>
-          <p className="text-stone-300 mt-3 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          <p className="text-temple-300 mt-3 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
             {safeTranslate(
               'upsell_desc', 
               'You are currently exploring a public demo workspace. To add unlimited records, generate official cryptographic PDFs, and secure your community\'s data, please establish your own private workspace.',
@@ -72,10 +72,10 @@ export const UpsellModal: React.FC<UpsellModalProps> = ({ isOpen, onClose, onUpg
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-stone-900 rounded-2xl p-6 border border-stone-700 shadow-xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">RECOMMENDED</div>
+            <div className="bg-temple-900 rounded-2xl p-6 border border-temple-700 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-saffron-500 to-saffron-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">RECOMMENDED</div>
               <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                <Star className="w-5 h-5 text-saffron-500 fill-saffron-500" />
                 {safeTranslate('plan_pro_title', 'SMART PRO PLAN', 'স্মার্ট প্রো প্ল্যান', 'स्मार्ट प्रो योजना')}
               </h3>
               <ul className="space-y-3 mt-6">
@@ -85,8 +85,8 @@ export const UpsellModal: React.FC<UpsellModalProps> = ({ isOpen, onClose, onUpg
                   'Verified Scholar Badges',
                   'Global Purohit Hiring & Booking'
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-stone-300 font-medium">
-                    <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <li key={idx} className="flex items-start gap-3 text-sm text-temple-300 font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-saffron-500 shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -107,7 +107,7 @@ export const UpsellModal: React.FC<UpsellModalProps> = ({ isOpen, onClose, onUpg
           
           <button
             onClick={onUpgrade}
-            className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-orange-500/20 transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto bg-gradient-to-r from-saffron-500 to-saffron-500 hover:from-saffron-600 hover:to-saffron-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-saffron-500/20 transition-all flex items-center justify-center gap-2"
           >
             <Zap className="w-4 h-4" />
             {safeTranslate('establish_secure_btn', 'Establish My Secure Workspace', 'আমার সুরক্ষিত ওয়ার্কস্পেস তৈরি করুন', 'अपना सुरक्षित कार्यक्षेत्र स्थापित करें')}

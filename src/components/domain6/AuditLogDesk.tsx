@@ -98,20 +98,20 @@ export const AuditLogDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[10px] font-bold uppercase tracking-wider">
               Immutable Cryptographic Audit Trail
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               Zero-Trust Enterprise Compliance
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             Security & System Audit Log Desk
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Tamper-proof record of every financial transaction, member edit, vault opening, and failed authentication
           </p>
         </div>
@@ -119,7 +119,7 @@ export const AuditLogDesk: React.FC = () => {
         <button
           type="button"
           onClick={handleExportCSV}
-          className="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+          className="px-3.5 py-2 rounded-xl bg-temple-800 hover:bg-temple-750 border border-temple-700 text-temple-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
         >
           <Download className="w-3.5 h-3.5" />
           <span>Export Audit Log</span>
@@ -128,14 +128,14 @@ export const AuditLogDesk: React.FC = () => {
 
       
       {/* Security Health Check Widget */}
-      <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl">
+      <div className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-rose-500/10 rounded-xl border border-rose-500/20">
             <ShieldAlert className="w-5 h-5 text-rose-400" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-stone-100">Security Health Check</h3>
-            <p className="text-xs text-stone-400">Monitoring for excessive permissions and privileged accounts.</p>
+            <h3 className="text-lg font-bold text-temple-100">Security Health Check</h3>
+            <p className="text-xs text-temple-400">Monitoring for excessive permissions and privileged accounts.</p>
           </div>
         </div>
         
@@ -148,12 +148,12 @@ export const AuditLogDesk: React.FC = () => {
             
             return (
               <>
-                <div className="bg-stone-950/50 border border-stone-800 rounded-2xl p-4">
+                <div className="bg-temple-950/50 border border-temple-800 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-stone-300">Privileged Accounts</span>
-                    <span className="text-xs font-mono bg-stone-800 text-stone-300 px-2 py-0.5 rounded-lg">{elevatedUsers.length}</span>
+                    <span className="text-xs font-semibold text-temple-300">Privileged Accounts</span>
+                    <span className="text-xs font-mono bg-temple-800 text-temple-300 px-2 py-0.5 rounded-lg">{elevatedUsers.length}</span>
                   </div>
-                  <p className="text-[10px] text-stone-500">Total accounts with administrative or trustee access.</p>
+                  <p className="text-[10px] text-temple-500">Total accounts with administrative or trustee access.</p>
                 </div>
                 
                 <div className="bg-rose-950/20 border border-rose-900/30 rounded-2xl p-4">
@@ -163,17 +163,17 @@ export const AuditLogDesk: React.FC = () => {
                       {suspiciousUsers.length} Flags
                     </span>
                   </div>
-                  <p className="text-[10px] text-stone-500">Privileged accounts with missing emails or low Seva Index.</p>
+                  <p className="text-[10px] text-temple-500">Privileged accounts with missing emails or low Seva Index.</p>
                   
                   {suspiciousUsers.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {suspiciousUsers.map(u => (
-                        <div key={u.id} className="flex items-center justify-between bg-stone-900/50 p-2 rounded-xl border border-rose-500/10">
+                        <div key={u.id} className="flex items-center justify-between bg-temple-900/50 p-2 rounded-xl border border-rose-500/10">
                           <div>
-                            <p className="text-xs font-bold text-stone-200">{u.fullName || u.name || 'Unknown'}</p>
+                            <p className="text-xs font-bold text-temple-200">{u.fullName || u.name || 'Unknown'}</p>
                             <p className="text-[10px] text-rose-400 font-mono uppercase">{u.role}</p>
                           </div>
-                          <button className="text-[10px] bg-stone-800 hover:bg-stone-700 text-stone-300 px-2 py-1 rounded border border-stone-700 transition-colors">
+                          <button className="text-[10px] bg-temple-800 hover:bg-temple-700 text-temple-300 px-2 py-1 rounded border border-temple-700 transition-colors">
                             Review
                           </button>
                         </div>
@@ -188,24 +188,24 @@ export const AuditLogDesk: React.FC = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="bg-stone-900/90 border border-stone-800 p-4 rounded-2xl flex items-center justify-between gap-4">
+      <div className="bg-temple-900/90 border border-temple-800 p-4 rounded-2xl flex items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
-          <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
+          <Search className="w-3.5 h-3.5 text-temple-400 absolute left-3 top-3" />
           <input
             type="text"
             placeholder="Search logs by action, user email, module..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-stone-800 border border-stone-700 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-200 placeholder-stone-400 focus:outline-none focus:border-amber-500"
+            className="w-full bg-temple-800 border border-temple-700 rounded-xl pl-9 pr-3 py-2 text-xs text-temple-200 placeholder-temple-400 focus:outline-none focus:border-saffron-500"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl overflow-hidden">
+      <div className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left text-xs">
-            <thead className="text-[10px] text-stone-400 uppercase bg-stone-950/60 font-semibold border-b border-stone-800">
+            <thead className="text-[10px] text-temple-400 uppercase bg-temple-950/60 font-semibold border-b border-temple-800">
               <tr>
                 <th className="p-3">Severity & ID</th>
                 <th className="p-3">Timestamp</th>
@@ -215,34 +215,34 @@ export const AuditLogDesk: React.FC = () => {
                 <th className="p-3">Cryptographic SHA-256 Hash</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-800">
+            <tbody className="divide-y divide-temple-800">
               {filteredLogs.map((log, idx) => (
-                <tr key={`${log.id}-${idx}`} className="hover:bg-stone-800/40 transition-colors">
+                <tr key={`${log.id}-${idx}`} className="hover:bg-temple-800/40 transition-colors">
                   <td className="p-3">
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                         log.severity === 'Security'
                           ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                           : log.severity === 'Warning'
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          : 'bg-stone-800 text-stone-300'
+                          ? 'bg-saffron-500/20 text-saffron-400 border border-saffron-500/30'
+                          : 'bg-temple-800 text-temple-300'
                       }`}
                     >
                       {log.severity}
                     </span>
-                    <p className="text-[10px] text-stone-400 font-mono mt-1">{log.id}</p>
+                    <p className="text-[10px] text-temple-400 font-mono mt-1">{log.id}</p>
                   </td>
-                  <td className="p-3 font-mono text-stone-300 text-[11px]">{log.timestamp}</td>
+                  <td className="p-3 font-mono text-temple-300 text-[11px]">{log.timestamp}</td>
                   <td className="p-3">
-                    <p className="font-bold text-stone-100">{log.userEmail}</p>
-                    <p className="text-[10px] text-amber-400 font-mono uppercase">{log.userRole}</p>
+                    <p className="font-bold text-temple-100">{log.userEmail}</p>
+                    <p className="text-[10px] text-saffron-400 font-mono uppercase">{log.userRole}</p>
                   </td>
                   <td className="p-3">
-                    <p className="font-semibold text-stone-200">{log.action}</p>
-                    <p className="text-[11px] text-stone-400">{log.module}</p>
+                    <p className="font-semibold text-temple-200">{log.action}</p>
+                    <p className="text-[11px] text-temple-400">{log.module}</p>
                   </td>
-                  <td className="p-3 font-mono text-stone-300">{log.ipAddress}</td>
-                  <td className="p-3 font-mono text-[10px] text-stone-400 truncate max-w-[140px]">
+                  <td className="p-3 font-mono text-temple-300">{log.ipAddress}</td>
+                  <td className="p-3 font-mono text-[10px] text-temple-400 truncate max-w-[140px]">
                     {log.sha256Hash}
                   </td>
                 </tr>

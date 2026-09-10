@@ -148,19 +148,19 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
       id="godmode-backend-modal"
       className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
     >
-      <div className="bg-slate-900 text-slate-100 rounded-3xl shadow-2xl border border-amber-500/40 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-slate-900 text-slate-100 rounded-3xl shadow-2xl border border-saffron-500/40 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Top Sacred God Mode Banner */}
-        <div className="px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/70 border-b border-amber-500/30 flex items-center justify-between">
+        <div className="px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-saffron-950/70 border-b border-saffron-500/30 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-[#FF9933] flex items-center justify-center text-slate-950 shadow-lg font-black text-xl">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-saffron-400 to-saffron-500 flex items-center justify-center text-slate-950 shadow-lg font-black text-xl">
               👑
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-amber-200 tracking-wide">
+                <h2 className="text-base font-bold text-saffron-200 tracking-wide">
                   sonatanibandhan.web.app/own/backend
                 </h2>
-                <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-mono border border-amber-500/40 uppercase font-bold">
+                <span className="px-2 py-0.5 rounded-md bg-saffron-500/20 text-saffron-300 text-[10px] font-mono border border-saffron-500/40 uppercase font-bold">
                   God Mode Sovereign Controller
                 </span>
               </div>
@@ -182,7 +182,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
         {/* Modal Main Content */}
         {!isUnlocked ? (
           <div className="p-8 flex flex-col items-center justify-center text-center max-w-md mx-auto my-auto">
-            <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 animate-pulse">
+            <div className="w-16 h-16 rounded-full bg-saffron-500/10 border border-saffron-500/30 flex items-center justify-center text-saffron-400 mb-4 animate-pulse">
               <Lock className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-bold text-white mb-1">Enter Master Reference Access Code</h3>
@@ -197,7 +197,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                   value={godEmail}
                   onChange={(e) => setGodEmail(e.target.value)}
                   placeholder="Super Admin Email (Optional)"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-amber-300 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-saffron-300 focus:ring-2 focus:ring-saffron-500 focus:border-saffron-500 outline-none"
                 />
               </div>
               <div className="relative">
@@ -207,7 +207,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                   value={godAccessKey}
                   onChange={(e) => setGodAccessKey(e.target.value)}
                   placeholder="Password or Master Key (1008)"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm text-amber-300 font-mono focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm text-saffron-300 font-mono focus:ring-2 focus:ring-saffron-500 focus:border-saffron-500 outline-none"
                   autoFocus
                 />
               </div>
@@ -231,7 +231,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-[#FF9933] text-slate-950 font-black text-xs uppercase tracking-wider hover:brightness-110 shadow-lg transition-all cursor-pointer"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-saffron-500 to-saffron-500 text-slate-950 font-black text-xs uppercase tracking-wider hover:brightness-110 shadow-lg transition-all cursor-pointer"
               >
                 Authenticate God Mode
               </button>
@@ -242,7 +242,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
             {/* Top Quick Status Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center gap-3">
-                <Building2 className="w-8 h-8 text-amber-400 shrink-0" />
+                <Building2 className="w-8 h-8 text-saffron-400 shrink-0" />
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
                     Total Shards
@@ -277,12 +277,12 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center gap-3">
-                <Server className="w-8 h-8 text-[#FF9933] shrink-0" />
+                <Server className="w-8 h-8 text-saffron-500 shrink-0" />
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
                     Auto-Wipe Timer
                   </span>
-                  <span className="text-xl font-black text-[#FF9933]">{ttlMinutes} Mins</span>
+                  <span className="text-xl font-black text-saffron-500">{ttlMinutes} Mins</span>
                   <span className="text-[10px] text-slate-400 block font-semibold">Automated Rolling TTL</span>
                 </div>
               </div>
@@ -293,7 +293,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    <ShieldAlert className="w-4 h-4 text-saffron-400" />
                     Multi-Tenant Shard Isolation & Instant Impersonation Engine
                   </h3>
                   <p className="text-xs text-slate-400">
@@ -323,7 +323,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                       key={`${ws.id}-${idx}`}
                       className={`p-3 rounded-xl border transition-all flex flex-col justify-between ${
                         isCurrentlyInspected
-                          ? 'bg-amber-500/10 border-amber-500/60 text-amber-100'
+                          ? 'bg-saffron-500/10 border-saffron-500/60 text-saffron-100'
                           : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
                       }`}
                     >
@@ -352,7 +352,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                             switchWorkspace(ws.id);
                             showToast(`Switched into workspace: ${ws.name}`, 'info');
                           }}
-                          className="flex-1 py-1 rounded bg-[#FF9933]/20 hover:bg-[#FF9933]/30 text-[10px] font-semibold text-orange-300 text-center"
+                          className="flex-1 py-1 rounded bg-saffron-500/20 hover:bg-saffron-500/30 text-[10px] font-semibold text-saffron-300 text-center"
                         >
                           Jump In
                         </button>
@@ -367,7 +367,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
             <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div>
-                  <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                  <h4 className="text-xs font-bold text-saffron-300 uppercase tracking-wider">
                     Isolated Shard Telemetry: {currentInspectWsObj.name} ({currentInspectWsObj.id})
                   </h4>
                   <p className="text-xs text-slate-400 mt-0.5">
@@ -415,7 +415,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
 
             {/* Global RBAC Role Simulator */}
             <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800">
-              <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider mb-3">
+              <h4 className="text-xs font-bold text-saffron-300 uppercase tracking-wider mb-3">
                 Change Super Admin Password
               </h4>
               <div className="flex gap-2">
@@ -424,13 +424,13 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="New Password (min 6 chars)"
-                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-amber-500"
+                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-saffron-500"
                 />
                 <button
                   type="button"
                   onClick={handleChangePassword}
                   disabled={isUpdatingPassword || !newPassword}
-                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold text-xs"
+                  className="px-4 py-2 rounded-xl bg-saffron-500 hover:bg-saffron-600 disabled:opacity-50 text-slate-950 font-bold text-xs"
                 >
                   {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                 </button>
@@ -453,7 +453,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                     }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                       currentRole === r
-                        ? 'bg-amber-500 text-slate-950 shadow-md font-black'
+                        ? 'bg-saffron-500 text-slate-950 shadow-md font-black'
                         : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                     }`}
                   >

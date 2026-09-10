@@ -141,13 +141,13 @@ export const QRScanner: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 flex flex-col items-center shadow-xl border border-stone-100 max-w-lg mx-auto w-full">
+    <div className="bg-white rounded-3xl p-6 sm:p-8 flex flex-col items-center shadow-xl border border-temple-100 max-w-lg mx-auto w-full">
       <div className="flex items-center gap-2 mb-6">
         <ShieldCheck className="w-6 h-6 text-emerald-600" />
-        <h2 className="text-xl font-black text-stone-900">Secure Entry Scanner</h2>
+        <h2 className="text-xl font-black text-temple-900">Secure Entry Scanner</h2>
       </div>
 
-      <div className="w-full relative overflow-hidden rounded-2xl border-4 border-stone-100 mb-6 bg-stone-50">
+      <div className="w-full relative overflow-hidden rounded-2xl border-4 border-temple-100 mb-6 bg-temple-50">
         <div id="qr-reader" className="w-full" />
         
         {/* Overlay Result */}
@@ -170,12 +170,12 @@ export const QRScanner: React.FC = () => {
                 {scanResult.devotee.avatarUrl || scanResult.devotee.photoUrl ? (
                   <img src={scanResult.devotee.avatarUrl || scanResult.devotee.photoUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover" />
                 ) : (
-                  <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-stone-400" />
+                  <div className="w-10 h-10 bg-temple-100 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5 text-temple-400" />
                   </div>
                 )}
                 <div className="text-left">
-                  <p className="text-sm font-bold text-stone-900">{scanResult.devotee.fullName || scanResult.devotee.name}</p>
+                  <p className="text-sm font-bold text-temple-900">{scanResult.devotee.fullName || scanResult.devotee.name}</p>
                   <p className="text-xs text-emerald-600 font-bold uppercase tracking-wider">{scanResult.devotee.sevaTier || 'Member'}</p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export const QRScanner: React.FC = () => {
         )}
       </div>
 
-      <p className="text-xs text-stone-500 font-medium text-center">
+      <p className="text-xs text-temple-500 font-medium text-center">
         Position the devotee's QR Pass within the frame. It will scan and verify automatically.
       </p>
     </div>

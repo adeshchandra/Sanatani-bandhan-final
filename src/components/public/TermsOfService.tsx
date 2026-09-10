@@ -8,7 +8,7 @@ export const TermsOfService: React.FC<{ onClose: () => void }> = ({ onClose }) =
       <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-saffron-100 text-saffron-600 rounded-xl flex items-center justify-center">
               <Scale className="w-6 h-6" />
             </div>
             <div>
@@ -64,7 +64,7 @@ export const TermsOfService: React.FC<{ onClose: () => void }> = ({ onClose }) =
         </div>
 
         <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
-          <button onClick={onClose} className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold transition-all shadow-md">
+          <button onClick={onClose} className="px-8 py-3 bg-saffron-600 hover:bg-saffron-700 text-white rounded-xl font-bold transition-all shadow-md">
             I Accept the Terms
           </button>
         </div>

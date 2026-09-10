@@ -273,12 +273,12 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
         {checkPermission(['TRUSTEE', 'MANAGER', 'VOLUNTEER', 'SUPER_ADMIN']) && (
           <div
             onClick={() => handleNav('gau-seva-goshala')}
-            className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-amber-300 transition-colors group"
+            className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 cursor-pointer hover:border-saffron-300 transition-colors group"
           >
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Gau Seva Units</span>
             <div className="flex items-end justify-between mt-1">
               <span className="text-2xl font-bold text-slate-900">{cows.length}</span>
-              <span className="text-[10px] text-amber-600 font-bold bg-amber-50 px-1.5 py-0.5 rounded">Gomata</span>
+              <span className="text-[10px] text-saffron-600 font-bold bg-saffron-50 px-1.5 py-0.5 rounded">Gomata</span>
             </div>
           </div>
         )}
@@ -290,7 +290,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
           <div className="rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col">
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h2 className="text-xs font-bold uppercase tracking-widest text-slate-600 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF9933]" />
+                <Sparkles className="w-3.5 h-3.5 text-saffron-500" />
                 Daily Vedic Wisdom
               </h2>
               <div className="flex items-center gap-2">
@@ -299,7 +299,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                   onClick={handlePlayShlokaAudio}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                     isPlayingAudio
-                      ? 'bg-[#FF9933]/20 text-[#FF9933] animate-pulse'
+                      ? 'bg-saffron-500/20 text-saffron-500 animate-pulse'
                       : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200'
                   }`}
                 >
@@ -309,7 +309,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                 <button
                   type="button"
                   onClick={handleNextShloka}
-                  className="px-3 py-1.5 rounded-lg bg-[#FF9933]/10 hover:bg-[#FF9933]/20 text-[#FF9933] font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-saffron-500/10 hover:bg-saffron-500/20 text-saffron-500 font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <span className="hidden sm:inline">Next Shloka</span>
                   <ChevronRight className="w-3 h-3" />
@@ -402,7 +402,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
               <button
                 type="button"
                 onClick={onOpenQuickPay}
-                className="w-full p-2.5 rounded-lg bg-[#FF9933] hover:bg-orange-600 text-white font-bold text-[11px] flex items-center justify-between transition-colors shadow-sm cursor-pointer"
+                className="w-full p-2.5 rounded-lg bg-saffron-500 hover:bg-saffron-600 text-white font-bold text-[11px] flex items-center justify-between transition-colors shadow-sm cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <Coins className="w-4 h-4" />
@@ -430,13 +430,13 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
                   type="button"
                   id="dashboard-dharmic-ai-btn"
                   onClick={() => handleNav('dharmic-assistant')}
-                  className="w-full p-2.5 rounded-lg bg-gradient-to-r from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 text-amber-900 font-semibold text-[11px] flex items-center justify-between border border-amber-500/30 transition-colors cursor-pointer group"
+                  className="w-full p-2.5 rounded-lg bg-gradient-to-r from-saffron-500/10 to-saffron-500/10 hover:from-saffron-500/20 hover:to-saffron-500/20 text-saffron-900 font-semibold text-[11px] flex items-center justify-between border border-saffron-500/30 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-serif font-bold text-amber-700 text-sm">ॐ</span>
+                    <span className="font-serif font-bold text-saffron-700 text-sm">ॐ</span>
                     <span>Dharmic AI Assistant (Gemini 3.7)</span>
                   </div>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 group-hover:scale-110 transition-transform" />
+                  <Sparkles className="w-3.5 h-3.5 text-saffron-600 group-hover:scale-110 transition-transform" />
                 </button>
               )}
 

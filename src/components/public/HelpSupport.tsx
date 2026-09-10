@@ -143,7 +143,7 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const CATEGORIES = [
     {
-      icon: <Book className="w-6 h-6 text-[#FF9933]" />,
+      icon: <Book className="w-6 h-6 text-saffron-500" />,
       title: 'Documentation',
       description: 'Comprehensive written guides for Dharmic workspace modules.',
       articles: [
@@ -206,7 +206,7 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       <div className="bg-slate-50 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
         {/* Header */}
         <div className="p-6 md:p-8 bg-slate-900 text-white relative overflow-hidden shrink-0">
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-[#FF9933] rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-saffron-500 rounded-full blur-3xl opacity-20"></div>
           
           <div className="relative z-10 flex justify-between items-start mb-6">
             <div className="flex items-center gap-3">
@@ -237,7 +237,7 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 placeholder="Search for articles, guides, or features..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF9933] focus:bg-white/20 transition-all font-medium text-base backdrop-blur-md"
+                className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white/20 transition-all font-medium text-base backdrop-blur-md"
               />
             </div>
           )}
@@ -252,7 +252,7 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                   <button 
                     key={idx} 
                     onClick={() => handleOpenCategory(cat.title)}
-                    className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-[#FF9933]/50 hover:shadow-lg transition-all text-left group"
+                    className="bg-white p-6 rounded-2xl border border-slate-200 hover:border-saffron-500/50 hover:shadow-lg transition-all text-left group"
                   >
                     <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       {cat.icon}
@@ -275,8 +275,8 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       onClick={() => handleOpenArticle(article)}
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group text-left"
                     >
-                      <span className="font-medium text-slate-700 group-hover:text-[#FF9933] transition-colors">{article}</span>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#FF9933] transition-colors" />
+                      <span className="font-medium text-slate-700 group-hover:text-saffron-500 transition-colors">{article}</span>
+                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-saffron-500 transition-colors" />
                     </button>
                   ))}
                 </div>
@@ -288,7 +288,7 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8">
                   <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Book className="w-5 h-5 text-[#FF9933]" />
+                    <Book className="w-5 h-5 text-saffron-500" />
                     Articles in {selectedTitle}
                   </h3>
                   <div className="space-y-3">
@@ -298,8 +298,8 @@ export const HelpSupport: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         onClick={() => handleOpenArticle(article)}
                         className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group text-left"
                       >
-                        <span className="font-medium text-slate-700 group-hover:text-[#FF9933] transition-colors">{article}</span>
-                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#FF9933] transition-colors" />
+                        <span className="font-medium text-slate-700 group-hover:text-saffron-500 transition-colors">{article}</span>
+                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-saffron-500 transition-colors" />
                       </button>
                     ))}
                   </div>

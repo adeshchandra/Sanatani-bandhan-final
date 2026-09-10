@@ -109,20 +109,20 @@ export const AnnadanamKitchenDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full bg-saffron-500/10 border border-saffron-500/30 text-saffron-400 text-[10px] font-bold uppercase tracking-wider">
               Maha Prasadam Kitchen Engine
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               Annam Parabrahma Swaroopam
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             Annadanam Mega Kitchen Desk
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Real-time meal distribution logging, donor Annadanam sponsorships, and raw ingredient batch calculations
           </p>
         </div>
@@ -130,7 +130,7 @@ export const AnnadanamKitchenDesk: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-saffron-600/20 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Sponsor Annadanam Feast</span>
@@ -138,15 +138,15 @@ export const AnnadanamKitchenDesk: React.FC = () => {
       </div>
 
       {/* Live Serving Counter */}
-      <div className="bg-stone-950/80 border border-amber-500/30 rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="bg-temple-950/80 border border-saffron-500/30 rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-1">
-          <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
+          <span className="text-[10px] uppercase font-bold text-saffron-400 tracking-wider">
             Today's Maha Prasadam Meals Distributed
           </span>
-          <p className="text-4xl sm:text-5xl font-black text-amber-400">
-            {totalMealsServedToday.toLocaleString()} <span className="text-base text-stone-300 font-normal">Meals</span>
+          <p className="text-4xl sm:text-5xl font-black text-saffron-400">
+            {totalMealsServedToday.toLocaleString()} <span className="text-base text-temple-300 font-normal">Meals</span>
           </p>
-          <p className="text-xs text-stone-400">
+          <p className="text-xs text-temple-400">
             Prepared with pure Desi Ghee, Sona Masoori Akshat, and seasonal sattvic vegetables.
           </p>
         </div>
@@ -155,21 +155,21 @@ export const AnnadanamKitchenDesk: React.FC = () => {
           <button
             type="button"
             onClick={() => handleIncrementMeals(50)}
-            className="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 text-stone-200 text-xs font-bold border border-stone-700 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-temple-800 hover:bg-temple-750 text-temple-200 text-xs font-bold border border-temple-700 cursor-pointer"
           >
             +50 Plates
           </button>
           <button
             type="button"
             onClick={() => handleIncrementMeals(100)}
-            className="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 text-stone-200 text-xs font-bold border border-stone-700 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-temple-800 hover:bg-temple-750 text-temple-200 text-xs font-bold border border-temple-700 cursor-pointer"
           >
             +100 Plates
           </button>
           <button
             type="button"
             onClick={() => handleIncrementMeals(500)}
-            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 text-xs font-black shadow-md shadow-amber-600/20 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 text-xs font-black shadow-md shadow-saffron-600/20 cursor-pointer"
           >
             +500 Mega Batch
           </button>
@@ -181,51 +181,51 @@ export const AnnadanamKitchenDesk: React.FC = () => {
         {sponsorships.map((s, idx) => (
           <div
             key={`${s.id}-${idx}`}
-            className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
+            className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4"
           >
             <div>
-              <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800">
+              <div className="flex items-start justify-between gap-2 pb-3 border-b border-temple-800">
                 <div>
-                  <h3 className="font-extrabold text-sm text-stone-100">{s.donorName}</h3>
-                  <p className="text-xs text-amber-400 font-medium">Gotra: {s.gotra}</p>
+                  <h3 className="font-extrabold text-sm text-temple-100">{s.donorName}</h3>
+                  <p className="text-xs text-saffron-400 font-medium">Gotra: {s.gotra}</p>
                 </div>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                     s.status === 'Distributed'
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      : 'bg-saffron-500/20 text-saffron-300 border border-saffron-500/30'
                   }`}
                 >
                   {s.status}
                 </span>
               </div>
 
-              <div className="py-2 space-y-1 text-xs text-stone-300">
+              <div className="py-2 space-y-1 text-xs text-temple-300">
                 <p>
-                  <span className="text-stone-400">Occasion:</span>{' '}
-                  <span className="font-semibold text-stone-100">{s.occasion}</span>
+                  <span className="text-temple-400">Occasion:</span>{' '}
+                  <span className="font-semibold text-temple-100">{s.occasion}</span>
                 </p>
                 <p>
-                  <span className="text-stone-400">Scheduled Date:</span>{' '}
-                  <span className="font-mono text-stone-200">{s.date}</span>
+                  <span className="text-temple-400">Scheduled Date:</span>{' '}
+                  <span className="font-mono text-temple-200">{s.date}</span>
                 </p>
                 <p>
-                  <span className="text-stone-400">Meal Capacity:</span>{' '}
-                  <span className="font-bold text-amber-300">{s.mealsCount} Devotees</span>
+                  <span className="text-temple-400">Meal Capacity:</span>{' '}
+                  <span className="font-bold text-saffron-300">{s.mealsCount} Devotees</span>
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-stone-950/60 border border-stone-800 flex items-center justify-between text-xs">
+              <div className="p-3 rounded-xl bg-temple-950/60 border border-temple-800 flex items-center justify-between text-xs">
                 <div>
-                  <p className="text-[10px] text-stone-400 font-semibold uppercase">Seva Contribution</p>
-                  <p className="font-black text-amber-400 text-sm">₹{(s.costRupees || 0).toLocaleString()}</p>
+                  <p className="text-[10px] text-temple-400 font-semibold uppercase">Seva Contribution</p>
+                  <p className="font-black text-saffron-400 text-sm">₹{(s.costRupees || 0).toLocaleString()}</p>
                 </div>
-                <Utensils className="w-5 h-5 text-amber-500 opacity-80" />
+                <Utensils className="w-5 h-5 text-saffron-500 opacity-80" />
               </div>
             </div>
 
             <div className="pt-2 text-right">
-              <span className="text-[10px] text-stone-400 font-mono">ID: {s.id}</span>
+              <span className="text-[10px] text-temple-400 font-mono">ID: {s.id}</span>
             </div>
           </div>
         ))}
@@ -233,14 +233,14 @@ export const AnnadanamKitchenDesk: React.FC = () => {
 
       {/* Sponsor Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md">
-          <div className="bg-stone-900 border border-stone-700 rounded-2xl max-w-md w-full p-6 text-stone-100 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-800 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/80 backdrop-blur-md">
+          <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-md w-full p-6 text-temple-100 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-temple-800 mb-4">
               <h3 className="font-bold text-sm">Sponsor Maha Prasadam Annadanam</h3>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-stone-400 hover:text-stone-100"
+                className="text-temple-400 hover:text-temple-100"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -248,58 +248,58 @@ export const AnnadanamKitchenDesk: React.FC = () => {
 
             <form onSubmit={handleSponsor} className="space-y-3 text-xs">
               <div>
-                <label className="block text-stone-300 font-semibold mb-1">Donor Name *</label>
+                <label className="block text-temple-300 font-semibold mb-1">Donor Name *</label>
                 <input
                   type="text"
                   required
                   value={donorName}
                   onChange={(e) => setDonorName(e.target.value)}
                   placeholder="e.g. Sri Rajesh Sharma & Parivar"
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                  className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Gotra *</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Gotra *</label>
                   <input
                     type="text"
                     required
                     value={gotra}
                     onChange={(e) => setGotra(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Date *</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Date *</label>
                   <input
                     type="date"
                     required
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-stone-300 font-semibold mb-1">Occasion / Sankalp</label>
+                <label className="block text-temple-300 font-semibold mb-1">Occasion / Sankalp</label>
                 <input
                   type="text"
                   value={occasion}
                   onChange={(e) => setOccasion(e.target.value)}
                   placeholder="e.g. Janmadin, Punyatithi, Grihapravesh"
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                  className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                 />
               </div>
 
               <div>
-                <label className="block text-stone-300 font-semibold mb-1">Number of Devotee Meals</label>
+                <label className="block text-temple-300 font-semibold mb-1">Number of Devotee Meals</label>
                 <select
                   value={mealsCount}
                   onChange={(e) => setMealsCount(Number(e.target.value))}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200"
+                  className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-xs text-temple-200"
                 >
                   <option value={101}>101 Meals (₹3,030)</option>
                   <option value={251}>251 Meals (₹7,530)</option>
@@ -309,17 +309,17 @@ export const AnnadanamKitchenDesk: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-temple-800">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-stone-800 text-stone-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-temple-800 text-temple-300 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold"
+                  className="px-5 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold"
                 >
                   Confirm Seva Pledge
                 </button>

@@ -130,7 +130,9 @@ export const DevoteeSelfService: React.FC = () => {
     try {
       let user = auth.currentUser;
       if (!user) {
-        const cred = await signInAnonymously(auth);
+        // Avoid anonymous auth if it's disabled.
+        // const cred = await signInAnonymously(auth);
+        throw new Error("Please log in properly before updating email.");
         user = cred.user;
       }
       await verifyBeforeUpdateEmail(user, formData.email);
@@ -272,27 +274,27 @@ export const DevoteeSelfService: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-stone-100 overflow-hidden flex flex-col h-full">
+    <div className="bg-white rounded-3xl shadow-xl border border-temple-100 overflow-hidden flex flex-col h-full">
       <div id="recaptcha-container"></div>
       
       {/* Header section with gradient */}
-      <div className="bg-gradient-to-r from-stone-900 to-stone-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-temple-900 to-temple-800 p-6 sm:p-8 flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
         
         <div className="relative z-10 flex gap-6 items-center">
           <div className="relative group shrink-0">
-            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-stone-100 border-4 border-stone-700 shadow-xl overflow-hidden flex items-center justify-center">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-temple-100 border-4 border-temple-700 shadow-xl overflow-hidden flex items-center justify-center">
               {previewUrl || formData.avatarUrl ? (
                 <img src={previewUrl || formData.avatarUrl || undefined} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-8 h-8 sm:w-10 sm:h-10 text-stone-400" />
+                <User className="w-8 h-8 sm:w-10 sm:h-10 text-temple-400" />
               )}
             </div>
             {isEditing && (
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="absolute -bottom-3 -right-3 p-2.5 bg-amber-500 hover:bg-amber-400 text-stone-900 rounded-xl shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
+                className="absolute -bottom-3 -right-3 p-2.5 bg-saffron-500 hover:bg-saffron-400 text-temple-900 rounded-xl shadow-lg transition-transform hover:scale-105 disabled:opacity-50"
               >
                 {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
               </button>
@@ -301,14 +303,14 @@ export const DevoteeSelfService: React.FC = () => {
           </div>
           
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-amber-50">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-saffron-50">
               {formData.fullName || "Your Profile"}
             </h2>
             <div className="flex items-center gap-2 mt-2">
-              <span className="px-2.5 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase tracking-widest rounded-lg border border-white/10">
+              <span className="px-2.5 py-1 bg-white/10 text-saffron-300 text-xs font-bold uppercase tracking-widest rounded-lg border border-white/10">
                 {currentDevotee?.sevaTier || 'Member'}
               </span>
-              <span className="text-sm font-medium text-stone-400">
+              <span className="text-sm font-medium text-temple-400">
                 Joined {currentDevotee?.joinedDate || 'Recently'}
               </span>
             </div>
@@ -322,10 +324,10 @@ export const DevoteeSelfService: React.FC = () => {
             </button>
           ) : (
             <div className="flex flex-col sm:flex-row gap-2">
-              <button onClick={handleCancel} className="flex items-center justify-center gap-2 bg-stone-700 hover:bg-stone-600 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all">
+              <button onClick={handleCancel} className="flex items-center justify-center gap-2 bg-temple-700 hover:bg-temple-600 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all">
                 <X className="w-4 h-4" /> Cancel
               </button>
-              <button onClick={handleSave} className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-400 px-5 py-3 rounded-xl text-sm font-bold text-stone-900 shadow-lg shadow-amber-500/20 transition-all">
+              <button onClick={handleSave} className="flex items-center justify-center gap-2 bg-saffron-500 hover:bg-saffron-400 px-5 py-3 rounded-xl text-sm font-bold text-temple-900 shadow-lg shadow-saffron-500/20 transition-all">
                 <Save className="w-4 h-4" /> Save
               </button>
             </div>
@@ -334,7 +336,7 @@ export const DevoteeSelfService: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-stone-100 px-2 sm:px-4 pt-2 bg-stone-50/50 overflow-x-auto scrollbar-hide">
+      <div className="flex border-b border-temple-100 px-2 sm:px-4 pt-2 bg-temple-50/50 overflow-x-auto scrollbar-hide">
         {[
           { id: 'PERSONAL', label: 'Personal Details', icon: User },
           { id: 'SPIRITUAL', label: 'Spiritual Profile', icon: Sparkles },
@@ -345,8 +347,8 @@ export const DevoteeSelfService: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`flex items-center gap-2 px-4 sm:px-6 py-4 text-sm font-bold border-b-2 transition-all whitespace-nowrap ${
               activeTab === tab.id 
-                ? 'border-amber-500 text-amber-700 bg-white rounded-t-xl' 
-                : 'border-transparent text-stone-500 hover:text-stone-700 hover:bg-stone-100/50 rounded-t-xl'
+                ? 'border-saffron-500 text-saffron-700 bg-white rounded-t-xl' 
+                : 'border-transparent text-temple-500 hover:text-temple-700 hover:bg-temple-100/50 rounded-t-xl'
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -361,7 +363,7 @@ export const DevoteeSelfService: React.FC = () => {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <User className="w-3.5 h-3.5" /> Full Legal Name *
                 </label>
                 <input
@@ -369,12 +371,12 @@ export const DevoteeSelfService: React.FC = () => {
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white disabled:opacity-60 transition-all"
                   placeholder="Enter full name"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <FileText className="w-3.5 h-3.5" /> PAN Number (For 80G)
                 </label>
                 <input
@@ -383,7 +385,7 @@ export const DevoteeSelfService: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, panNumber: e.target.value.toUpperCase() })}
                   disabled={!isEditing}
                   maxLength={10}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all uppercase"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white disabled:opacity-60 transition-all uppercase"
                   placeholder="ABCDE1234F"
                 />
               </div>
@@ -391,7 +393,7 @@ export const DevoteeSelfService: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <Phone className="w-3.5 h-3.5" /> Phone Number *
                 </label>
                 <div className="flex gap-2">
@@ -400,11 +402,11 @@ export const DevoteeSelfService: React.FC = () => {
                     value={formData.phone}
                     onChange={handlePhoneChange}
                     disabled={!isEditing}
-                    className={`w-full px-4 py-3 bg-stone-50 border rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all ${!phoneVerified && isEditing ? 'border-rose-300' : 'border-stone-200'}`}
+                    className={`w-full px-4 py-3 bg-temple-50 border rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white transition-all ${!phoneVerified && isEditing ? 'border-rose-300' : 'border-temple-200'}`}
                     placeholder="10 digit mobile"
                   />
                   {isEditing && !phoneVerified && !otpSent && (
-                    <button onClick={sendOtp} className="px-5 py-3 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-sm">
+                    <button onClick={sendOtp} className="px-5 py-3 bg-temple-900 hover:bg-temple-800 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-sm">
                       Verify
                     </button>
                   )}
@@ -415,12 +417,12 @@ export const DevoteeSelfService: React.FC = () => {
                   )}
                 </div>
                 {otpSent && (
-                  <div className="flex gap-2 mt-2 p-3 bg-stone-50 rounded-xl border border-stone-200 animate-in fade-in">
+                  <div className="flex gap-2 mt-2 p-3 bg-temple-50 rounded-xl border border-temple-200 animate-in fade-in">
                     <input
                       type="text"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value)}
-                      className="w-full px-4 py-3 bg-white border border-stone-200 rounded-lg text-sm font-bold tracking-widest text-center"
+                      className="w-full px-4 py-3 bg-white border border-temple-200 rounded-lg text-sm font-bold tracking-widest text-center"
                       placeholder="XXXXXX"
                     />
                     <button onClick={verifyOtp} className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shrink-0 transition-colors">
@@ -431,7 +433,7 @@ export const DevoteeSelfService: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <Mail className="w-3.5 h-3.5" /> Email Address
                 </label>
                 <div className="flex gap-2">
@@ -440,11 +442,11 @@ export const DevoteeSelfService: React.FC = () => {
                     value={formData.email}
                     onChange={handleEmailChange}
                     disabled={!isEditing}
-                    className={`w-full px-4 py-3 bg-stone-50 border rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all ${!emailVerified && isEditing ? 'border-amber-300' : 'border-stone-200'}`}
+                    className={`w-full px-4 py-3 bg-temple-50 border rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white transition-all ${!emailVerified && isEditing ? 'border-saffron-300' : 'border-temple-200'}`}
                     placeholder="email@example.com"
                   />
                   {isEditing && !emailVerified && !verificationLinkSent && formData.email && (
-                    <button onClick={sendEmailLink} className="px-5 py-3 bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-sm">
+                    <button onClick={sendEmailLink} className="px-5 py-3 bg-temple-900 hover:bg-temple-800 text-white text-xs font-bold rounded-xl shrink-0 transition-colors shadow-sm">
                       Verify
                     </button>
                   )}
@@ -455,7 +457,7 @@ export const DevoteeSelfService: React.FC = () => {
                   )}
                 </div>
                 {verificationLinkSent && !emailVerified && (
-                  <p className="text-xs text-amber-600 mt-2 flex items-center gap-1.5 bg-amber-50 px-3 py-2 rounded-lg font-medium">
+                  <p className="text-xs text-saffron-600 mt-2 flex items-center gap-1.5 bg-saffron-50 px-3 py-2 rounded-lg font-medium">
                     <AlertCircle className="w-4 h-4" /> Waiting for email confirmation...
                   </p>
                 )}
@@ -464,7 +466,7 @@ export const DevoteeSelfService: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" /> Birth Date
                 </label>
                 <input
@@ -472,11 +474,11 @@ export const DevoteeSelfService: React.FC = () => {
                   value={formData.birthDate}
                   onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white disabled:opacity-60 transition-all"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" /> Anniversary
                 </label>
                 <input
@@ -484,13 +486,13 @@ export const DevoteeSelfService: React.FC = () => {
                   value={formData.anniversaryDate}
                   onChange={(e) => setFormData({ ...formData, anniversaryDate: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white disabled:opacity-60 transition-all"
                 />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+              <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                 <User className="w-3.5 h-3.5" /> Full Address *
               </label>
               <textarea
@@ -498,7 +500,7 @@ export const DevoteeSelfService: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 disabled={!isEditing}
                 rows={3}
-                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white disabled:opacity-60 transition-all resize-none"
+                className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 focus:bg-white disabled:opacity-60 transition-all resize-none"
                 placeholder="Street Address, City, State, Pincode"
               />
             </div>
@@ -507,13 +509,13 @@ export const DevoteeSelfService: React.FC = () => {
 
         {activeTab === 'SPIRITUAL' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-amber-700" />
+            <div className="bg-saffron-50 border border-saffron-100 p-5 rounded-2xl flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-saffron-100 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-saffron-700" />
               </div>
               <div>
-                <h4 className="text-sm font-black text-amber-900">Vedic & Spiritual Identity</h4>
-                <p className="text-xs text-amber-700/80 mt-1 font-medium leading-relaxed">
+                <h4 className="text-sm font-black text-saffron-900">Vedic & Spiritual Identity</h4>
+                <p className="text-xs text-saffron-700/80 mt-1 font-medium leading-relaxed">
                   These details help our Purohits perform sankalp and rituals accurately on your behalf.
                   Your spiritual name will also be reflected across the community.
                 </p>
@@ -522,48 +524,48 @@ export const DevoteeSelfService: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Spiritual / Diksha Name</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Spiritual / Diksha Name</label>
                 <input
                   type="text"
                   value={formData.spiritualName}
                   onChange={(e) => setFormData({ ...formData, spiritualName: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="E.g. Hari Dasa"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Varna / Kul</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Varna / Kul</label>
                 <input
                   type="text"
                   value={formData.varnaKul}
                   onChange={(e) => setFormData({ ...formData, varnaKul: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Gotra</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Gotra</label>
                 <input
                   type="text"
                   value={formData.gotra}
                   onChange={(e) => setFormData({ ...formData, gotra: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="Kashyapa, Bharadwaja..."
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Pravara</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Pravara</label>
                 <input
                   type="text"
                   value={formData.pravara}
                   onChange={(e) => setFormData({ ...formData, pravara: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="Optional"
                 />
               </div>
@@ -571,13 +573,13 @@ export const DevoteeSelfService: React.FC = () => {
 
             <div className="grid grid-cols-1 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Kuladevata / Ishta Devata</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Kuladevata / Ishta Devata</label>
                 <input
                   type="text"
                   value={formData.kuladevata}
                   onChange={(e) => setFormData({ ...formData, kuladevata: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="Family Deity"
                 />
               </div>
@@ -585,24 +587,24 @@ export const DevoteeSelfService: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Diksha Guru</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Diksha Guru</label>
                 <input
                   type="text"
                   value={formData.dikshaGuru}
                   onChange={(e) => setFormData({ ...formData, dikshaGuru: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="Name of Guru"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest">Diksha Date</label>
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest">Diksha Date</label>
                 <input
                   type="date"
                   value={formData.dikshaDate}
                   onChange={(e) => setFormData({ ...formData, dikshaDate: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                 />
               </div>
             </div>
@@ -613,7 +615,7 @@ export const DevoteeSelfService: React.FC = () => {
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <User className="w-3.5 h-3.5" /> Emergency Contact Name
                 </label>
                 <input
@@ -621,12 +623,12 @@ export const DevoteeSelfService: React.FC = () => {
                   value={formData.emergencyContact}
                   onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="Relative or friend name"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <Phone className="w-3.5 h-3.5" /> Emergency Phone
                 </label>
                 <input
@@ -634,7 +636,7 @@ export const DevoteeSelfService: React.FC = () => {
                   value={formData.emergencyPhone}
                   onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                   placeholder="10 digit mobile"
                 />
               </div>
@@ -642,14 +644,14 @@ export const DevoteeSelfService: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <Droplet className="w-3.5 h-3.5" /> Blood Group
                 </label>
                 <select
                   value={formData.bloodGroup}
                   onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all"
                 >
                   <option value="">Select...</option>
                   <option value="A+">A+</option>
@@ -663,7 +665,7 @@ export const DevoteeSelfService: React.FC = () => {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-stone-500 uppercase tracking-widest flex items-center gap-1">
+                <label className="text-xs font-bold text-temple-500 uppercase tracking-widest flex items-center gap-1">
                   <ShieldAlert className="w-3.5 h-3.5" /> Medical Notes / Allergies
                 </label>
                 <textarea
@@ -671,19 +673,19 @@ export const DevoteeSelfService: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, medicalNotes: e.target.value })}
                   disabled={!isEditing}
                   rows={4}
-                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 disabled:opacity-60 transition-all resize-none"
+                  className="w-full px-4 py-3 bg-temple-50 border border-temple-200 rounded-xl text-sm font-semibold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 disabled:opacity-60 transition-all resize-none"
                   placeholder="Any known allergies, chronic conditions, or medications"
                 />
               </div>
             </div>
             
-            <div className="bg-stone-50 border border-stone-100 p-5 rounded-2xl flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-stone-200 flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5 text-stone-500" />
+            <div className="bg-temple-50 border border-temple-100 p-5 rounded-2xl flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-temple-200 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5 text-temple-500" />
               </div>
               <div>
-                <h4 className="text-sm font-black text-stone-900">Privacy Notice</h4>
-                <p className="text-xs text-stone-500 mt-1 font-medium leading-relaxed">
+                <h4 className="text-sm font-black text-temple-900">Privacy Notice</h4>
+                <p className="text-xs text-temple-500 mt-1 font-medium leading-relaxed">
                   Medical and emergency contact information is securely stored and only accessible by authorized
                   sevadars or medical responders in case of an emergency at the temple premises.
                 </p>

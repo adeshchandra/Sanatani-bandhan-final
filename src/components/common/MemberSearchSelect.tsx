@@ -65,13 +65,13 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:border-amber-500"
+          className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-saffron-500"
         />
-        <Search className="absolute right-3 top-2.5 w-3.5 h-3.5 text-stone-400" />
+        <Search className="absolute right-3 top-2.5 w-3.5 h-3.5 text-temple-400" />
       </div>
       
       {isOpen && (searchTerm || devotees.length > 0) && (
-        <div className="absolute z-50 w-full mt-1 bg-stone-900 border border-stone-700 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-temple-900 border border-temple-700 rounded-xl shadow-xl max-h-48 overflow-y-auto">
           {filteredDevotees.length > 0 ? (
             <div className="p-1">
               {filteredDevotees.map((d) => (
@@ -83,20 +83,20 @@ export const MemberSearchSelect: React.FC<MemberSearchSelectProps> = ({
                     onChange(d.fullName, d.id);
                     setIsOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-stone-800 flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-temple-800 flex items-center gap-2"
                 >
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-saffron-500/20 text-saffron-500 flex items-center justify-center shrink-0">
                     <User className="w-3 h-3" />
                   </div>
                   <div className="flex-1 truncate">
-                    <p className="text-xs font-bold text-stone-200">{d.fullName}</p>
-                    <p className="text-[10px] text-stone-400">{d.phone} {d.gotra ? `• ${d.gotra}` : ''}</p>
+                    <p className="text-xs font-bold text-temple-200">{d.fullName}</p>
+                    <p className="text-[10px] text-temple-400">{d.phone} {d.gotra ? `• ${d.gotra}` : ''}</p>
                   </div>
                 </button>
               ))}
             </div>
           ) : (
-            <div className="p-3 text-xs text-stone-500 text-center">
+            <div className="p-3 text-xs text-temple-500 text-center">
               {allowFreeText ? 'Will be saved as new name' : 'No members found'}
             </div>
           )}

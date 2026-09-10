@@ -248,12 +248,12 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               placeholder={safeTranslate('search_forum', 'Search discussions...', 'আলোচনা খুঁজুন...', 'चर्चा खोजें...')}
               value={searchQuery}
               onChange={handleSearch}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-[#FF9933] transition-colors"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:border-saffron-500 transition-colors"
             />
           </div>
           <button 
             onClick={() => setIsComposeOpen(true)}
-            className="w-full md:w-auto px-6 py-3 bg-[#FF9933] hover:bg-orange-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-orange-500/20 shrink-0"
+            className="w-full md:w-auto px-6 py-3 bg-saffron-500 hover:bg-saffron-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-saffron-500/20 shrink-0"
           >
             <Plus className="w-5 h-5" />
             {safeTranslate('ask_community', 'Ask the Community', 'কমিউনিটিকে জিজ্ঞাসা করুন', 'समुदाय से पूछें')}
@@ -290,7 +290,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               <div 
                 key={`${thread.id}-${idx}`} 
                 onClick={() => setSelectedThread(thread)}
-                className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-[#FF9933]/50 hover:shadow-md transition-all cursor-pointer group"
+                className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-saffron-500/50 hover:shadow-md transition-all cursor-pointer group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -314,7 +314,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                         </span>
                       )}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#FF9933] transition-colors mb-2">
+                    <h3 className="text-lg font-bold text-slate-900 group-hover:text-saffron-500 transition-colors mb-2">
                       {thread.title}
                     </h3>
                     <p className="text-slate-500 text-sm line-clamp-2 mb-4">
@@ -332,9 +332,9 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                       <span>{new Date(thread.timestamp).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center justify-center shrink-0 w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-orange-50 group-hover:border-orange-100 transition-colors">
-                    <MessageCircle className="w-5 h-5 text-slate-400 group-hover:text-[#FF9933] mb-1" />
-                    <span className="font-bold text-slate-700 group-hover:text-orange-700">{thread.replyCount || 0}</span>
+                  <div className="flex flex-col items-center justify-center shrink-0 w-16 h-16 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-saffron-50 group-hover:border-saffron-100 transition-colors">
+                    <MessageCircle className="w-5 h-5 text-slate-400 group-hover:text-saffron-500 mb-1" />
+                    <span className="font-bold text-slate-700 group-hover:text-saffron-700">{thread.replyCount || 0}</span>
                   </div>
                 </div>
               </div>
@@ -465,7 +465,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   value={replyBody}
                   onChange={e => setReplyBody(e.target.value)}
                   placeholder="Type your response here..."
-                  className="w-full h-32 p-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#FF9933] resize-none mb-4"
+                  className="w-full h-32 p-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-saffron-500 resize-none mb-4"
                 />
                 <div className="flex justify-end">
                   <button 
@@ -508,7 +508,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
               <select 
                 value={newCategory}
                 onChange={e => setNewCategory(e.target.value)}
-                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#FF9933] bg-white font-medium"
+                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-saffron-500 bg-white font-medium"
               >
                 {CATEGORIES.filter(c => c !== 'All' && c !== 'My Posts').map((cat, idx) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -523,7 +523,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 placeholder="Brief summary of your question or issue"
-                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#FF9933] font-medium"
+                className="w-full p-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-saffron-500 font-medium"
               />
             </div>
             
@@ -533,7 +533,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                 value={newBody}
                 onChange={e => setNewBody(e.target.value)}
                 placeholder="Provide as much context as possible..."
-                className="w-full h-40 p-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#FF9933] resize-none"
+                className="w-full h-40 p-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-saffron-500 resize-none"
               />
             </div>
 
@@ -550,9 +550,9 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 hover:border-[#FF9933] rounded-xl cursor-pointer bg-slate-50 hover:bg-orange-50/30 transition-colors group">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 hover:border-saffron-500 rounded-xl cursor-pointer bg-slate-50 hover:bg-saffron-50/30 transition-colors group">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <ImageIcon className="w-8 h-8 text-slate-400 group-hover:text-[#FF9933] mb-2 transition-colors" />
+                    <ImageIcon className="w-8 h-8 text-slate-400 group-hover:text-saffron-500 mb-2 transition-colors" />
                     <p className="text-sm text-slate-500 font-medium group-hover:text-slate-700">Click to upload an image</p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
@@ -571,7 +571,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
             <button 
               onClick={handleCreatePost}
               disabled={!newTitle.trim() || !newBody.trim()}
-              className="px-8 py-2.5 bg-[#FF9933] hover:bg-orange-600 disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold rounded-xl shadow-md transition-colors flex items-center gap-2"
+              className="px-8 py-2.5 bg-saffron-500 hover:bg-saffron-600 disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold rounded-xl shadow-md transition-colors flex items-center gap-2"
             >
               Post Thread
             </button>

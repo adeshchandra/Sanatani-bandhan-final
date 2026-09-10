@@ -34,14 +34,14 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
 
   const isDark = theme === 'dark';
   
-  const bgPanel = isDark ? 'bg-stone-900 border-stone-800' : 'bg-white border-stone-200';
-  const textHeader = isDark ? 'text-white' : 'text-stone-900';
-  const textSub = isDark ? 'text-stone-400' : 'text-stone-500';
-  const bgItemHover = isDark ? 'hover:bg-stone-800' : 'hover:bg-stone-50';
-  const borderItem = isDark ? 'border-stone-800/50' : 'border-stone-100';
-  const bgUnread = isDark ? 'bg-amber-500/10' : 'bg-amber-50/50';
-  const textTitleUnread = isDark ? 'text-white' : 'text-stone-900';
-  const textTitleRead = isDark ? 'text-stone-300' : 'text-stone-700';
+  const bgPanel = isDark ? 'bg-temple-900 border-temple-800' : 'bg-white border-temple-200';
+  const textHeader = isDark ? 'text-white' : 'text-temple-900';
+  const textSub = isDark ? 'text-temple-400' : 'text-temple-500';
+  const bgItemHover = isDark ? 'hover:bg-temple-800' : 'hover:bg-temple-50';
+  const borderItem = isDark ? 'border-temple-800/50' : 'border-temple-100';
+  const bgUnread = isDark ? 'bg-saffron-500/10' : 'bg-saffron-50/50';
+  const textTitleUnread = isDark ? 'text-white' : 'text-temple-900';
+  const textTitleRead = isDark ? 'text-temple-300' : 'text-temple-700';
 
   const filteredNotifications = notifications.filter(notification => {
     if (activeTab === 'All') return true;
@@ -55,7 +55,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
     <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm animate-in fade-in transition-opacity"
+        className="absolute inset-0 bg-temple-900/40 backdrop-blur-sm animate-in fade-in transition-opacity"
         onClick={onClose}
       />
       
@@ -64,17 +64,17 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
         {/* Header */}
         <div className={`flex items-center justify-between p-4 sm:p-5 border-b ${borderItem}`}>
           <div className="flex items-center gap-2">
-            <Bell className={`w-5 h-5 ${isDark ? 'text-stone-300' : 'text-stone-700'}`} />
+            <Bell className={`w-5 h-5 ${isDark ? 'text-temple-300' : 'text-temple-700'}`} />
             <h2 className={`text-lg font-black ${textHeader}`}>Notifications</h2>
             {unreadCount > 0 && (
-              <span className="bg-amber-500 text-stone-950 text-[10px] font-black px-2 py-0.5 rounded-full">
+              <span className="bg-saffron-500 text-temple-950 text-[10px] font-black px-2 py-0.5 rounded-full">
                 {unreadCount} NEW
               </span>
             )}
           </div>
           <button 
             onClick={onClose}
-            className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-stone-800 text-stone-400' : 'hover:bg-stone-100 text-stone-500'}`}
+            className={`p-2 rounded-full transition-colors ${isDark ? 'hover:bg-temple-800 text-temple-400' : 'hover:bg-temple-100 text-temple-500'}`}
           >
             <X className="w-5 h-5" />
           </button>
@@ -88,8 +88,8 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
                 activeTab === tab
-                  ? isDark ? 'border-amber-500 text-amber-500' : 'border-amber-600 text-amber-600'
-                  : isDark ? 'border-transparent text-stone-400 hover:text-stone-300' : 'border-transparent text-stone-500 hover:text-stone-700'
+                  ? isDark ? 'border-saffron-500 text-saffron-500' : 'border-saffron-600 text-saffron-600'
+                  : isDark ? 'border-transparent text-temple-400 hover:text-temple-300' : 'border-transparent text-temple-500 hover:text-temple-700'
               }`}
             >
               {tab}
@@ -99,10 +99,10 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
 
         {/* Actions (Mark all read / Clear) */}
         {filteredNotifications.length > 0 && (
-          <div className={`flex items-center justify-between px-4 py-2 sm:px-5 sm:py-3 border-b ${borderItem} bg-stone-500/5`}>
+          <div className={`flex items-center justify-between px-4 py-2 sm:px-5 sm:py-3 border-b ${borderItem} bg-temple-500/5`}>
             <button 
               onClick={markAllAsRead}
-              className={`text-xs font-bold hover:underline ${isDark ? 'text-amber-500' : 'text-amber-600'}`}
+              className={`text-xs font-bold hover:underline ${isDark ? 'text-saffron-500' : 'text-saffron-600'}`}
             >
               Mark all as read
             </button>
@@ -140,7 +140,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                     <div className="shrink-0 mt-0.5">
                       {notification.type === 'info' && <div className="p-2 rounded-full bg-blue-500/10 text-blue-500"><Bell className="w-4 h-4" /></div>}
                       {notification.type === 'success' && <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-500"><Check className="w-4 h-4" /></div>}
-                      {notification.type === 'warning' && <div className="p-2 rounded-full bg-orange-500/10 text-orange-500"><Flame className="w-4 h-4" /></div>}
+                      {notification.type === 'warning' && <div className="p-2 rounded-full bg-saffron-500/10 text-saffron-500"><Flame className="w-4 h-4" /></div>}
                       {notification.type === 'error' && <div className="p-2 rounded-full bg-red-500/10 text-red-500"><Shield className="w-4 h-4" /></div>}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -150,13 +150,13 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                       <p className={`text-xs mt-1 leading-relaxed ${textSub}`}>
                         {notification.message}
                       </p>
-                      <p className={`text-[10px] mt-2 font-medium ${isDark ? 'text-stone-500' : 'text-stone-400'}`}>
+                      <p className={`text-[10px] mt-2 font-medium ${isDark ? 'text-temple-500' : 'text-temple-400'}`}>
                         {new Date(notification.timestamp).toLocaleDateString()} • {new Date(notification.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     {!notification.isRead && (
                       <div className="shrink-0">
-                        <div className="w-2.5 h-2.5 bg-amber-500 rounded-full mt-2 shadow-sm" />
+                        <div className="w-2.5 h-2.5 bg-saffron-500 rounded-full mt-2 shadow-sm" />
                       </div>
                     )}
                   </div>

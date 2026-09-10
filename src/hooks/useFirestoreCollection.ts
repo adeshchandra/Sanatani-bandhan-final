@@ -7,11 +7,11 @@ export function useFirestoreCollection<T extends { id: string, workspaceId?: str
   collectionName: string,
   initialData: T[]
 ) {
-  const { activeWorkspace } = useAuthWorkspace();
+  const { activeWorkspace, isAuthenticated, firebaseUser } = useAuthWorkspace();
   const [data, setData] = useState<T[]>(initialData);
 
   useEffect(() => {
-    if (!activeWorkspace?.id) return;
+    if (!activeWorkspace?.id || !isAuthenticated || !firebaseUser) return;
     
     // Only fetch records for the active workspace, or global records if needed
     const q = query(

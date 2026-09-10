@@ -30,6 +30,7 @@ export type PostAudience = 'public' | 'devotees' | 'members' | 'trustees' | 'got
 export interface FeedComment {
   id: string;
   authorName: string;
+  authorId?: string;
   authorRole?: string;
   avatarLetter: string;
   text: string;
@@ -39,6 +40,7 @@ export interface FeedComment {
 export interface FeedPost {
   id: string;
   workspaceId: string;
+  authorId?: string;
   authorName: string;
   authorRole: 'Head Priest' | 'Trustee' | 'Devotee' | 'Volunteer' | 'Purohit';
   authorCity?: string;
@@ -146,9 +148,9 @@ export const FEELING_OPTIONS = [
 
 export const BG_GRADIENTS = [
   { label: 'None', value: '' },
-  { label: 'Saffron Sun', value: 'from-amber-600 to-orange-700 text-white' },
-  { label: 'Temple Crimson', value: 'from-red-800 to-amber-900 text-white' },
-  { label: 'Deep Twilight', value: 'from-stone-900 to-stone-800 text-amber-200' },
+  { label: 'Saffron Sun', value: 'from-saffron-600 to-saffron-700 text-white' },
+  { label: 'Temple Crimson', value: 'from-red-800 to-saffron-900 text-white' },
+  { label: 'Deep Twilight', value: 'from-temple-900 to-temple-800 text-saffron-200' },
   { label: 'Sacred Ganga', value: 'from-indigo-900 to-blue-900 text-white' },
   { label: 'Tulsi Green', value: 'from-emerald-800 to-teal-900 text-white' }
 ];
@@ -578,7 +580,7 @@ export const SanataniSocialFeed: React.FC = () => {
   const currentAudienceObj = AUDIENCE_OPTIONS.find(a => a.key === newPostAudience) || AUDIENCE_OPTIONS[0];
 
   return (
-    <div className="h-full flex flex-col bg-stone-100 overflow-hidden relative">
+    <div className="h-full flex flex-col bg-temple-50 overflow-hidden relative">
       {/* Floating Pushpam / Diya Animation Overlay */}
       {offeringAnimation && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
@@ -589,20 +591,20 @@ export const SanataniSocialFeed: React.FC = () => {
       )}
 
       {/* Header & Quick Action Bar */}
-      <div className="bg-white border-b border-stone-200 px-4 py-3 shrink-0">
+      <div className="bg-white border-b border-temple-200 px-4 py-3 shrink-0">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-black text-stone-900 flex items-center gap-2">
-              <Sun className="w-5 h-5 text-amber-500 fill-amber-400" />
+            <h2 className="text-lg font-semibold text-temple-900 flex items-center gap-2">
+              <Sun className="w-5 h-5 text-saffron-500 fill-saffron-400" />
               {safeTranslate('social_feed', 'Sanatani Social Feed', 'সনাতনী সোশ্যাল ফিড', 'सनातनी सोशल फीड')}
             </h2>
-            <p className="text-xs text-stone-500 font-medium">
+            <p className="text-xs text-temple-500 font-medium">
               {activeWorkspace?.name || 'Sanatani Mandir'} • Live Darshan, Seva & Community
             </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl text-xs font-black shadow-sm active:scale-95 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-saffron-500 hover:bg-saffron-600 text-white rounded-xl text-xs font-semibold shadow-sm active:scale-95 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>{safeTranslate('create_post', 'Share Post', 'পোস্ট করুন', 'पोस्ट करें')}</span>
@@ -612,11 +614,11 @@ export const SanataniSocialFeed: React.FC = () => {
         {/* Global Online SOS Trigger */}
         <button 
           onClick={() => setShowSOSModal(true)}
-          className="mt-4 w-full p-3 bg-red-600 hover:bg-red-700 text-white rounded-2xl shadow-lg shadow-red-600/20 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 transition-transform active:scale-95 border border-red-500"
+          className="mt-4 w-full p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg shadow-red-600/20 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 transition-transform active:scale-95 border border-red-500"
         >
           <ShieldAlert className="w-6 h-6 animate-pulse" />
           <div className="text-center sm:text-left">
-            <h3 className="text-sm font-black tracking-widest uppercase">Emergency Panic SOS</h3>
+            <h3 className="text-sm font-semibold tracking-widest uppercase">Emergency Panic SOS</h3>
             <p className="text-[10px] font-bold text-red-200 uppercase tracking-widest">Broadcast Alert Globally • Send Location to Rescuers</p>
           </div>
         </button>
@@ -624,17 +626,17 @@ export const SanataniSocialFeed: React.FC = () => {
         {/* Facebook-style Quick Share Box */}
         <div 
           onClick={() => setShowCreateModal(true)}
-          className="mt-3 p-3 bg-stone-50 hover:bg-stone-100/80 rounded-2xl border border-stone-200 cursor-pointer flex items-center gap-3 transition-colors"
+          className="mt-3 p-3 bg-temple-50 hover:bg-temple-50/80 rounded-xl border border-temple-200 cursor-pointer flex items-center gap-3 transition-colors"
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white font-black flex items-center justify-center text-sm shadow-xs shrink-0">
+          <div className="w-9 h-9 rounded-full bg-saffron-500 text-white font-semibold flex items-center justify-center text-sm shadow-xs shrink-0">
             {(currentUser?.name || 'D').charAt(0).toUpperCase()}
           </div>
-          <div className="flex-1 text-xs text-stone-500 font-medium">
+          <div className="flex-1 text-xs text-temple-500 font-medium">
             Share Darshan, Shloka reflection, Gau Seva, or Mandir update...
           </div>
-          <div className="flex items-center gap-1 text-stone-400 shrink-0">
+          <div className="flex items-center gap-1 text-temple-400 shrink-0">
             <ImageIcon className="w-4 h-4 text-emerald-600" />
-            <span className="text-[11px] font-bold text-stone-600 hidden sm:inline">Photo</span>
+            <span className="text-[11px] font-bold text-temple-600 hidden sm:inline">Photo</span>
           </div>
         </div>
 
@@ -642,11 +644,11 @@ export const SanataniSocialFeed: React.FC = () => {
         {activeEmergencies.length > 0 && (
           <div className="mt-3 space-y-2">
             {activeEmergencies.map((emergency, idx) => (
-              <div key={`${emergency.id}-${idx}`} className="bg-red-50 border border-red-200 rounded-2xl p-3 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in">
+              <div key={`${emergency.id}-${idx}`} className="bg-red-50 border border-red-200 rounded-xl p-3 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,0.6)]" />
-                    <span className="text-xs font-black text-red-700 uppercase tracking-widest flex items-center gap-1">
+                    <span className="text-xs font-semibold text-red-700 uppercase tracking-widest flex items-center gap-1">
                       <AlertTriangle className="w-3.5 h-3.5" /> ACTIVE EMERGENCY
                     </span>
                   </div>
@@ -683,7 +685,7 @@ export const SanataniSocialFeed: React.FC = () => {
                       <MapPin className="w-3.5 h-3.5" /> GPS Linked
                     </span>
                   )}
-                  <span className="font-bold flex items-center gap-1.5 text-stone-600">
+                  <span className="font-bold flex items-center gap-1.5 text-temple-600">
                     <Clock className="w-3.5 h-3.5" /> {new Date(emergency.originalTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -705,8 +707,8 @@ export const SanataniSocialFeed: React.FC = () => {
             onClick={() => setSelectedFilter('all')}
             className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap transition-all ${
               selectedFilter === 'all'
-                ? 'bg-stone-900 text-white shadow-xs'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                ? 'bg-temple-900 text-white shadow-xs'
+                : 'bg-temple-50 text-temple-600 hover:bg-temple-200'
             }`}
           >
             {safeTranslate('filter_all', 'All Posts', 'সকল', 'सभी')}
@@ -718,8 +720,8 @@ export const SanataniSocialFeed: React.FC = () => {
               onClick={() => setSelectedFilter(f.key)}
               className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap transition-all ${
                 selectedFilter === f.key
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  ? 'bg-saffron-600 text-white shadow-xs'
+                  : 'bg-temple-50 text-temple-600 hover:bg-temple-200'
               }`}
             >
               {f.label}
@@ -733,8 +735,8 @@ export const SanataniSocialFeed: React.FC = () => {
               onClick={() => setSelectedFilter(cat)}
               className={`px-3 py-1.5 rounded-full font-bold whitespace-nowrap transition-all ${
                 selectedFilter === cat
-                  ? 'bg-amber-600 text-white shadow-xs'
-                  : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
+                  ? 'bg-saffron-600 text-white shadow-xs'
+                  : 'bg-saffron-50 text-saffron-900 border border-saffron-200 hover:bg-saffron-100'
               }`}
             >
               ✨ {cat}
@@ -746,13 +748,13 @@ export const SanataniSocialFeed: React.FC = () => {
       {/* Posts Feed List */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 max-w-xl mx-auto w-full custom-scrollbar pb-24">
         {filteredPosts.length === 0 ? (
-          <div className="bg-white rounded-3xl p-8 text-center border border-stone-200 shadow-xs">
-            <Sparkles className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-stone-900">No posts in this category yet</h3>
-            <p className="text-xs text-stone-500 mt-1">Be the first devotee to share Darshan, reflections, or Seva updates.</p>
+          <div className="bg-white rounded-xl p-8 text-center border border-temple-200 shadow-xs">
+            <Sparkles className="w-12 h-12 text-saffron-500 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-temple-900">No posts in this category yet</h3>
+            <p className="text-xs text-temple-500 mt-1">Be the first devotee to share Darshan, reflections, or Seva updates.</p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="mt-4 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl text-xs font-black shadow-md"
+              className="mt-4 px-4 py-2 bg-saffron-500 text-white rounded-xl text-xs font-semibold shadow-sm"
             >
               Create First Post 🙏
             </button>
@@ -763,52 +765,52 @@ export const SanataniSocialFeed: React.FC = () => {
             return (
               <div 
                 key={`${post.id}-${idx}`} 
-                className="bg-white rounded-2xl border border-stone-200/90 shadow-xs overflow-hidden transition-all hover:border-amber-300"
+                className="bg-white rounded-xl border border-temple-200/90 shadow-xs overflow-hidden transition-all hover:border-saffron-300"
               >
                 {/* Post Header */}
                 <div className="p-4 pb-2 flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 border border-amber-200 flex items-center justify-center text-stone-800 font-black text-sm shadow-xs shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-saffron-100 border border-saffron-200 flex items-center justify-center text-temple-800 font-semibold text-sm shadow-xs shrink-0">
                       {post.avatarLetter}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-bold text-stone-900 flex items-center gap-2">
+                        <span className="text-sm font-bold text-temple-900 flex items-center gap-2">
                            {post.authorName}
                            <button 
                              onClick={(e) => { e.stopPropagation(); setActiveChatUser({ id: post.authorId || post.id + "_author", name: post.authorName || 'Author' }); }}
-                             className="text-amber-500 hover:text-amber-600 transition-colors p-1 bg-amber-50 hover:bg-amber-100 rounded-md"
+                             className="text-saffron-500 hover:text-saffron-600 transition-colors p-1 bg-saffron-50 hover:bg-saffron-100 rounded-md"
                              title="Direct Message"
                            >
                              <MessageSquare size={14} />
                            </button>
                         </span>
                         {post.isOfficial && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800 border border-amber-300">
-                            <CheckCircle2 className="w-3 h-3 text-amber-600" />
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-saffron-100 text-saffron-800 border border-saffron-300">
+                            <CheckCircle2 className="w-3 h-3 text-saffron-600" />
                             Official
                           </span>
                         )}
                         {post.feeling && (
-                          <span className="text-xs font-medium text-stone-500">
+                          <span className="text-xs font-medium text-temple-500">
                             is {post.feeling}
                           </span>
                         )}
                       </div>
                       
                       {/* Meta line with Audience badge and Location */}
-                      <div className="flex items-center gap-2 text-[11px] text-stone-500 mt-0.5 flex-wrap">
-                        <span className="font-semibold text-stone-700">{post.authorRole}</span>
+                      <div className="flex items-center gap-2 text-[11px] text-temple-500 mt-0.5 flex-wrap">
+                        <span className="font-semibold text-temple-700">{post.authorRole}</span>
                         <span>•</span>
                         <span>{post.createdAt}</span>
                         <span>•</span>
-                        <span className="inline-flex items-center gap-1 bg-stone-100 px-2 py-0.5 rounded-md font-bold text-stone-600 text-[10px]" title={audienceInfo.desc}>
+                        <span className="inline-flex items-center gap-1 bg-temple-50 px-2 py-0.5 rounded-md font-bold text-temple-600 text-[10px]" title={audienceInfo.desc}>
                           <span>{audienceInfo.icon}</span>
                           <span>{audienceInfo.badge}</span>
                         </span>
                         {post.location && (
-                          <span className="text-stone-500 flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3 text-amber-600" />
+                          <span className="text-temple-500 flex items-center gap-0.5">
+                            <MapPin className="w-3 h-3 text-saffron-600" />
                             {post.location}
                           </span>
                         )}
@@ -818,13 +820,13 @@ export const SanataniSocialFeed: React.FC = () => {
 
                   <div className="flex items-center gap-1">
                     {/* Category Tag Badge */}
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-saffron-50 text-saffron-900 border border-saffron-200">
                       {post.customCategoryEmoji ? `${post.customCategoryEmoji} ` : ''}
                       {post.customCategoryName || post.category}
                     </span>
                     <button
                       onClick={() => handleShare(post)}
-                      className="p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100 transition-colors"
+                      className="p-1.5 text-temple-400 hover:text-temple-600 rounded-lg hover:bg-temple-50 transition-colors"
                       title="Share post"
                     >
                       <Share2 className="w-4 h-4" />
@@ -835,35 +837,35 @@ export const SanataniSocialFeed: React.FC = () => {
                 {/* Post Title & Content */}
                 <div className="px-4 py-2">
                   {post.title && (
-                    <h3 className="text-base font-bold text-stone-900 mb-1.5 leading-snug">
+                    <h3 className="text-base font-bold text-temple-900 mb-1.5 leading-snug">
                       {post.title}
                     </h3>
                   )}
 
                   {/* Optional Background Gradient for quotes/thoughts */}
                   {post.bgGradient ? (
-                    <div className={`p-6 rounded-2xl bg-gradient-to-br ${post.bgGradient} text-center font-bold text-base my-2 leading-relaxed shadow-sm`}>
+                    <div className={`p-6 rounded-xl bg-gradient-to-br ${post.bgGradient} text-center font-bold text-base my-2 leading-relaxed shadow-sm`}>
                       {post.content}
                     </div>
                   ) : (
-                    <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-line">
+                    <p className="text-sm text-temple-700 leading-relaxed whitespace-pre-line">
                       {post.content}
                     </p>
                   )}
 
                   {/* Shloka Card if present */}
                   {post.shloka && (
-                    <div className="mt-3 p-4 bg-gradient-to-br from-amber-50/70 to-orange-50/50 border border-amber-200/80 rounded-xl relative overflow-hidden">
+                    <div className="mt-3 p-4 bg-white border border-temple-200 rounded-xl relative overflow-hidden shadow-sm">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-black tracking-wider uppercase text-amber-700 bg-amber-100 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-semibold tracking-wider uppercase text-saffron-700 bg-saffron-100 px-2 py-0.5 rounded-md">
                           {post.shloka.source}
                         </span>
                         <button
                           onClick={() => playShlokaRecitation(post.shloka!.sanskrit)}
                           className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
                             isSpeakingShloka 
-                              ? 'bg-amber-600 text-white' 
-                              : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                              ? 'bg-saffron-600 text-white' 
+                              : 'bg-saffron-100 text-saffron-800 hover:bg-saffron-200'
                           }`}
                           title="Listen to Shloka recitation"
                         >
@@ -871,10 +873,10 @@ export const SanataniSocialFeed: React.FC = () => {
                           <span className="text-[10px]">{isSpeakingShloka ? 'Stop' : 'Recite'}</span>
                         </button>
                       </div>
-                      <div className="text-sm font-serif font-bold text-amber-950 text-center my-2 whitespace-pre-line leading-relaxed tracking-wide">
+                      <div className="text-sm font-serif font-bold text-saffron-950 text-center my-2 whitespace-pre-line leading-relaxed tracking-wide">
                         {post.shloka.sanskrit}
                       </div>
-                      <div className="text-xs text-stone-600 italic text-center mt-2 border-t border-amber-200/50 pt-2">
+                      <div className="text-xs text-temple-600 italic text-center mt-2 border-t border-saffron-200/50 pt-2">
                         "{post.shloka.translation}"
                       </div>
                     </div>
@@ -882,8 +884,8 @@ export const SanataniSocialFeed: React.FC = () => {
 
                   {/* Event Tag / Notice highlight */}
                   {post.eventDate && (
-                    <div className="mt-3 flex items-center gap-2 p-2.5 bg-orange-50 border border-orange-200 rounded-xl text-xs font-bold text-orange-800">
-                      <Calendar className="w-4 h-4 text-orange-600 shrink-0" />
+                    <div className="mt-3 flex items-center gap-2 p-2.5 bg-saffron-50 border border-saffron-200 rounded-xl text-xs font-bold text-saffron-800">
+                      <Calendar className="w-4 h-4 text-saffron-600 shrink-0" />
                       <span>Schedule: {post.eventDate}</span>
                     </div>
                   )}
@@ -892,7 +894,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   {post.tags && post.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {post.tags.map((tag, idx) => (
-                        <span key={tag} className="text-[10px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">
+                        <span key={tag} className="text-[10px] font-semibold text-saffron-800 bg-saffron-50 px-2 py-0.5 rounded-md">
                           #{tag}
                         </span>
                       ))}
@@ -902,7 +904,7 @@ export const SanataniSocialFeed: React.FC = () => {
 
                 {/* Post Image */}
                 {post.imageUrl && (
-                  <div className="mt-2 relative bg-stone-100 max-h-96 overflow-hidden">
+                  <div className="mt-2 relative bg-temple-50 max-h-96 overflow-hidden">
                     <img
                       src={post.imageUrl || undefined}
                       alt={post.title || 'Post image'}
@@ -916,22 +918,22 @@ export const SanataniSocialFeed: React.FC = () => {
                 )}
 
                 {/* Devotional Offerings & Reaction Counters */}
-                <div className="px-4 py-2 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500 font-medium">
+                <div className="px-4 py-2 border-t border-temple-100 flex items-center justify-between text-xs text-temple-500 font-medium">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
-                      🙏 <strong className="text-stone-700">{post.pranams}</strong> {safeTranslate('pranams', 'Pranams', 'প্রণাম', 'प्रणाम')}
+                      🙏 <strong className="text-temple-700">{post.pranams}</strong> {safeTranslate('pranams', 'Pranams', 'প্রণাম', 'प्रणाम')}
                     </span>
                     <span className="flex items-center gap-1">
-                      🌺 <strong className="text-stone-700">{post.flowersOffered}</strong> {safeTranslate('pushpam', 'Flowers', 'পুষ্প', 'पुष्प')}
+                      🌺 <strong className="text-temple-700">{post.flowersOffered}</strong> {safeTranslate('pushpam', 'Flowers', 'পুষ্প', 'पुष्प')}
                     </span>
                     <span className="flex items-center gap-1">
-                      🪔 <strong className="text-stone-700">{post.diyasLit}</strong> {safeTranslate('deepam', 'Diyas', 'প্রদীপ', 'दीपक')}
+                      🪔 <strong className="text-temple-700">{post.diyasLit}</strong> {safeTranslate('deepam', 'Diyas', 'প্রদীপ', 'दीपक')}
                     </span>
                   </div>
                   <div>
                     <button 
                       onClick={() => setActiveCommentPostId(activeCommentPostId === post.id ? null : post.id)}
-                      className="hover:underline text-stone-600 font-semibold"
+                      className="hover:underline text-temple-600 font-semibold"
                     >
                       {post.comments.length} {safeTranslate('comments', 'Comments', 'মন্তব্য', 'टिप्पणियां')}
                     </button>
@@ -939,14 +941,14 @@ export const SanataniSocialFeed: React.FC = () => {
                 </div>
 
                 {/* Action Buttons: Pranam, Flower, Diya, Comment */}
-                <div className="px-3 py-2 border-t border-stone-100 bg-stone-50/50 grid grid-cols-4 gap-1">
+                <div className="px-3 py-2 border-t border-temple-100 bg-temple-50/50 grid grid-cols-4 gap-1">
                   {/* 1. Pranam Button */}
                   <button
                     onClick={() => handlePranam(post.id)}
                     className={`py-2 px-1 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       post.hasPranamed
-                        ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                        : 'hover:bg-stone-100 text-stone-700'
+                        ? 'bg-saffron-100 text-saffron-800 border border-saffron-300'
+                        : 'hover:bg-temple-50 text-temple-700'
                     }`}
                   >
                     <span className="text-base">🙏</span>
@@ -966,7 +968,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   {/* 3. Offer Diya Button */}
                   <button
                     onClick={() => handleOfferDiya(post.id)}
-                    className="py-2 px-1 rounded-xl text-xs font-bold hover:bg-amber-50 text-amber-700 flex items-center justify-center gap-1.5 transition-all"
+                    className="py-2 px-1 rounded-xl text-xs font-bold hover:bg-saffron-50 text-saffron-700 flex items-center justify-center gap-1.5 transition-all"
                     title="Light Diya"
                   >
                     <span className="text-base">🪔</span>
@@ -978,32 +980,32 @@ export const SanataniSocialFeed: React.FC = () => {
                     onClick={() => setActiveCommentPostId(activeCommentPostId === post.id ? null : post.id)}
                     className={`py-2 px-1 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       activeCommentPostId === post.id
-                        ? 'bg-stone-200 text-stone-900'
-                        : 'hover:bg-stone-100 text-stone-700'
+                        ? 'bg-temple-200 text-temple-900'
+                        : 'hover:bg-temple-50 text-temple-700'
                     }`}
                   >
-                    <MessageCircle className="w-4 h-4 text-stone-600" />
+                    <MessageCircle className="w-4 h-4 text-temple-600" />
                     <span className="hidden xs:inline">Comment</span>
                   </button>
                 </div>
 
                 {/* Comments Section Drawer */}
                 {activeCommentPostId === post.id && (
-                  <div className="p-4 border-t border-stone-200 bg-stone-50 space-y-3">
+                  <div className="p-4 border-t border-temple-200 bg-temple-50 space-y-3">
                     {/* List comments */}
                     <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
                       {post.comments.length === 0 ? (
-                        <p className="text-xs text-stone-400 italic text-center py-2">
+                        <p className="text-xs text-temple-400 italic text-center py-2">
                           No comments yet. Write the first devotional reflection!
                         </p>
                       ) : (
                         post.comments.map((c, idx) => (
-                          <div key={`${c.id}-${idx}`} className="bg-white p-2.5 rounded-xl border border-stone-200/80 text-xs">
+                          <div key={`${c.id}-${idx}`} className="bg-white p-2.5 rounded-xl border border-temple-200/80 text-xs">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="font-bold text-stone-900">{c.authorName}</span>
-                              <span className="text-[10px] text-stone-400">{c.timestamp}</span>
+                              <span className="font-bold text-temple-900">{c.authorName}</span>
+                              <span className="text-[10px] text-temple-400">{c.timestamp}</span>
                             </div>
-                            <p className="text-stone-700">{c.text}</p>
+                            <p className="text-temple-700">{c.text}</p>
                           </div>
                         ))
                       )}
@@ -1019,11 +1021,11 @@ export const SanataniSocialFeed: React.FC = () => {
                           if (e.key === 'Enter') handleAddComment(post.id);
                         }}
                         placeholder="Write your reflection or Jai Shri Ram..."
-                        className="flex-1 px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                        className="flex-1 px-3 py-2 bg-white border border-temple-200 rounded-xl text-xs text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500"
                       />
                       <button
                         onClick={() => handleAddComment(post.id)}
-                        className="p-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-colors shrink-0"
+                        className="p-2 bg-saffron-600 hover:bg-saffron-700 text-white rounded-xl text-xs font-bold transition-colors shrink-0"
                       >
                         <Send className="w-4 h-4" />
                       </button>
@@ -1039,31 +1041,31 @@ export const SanataniSocialFeed: React.FC = () => {
       {/* CREATE POST MODAL - FACEBOOK STYLE FULL SYSTEM */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[92vh]">
+          <div className="bg-white rounded-xl w-full max-w-lg shadow-2xl border border-temple-200 overflow-hidden flex flex-col max-h-[92vh]">
             {/* Modal Header */}
-            <div className="px-5 py-3.5 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+            <div className="px-5 py-3.5 border-b border-temple-200 flex items-center justify-between bg-temple-50">
               <div className="w-6"></div>
-              <h3 className="font-black text-stone-900 text-base text-center">
+              <h3 className="font-semibold text-temple-900 text-base text-center">
                 {safeTranslate('create_post', 'Create Post', 'পোস্ট তৈরি করুন', 'पोस्ट बनाएं')}
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="w-8 h-8 rounded-full bg-stone-200/70 hover:bg-stone-300 flex items-center justify-center text-stone-600 transition-colors"
+                className="w-8 h-8 rounded-full bg-temple-200/70 hover:bg-temple-300 flex items-center justify-center text-temple-600 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Author Profile & Audience Section (Facebook style) */}
-            <div className="p-4 border-b border-stone-100 flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white font-black flex items-center justify-center text-base shadow-sm">
+            <div className="p-4 border-b border-temple-100 flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-saffron-500 text-white font-semibold flex items-center justify-center text-base shadow-sm">
                 {(currentUser?.name || 'D').charAt(0).toUpperCase()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <h4 className="font-bold text-stone-900 text-sm">{currentUser?.name || 'Devotee'}</h4>
+                  <h4 className="font-bold text-temple-900 text-sm">{currentUser?.name || 'Devotee'}</h4>
                   {newPostFeeling && (
-                    <span className="text-xs text-stone-500 font-medium">
+                    <span className="text-xs text-temple-500 font-medium">
                       is {newPostFeeling}
                     </span>
                   )}
@@ -1075,18 +1077,18 @@ export const SanataniSocialFeed: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowAudienceModal(true)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-all border border-stone-200/80"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-temple-50 hover:bg-temple-200 text-temple-700 text-xs font-bold transition-all border border-temple-200/80"
                   >
                     <span>{currentAudienceObj.icon}</span>
                     <span>{currentAudienceObj.label}</span>
-                    <ChevronDown className="w-3 h-3 text-stone-500" />
+                    <ChevronDown className="w-3 h-3 text-temple-500" />
                   </button>
 
                   {/* Category Dropdown */}
                   <select
                     value={newPostCategory}
                     onChange={(e) => setNewPostCategory(e.target.value)}
-                    className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200 focus:outline-none cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-saffron-50 hover:bg-saffron-100 text-saffron-900 text-xs font-bold border border-saffron-200 focus:outline-none cursor-pointer"
                   >
                     {STANDARD_CATEGORIES.map((c, idx) => (
                       <option key={`${c.key}-${idx}`} value={c.key}>
@@ -1101,13 +1103,13 @@ export const SanataniSocialFeed: React.FC = () => {
             <form onSubmit={handleCreatePost} className="p-4 overflow-y-auto space-y-3.5 flex-1 custom-scrollbar">
               {/* "OTHER" CUSTOM CATEGORY INPUT */}
               {newPostCategory === 'other' && (
-                <div className="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-300 space-y-2 animate-in slide-in-from-top-1">
+                <div className="p-3.5 bg-gradient-to-r from-saffron-50 to-saffron-50 rounded-xl border border-saffron-300 space-y-2 animate-in slide-in-from-top-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-black text-amber-950 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <label className="text-xs font-semibold text-saffron-950 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-saffron-600" />
                       Specify Your Custom Category
                     </label>
-                    <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">New Category</span>
+                    <span className="text-[10px] font-bold text-saffron-700 bg-saffron-100 px-2 py-0.5 rounded-full">New Category</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -1116,7 +1118,7 @@ export const SanataniSocialFeed: React.FC = () => {
                       <select
                         value={customCategoryEmoji}
                         onChange={(e) => setCustomCategoryEmoji(e.target.value)}
-                        className="w-11 h-10 bg-white border border-amber-300 rounded-xl text-lg text-center cursor-pointer shadow-xs focus:ring-2 focus:ring-amber-500"
+                        className="w-11 h-10 bg-white border border-saffron-300 rounded-xl text-lg text-center cursor-pointer shadow-xs focus:ring-2 focus:ring-saffron-500"
                         title="Pick icon emoji"
                       >
                         {CUSTOM_EMOJIS.map((em, idx) => (
@@ -1131,7 +1133,7 @@ export const SanataniSocialFeed: React.FC = () => {
                       value={customCategoryName}
                       onChange={(e) => setCustomCategoryName(e.target.value)}
                       placeholder="e.g. Youth Sangha, Sanskrit Chanting, Vedic Camp, Renovation..."
-                      className="flex-1 px-3 py-2 bg-white border border-amber-300 rounded-xl text-xs font-bold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-xs"
+                      className="flex-1 px-3 py-2 bg-white border border-saffron-300 rounded-xl text-xs font-bold text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500 shadow-xs"
                     />
                   </div>
                 </div>
@@ -1144,7 +1146,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   value={newPostTitle}
                   onChange={(e) => setNewPostTitle(e.target.value)}
                   placeholder="Post title or headline (Optional)..."
-                  className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-stone-900 focus:bg-white focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-2 bg-temple-50 border border-temple-200 rounded-xl text-xs font-bold text-temple-900 focus:bg-white focus:ring-2 focus:ring-saffron-500"
                 />
               </div>
 
@@ -1155,7 +1157,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   value={newPostContent}
                   onChange={(e) => setNewPostContent(e.target.value)}
                   placeholder={`What's on your mind, ${currentUser?.name || 'Devotee'}? Share reflections, Darshan, or questions...`}
-                  className={`w-full p-3.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                  className={`w-full p-3.5 bg-temple-50 border border-temple-200 rounded-xl text-sm text-temple-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-saffron-500 ${
                     newPostBgGradient ? `bg-gradient-to-br ${newPostBgGradient} font-bold text-center` : ''
                   }`}
                 />
@@ -1163,7 +1165,7 @@ export const SanataniSocialFeed: React.FC = () => {
 
               {/* Facebook-style Color Themes for Quotes */}
               <div className="flex items-center gap-1.5 overflow-x-auto py-1">
-                <span className="text-[11px] font-bold text-stone-500 flex items-center gap-1 shrink-0">
+                <span className="text-[11px] font-bold text-temple-500 flex items-center gap-1 shrink-0">
                   <Palette className="w-3.5 h-3.5" /> Background:
                 </span>
                 {BG_GRADIENTS.map((bg, idx) => (
@@ -1173,9 +1175,9 @@ export const SanataniSocialFeed: React.FC = () => {
                     onClick={() => setNewPostBgGradient(bg.value)}
                     className={`h-6 px-2 rounded-lg text-[10px] font-bold shrink-0 border transition-all ${
                       newPostBgGradient === bg.value
-                        ? 'ring-2 ring-amber-500 scale-105 border-amber-500'
-                        : 'border-stone-200'
-                    } ${bg.value ? `bg-gradient-to-r ${bg.value}` : 'bg-stone-100 text-stone-700'}`}
+                        ? 'ring-2 ring-saffron-500 scale-105 border-saffron-500'
+                        : 'border-temple-200'
+                    } ${bg.value ? `bg-gradient-to-r ${bg.value}` : 'bg-temple-50 text-temple-700'}`}
                   >
                     {bg.label}
                   </button>
@@ -1183,17 +1185,17 @@ export const SanataniSocialFeed: React.FC = () => {
               </div>
 
               {/* Add to Your Post Controls Box (Facebook-style Toolbar) */}
-              <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 space-y-2.5">
-                <div className="text-xs font-bold text-stone-700">Add to your post</div>
+              <div className="p-3 bg-temple-50 rounded-xl border border-temple-200 space-y-2.5">
+                <div className="text-xs font-bold text-temple-700">Add to your post</div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {/* Feeling button */}
                   <button
                     type="button"
                     onClick={() => setShowFeelingsModal(true)}
-                    className="flex items-center gap-1.5 p-2 bg-white hover:bg-stone-100 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 transition-colors"
+                    className="flex items-center gap-1.5 p-2 bg-white hover:bg-temple-50 rounded-xl border border-temple-200 text-xs font-bold text-temple-700 transition-colors"
                   >
-                    <Smile className="w-4 h-4 text-amber-500" />
+                    <Smile className="w-4 h-4 text-saffron-500" />
                     <span className="truncate">{newPostFeeling || 'Feeling / Activity'}</span>
                   </button>
 
@@ -1204,7 +1206,7 @@ export const SanataniSocialFeed: React.FC = () => {
                       const loc = prompt('Enter Mandir / Location (e.g. Kashi Vishwanath Mandir):', newPostLocation);
                       if (loc !== null) setNewPostLocation(loc);
                     }}
-                    className="flex items-center gap-1.5 p-2 bg-white hover:bg-stone-100 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 transition-colors"
+                    className="flex items-center gap-1.5 p-2 bg-white hover:bg-temple-50 rounded-xl border border-temple-200 text-xs font-bold text-temple-700 transition-colors"
                   >
                     <MapPin className="w-4 h-4 text-rose-500" />
                     <span className="truncate">{newPostLocation || 'Check in'}</span>
@@ -1217,7 +1219,7 @@ export const SanataniSocialFeed: React.FC = () => {
                       const tag = prompt('Enter hashtags (comma separated):', newPostTag);
                       if (tag !== null) setNewPostTag(tag);
                     }}
-                    className="flex items-center gap-1.5 p-2 bg-white hover:bg-stone-100 rounded-xl border border-stone-200 text-xs font-bold text-stone-700 transition-colors"
+                    className="flex items-center gap-1.5 p-2 bg-white hover:bg-temple-50 rounded-xl border border-temple-200 text-xs font-bold text-temple-700 transition-colors"
                   >
                     <Tag className="w-4 h-4 text-blue-500" />
                     <span className="truncate">{newPostTag || 'Hashtags'}</span>
@@ -1225,7 +1227,7 @@ export const SanataniSocialFeed: React.FC = () => {
                 </div>
 
                 {/* Photo / Image Attachment */}
-                <div className="pt-2 border-t border-stone-200/60">
+                <div className="pt-2 border-t border-temple-200/60">
                   <div className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4 text-emerald-600 shrink-0" />
                     <input
@@ -1233,7 +1235,7 @@ export const SanataniSocialFeed: React.FC = () => {
                       value={newPostImageUrl}
                       onChange={(e) => setNewPostImageUrl(e.target.value)}
                       placeholder="Paste Image URL (https://...)"
-                      className="flex-1 px-3 py-1.5 bg-white border border-stone-200 rounded-xl text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="flex-1 px-3 py-1.5 bg-white border border-temple-200 rounded-xl text-xs text-temple-900 focus:outline-none focus:ring-2 focus:ring-saffron-500"
                     />
                     {newPostImageUrl && (
                       <button
@@ -1248,7 +1250,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   </div>
 
                   {newPostImageUrl && (
-                    <div className="mt-2 relative rounded-xl overflow-hidden max-h-40 border border-stone-200">
+                    <div className="mt-2 relative rounded-xl overflow-hidden max-h-40 border border-temple-200">
                       <img src={newPostImageUrl || undefined} alt="Preview" className="w-full h-40 object-cover" />
                     </div>
                   )}
@@ -1259,7 +1261,7 @@ export const SanataniSocialFeed: React.FC = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-2xl text-sm font-black shadow-md transition-all active:scale-98"
+                  className="w-full py-3 bg-saffron-500 hover:bg-saffron-600 text-white rounded-xl text-sm font-semibold shadow-sm transition-all active:scale-98"
                 >
                   Publish Post 🙏
                 </button>
@@ -1272,22 +1274,22 @@ export const SanataniSocialFeed: React.FC = () => {
       {/* AUDIENCE SELECTOR DIALOG (FACEBOOK-STYLE MODAL) */}
       {showAudienceModal && (
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
-            <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-              <h4 className="font-black text-stone-900 text-base flex items-center gap-2">
-                <Globe className="w-5 h-5 text-amber-600" />
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl border border-temple-200 overflow-hidden flex flex-col">
+            <div className="px-5 py-4 border-b border-temple-200 flex items-center justify-between bg-temple-50">
+              <h4 className="font-semibold text-temple-900 text-base flex items-center gap-2">
+                <Globe className="w-5 h-5 text-saffron-600" />
                 Select Audience
               </h4>
               <button
                 onClick={() => setShowAudienceModal(false)}
-                className="w-7 h-7 rounded-full bg-stone-200 hover:bg-stone-300 flex items-center justify-center text-stone-600"
+                className="w-7 h-7 rounded-full bg-temple-200 hover:bg-temple-300 flex items-center justify-center text-temple-600"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-4 space-y-2 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              <p className="text-xs text-stone-500 mb-3">
+              <p className="text-xs text-temple-500 mb-3">
                 Who can see your post on Sanatani Social Feed?
               </p>
 
@@ -1300,19 +1302,19 @@ export const SanataniSocialFeed: React.FC = () => {
                       setNewPostAudience(opt.key);
                       setShowAudienceModal(false);
                     }}
-                    className={`p-3.5 rounded-2xl border flex items-start gap-3.5 cursor-pointer transition-all ${
+                    className={`p-3.5 rounded-xl border flex items-start gap-3.5 cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-amber-50/80 border-amber-500 shadow-xs'
-                        : 'bg-white border-stone-200 hover:bg-stone-50'
+                        ? 'bg-saffron-50/80 border-saffron-500 shadow-xs'
+                        : 'bg-white border-temple-200 hover:bg-temple-50'
                     }`}
                   >
                     <div className="text-2xl pt-0.5">{opt.icon}</div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <h5 className="font-bold text-sm text-stone-900">{opt.label}</h5>
-                        {isSelected && <Check className="w-4 h-4 text-amber-600 font-black" />}
+                        <h5 className="font-bold text-sm text-temple-900">{opt.label}</h5>
+                        {isSelected && <Check className="w-4 h-4 text-saffron-600 font-semibold" />}
                       </div>
-                      <p className="text-xs text-stone-500 mt-0.5">{opt.desc}</p>
+                      <p className="text-xs text-temple-500 mt-0.5">{opt.desc}</p>
                     </div>
                   </div>
                 );
@@ -1325,15 +1327,15 @@ export const SanataniSocialFeed: React.FC = () => {
       {/* FEELINGS / ACTIVITIES SELECTOR MODAL */}
       {showFeelingsModal && (
         <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-stone-200 overflow-hidden flex flex-col">
-            <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-              <h4 className="font-black text-stone-900 text-base flex items-center gap-2">
-                <Smile className="w-5 h-5 text-amber-600" />
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl border border-temple-200 overflow-hidden flex flex-col">
+            <div className="px-5 py-4 border-b border-temple-200 flex items-center justify-between bg-temple-50">
+              <h4 className="font-semibold text-temple-900 text-base flex items-center gap-2">
+                <Smile className="w-5 h-5 text-saffron-600" />
                 How are you feeling?
               </h4>
               <button
                 onClick={() => setShowFeelingsModal(false)}
-                className="w-7 h-7 rounded-full bg-stone-200 hover:bg-stone-300 flex items-center justify-center text-stone-600"
+                className="w-7 h-7 rounded-full bg-temple-200 hover:bg-temple-300 flex items-center justify-center text-temple-600"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1345,7 +1347,7 @@ export const SanataniSocialFeed: React.FC = () => {
                   setNewPostFeeling('');
                   setShowFeelingsModal(false);
                 }}
-                className="p-2.5 text-left text-xs font-bold text-stone-500 hover:bg-stone-100 rounded-xl"
+                className="p-2.5 text-left text-xs font-bold text-temple-500 hover:bg-temple-50 rounded-xl"
               >
                 Clear feeling
               </button>
@@ -1357,11 +1359,11 @@ export const SanataniSocialFeed: React.FC = () => {
                     setShowFeelingsModal(false);
                   }}
                   className={`p-3 text-left rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
-                    newPostFeeling === f ? 'bg-amber-100 text-amber-900' : 'bg-stone-50 hover:bg-stone-100 text-stone-800'
+                    newPostFeeling === f ? 'bg-saffron-100 text-saffron-900' : 'bg-temple-50 hover:bg-temple-50 text-temple-800'
                   }`}
                 >
                   <span>{f}</span>
-                  {newPostFeeling === f && <Check className="w-4 h-4 text-amber-700" />}
+                  {newPostFeeling === f && <Check className="w-4 h-4 text-saffron-700" />}
                 </button>
               ))}
             </div>
@@ -1372,9 +1374,9 @@ export const SanataniSocialFeed: React.FC = () => {
       {/* ONLINE SOS MODAL */}
       {showSOSModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
             <div className="bg-red-600 p-4 text-white flex items-center justify-between">
-              <h3 className="font-black text-lg flex items-center gap-2">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
                 <ShieldAlert className="w-6 h-6 animate-pulse" />
                 INITIATE GLOBAL SOS
               </h3>
@@ -1385,29 +1387,29 @@ export const SanataniSocialFeed: React.FC = () => {
             
             <div className="p-6 space-y-5 flex-1 overflow-y-auto">
               <div className="space-y-2">
-                <label className="text-xs font-black text-stone-500 uppercase tracking-widest">Type of Emergency</label>
+                <label className="text-xs font-semibold text-temple-500 uppercase tracking-widest">Type of Emergency</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button 
                     onClick={() => setSosSituation('ACCIDENT_MEDICAL')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'ACCIDENT_MEDICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'ACCIDENT_MEDICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <Activity className="w-5 h-5" /> Accident / Medical
                   </button>
                   <button 
                     onClick={() => setSosSituation('ROBBERY_ATTACK')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'ROBBERY_ATTACK' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'ROBBERY_ATTACK' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <ShieldAlert className="w-5 h-5" /> Robbery / Attack
                   </button>
                   <button 
                     onClick={() => setSosSituation('FIRE_DISASTER')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'FIRE_DISASTER' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'FIRE_DISASTER' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <Flame className="w-5 h-5" /> Fire / Disaster
                   </button>
                   <button 
                     onClick={() => setSosSituation('OTHER_CRITICAL')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'OTHER_CRITICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'OTHER_CRITICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <AlertTriangle className="w-5 h-5" /> Other Critical
                   </button>
@@ -1415,19 +1417,19 @@ export const SanataniSocialFeed: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-stone-500 uppercase tracking-widest">Emergency Details</label>
+                <label className="text-xs font-semibold text-temple-500 uppercase tracking-widest">Emergency Details</label>
                 <textarea 
                   value={sosDetails}
                   onChange={e => setSosDetails(e.target.value)}
                   placeholder="Describe the situation urgently... (e.g. Trapped in car, need ambulance at Highway 4)"
-                  className="w-full p-4 rounded-xl border border-stone-200 bg-stone-50 text-sm font-medium min-h-[100px] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                  className="w-full p-4 rounded-xl border border-temple-200 bg-temple-50 text-sm font-medium min-h-[100px] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
                 />
               </div>
 
-              <div className="bg-stone-100 p-4 rounded-xl text-xs font-bold text-stone-600 flex flex-col gap-2">
+              <div className="bg-temple-50 p-4 rounded-xl text-xs font-bold text-temple-600 flex flex-col gap-2">
                 <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-600" /> Auto-attaching Live GPS Location</span>
                 <span className="flex items-center gap-2"><Battery className="w-4 h-4 text-emerald-600" /> Auto-attaching Device Battery %</span>
-                <div className="mt-2 pt-2 border-t border-stone-200">
+                <div className="mt-2 pt-2 border-t border-temple-200">
                   <span className="flex items-center gap-2 text-indigo-700">
                     <Radio className="w-4 h-4" /> 
                     <span>
@@ -1440,11 +1442,11 @@ export const SanataniSocialFeed: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4 border-t border-stone-200 bg-stone-50">
+            <div className="p-4 border-t border-temple-200 bg-temple-50">
               <button 
                 onClick={handleOnlineSOS}
                 disabled={!sosDetails.trim()}
-                className="w-full py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest shadow-xl shadow-red-600/20 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold uppercase tracking-widest shadow-xl shadow-red-600/20 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
               >
                 <Radio className="w-5 h-5 animate-pulse" /> BROADCAST DUAL-BAND SOS
               </button>
@@ -1456,8 +1458,8 @@ export const SanataniSocialFeed: React.FC = () => {
 
       {/* CHAT OVERLAY */}
       {activeChatUser && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-stone-950/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-2xl h-full max-h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4 bg-temple-950/60 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-2xl h-full max-h-[85vh] bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col">
             <DirectMessageChat 
               recipientId={activeChatUser.id}
               recipientName={activeChatUser.name}

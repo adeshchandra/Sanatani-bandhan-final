@@ -18,7 +18,7 @@ export const DharamshalaDesk: React.FC = () => {
     switch (status) {
       case 'AVAILABLE': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       case 'OCCUPIED': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'CLEANING': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'CLEANING': return 'bg-saffron-100 text-saffron-800 border-saffron-200';
       default: return 'bg-slate-100 text-slate-800 border-slate-200';
     }
   };
@@ -65,10 +65,10 @@ export const DharamshalaDesk: React.FC = () => {
         </div>
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-amber-600 font-bold text-xs uppercase">Needs Cleaning</span>
-            <Clock className="w-4 h-4 text-amber-500" />
+            <span className="text-saffron-600 font-bold text-xs uppercase">Needs Cleaning</span>
+            <Clock className="w-4 h-4 text-saffron-500" />
           </div>
-          <p className="text-2xl font-black text-amber-700">4</p>
+          <p className="text-2xl font-black text-saffron-700">4</p>
         </div>
       </div>
 

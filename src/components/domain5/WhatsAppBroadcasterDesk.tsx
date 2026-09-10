@@ -51,20 +51,20 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
               High-Throughput Sandesh Engine
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               WhatsApp Business API & Twilio Meta Grounded
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             WhatsApp Broadcast & Sandesh Desk
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Automated Utsav notifications, personalized Gotra merge tags, and temple emergency alerts
           </p>
         </div>
@@ -73,7 +73,7 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
           type="button"
           disabled={isBroadcasting}
           onClick={handleSendBroadcast}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-stone-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50"
+          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-temple-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer disabled:opacity-50"
         >
           <Send className="w-4 h-4" />
           <span>{isBroadcasting ? 'Broadcasting...' : `Send to ${targetDevotees.length} Devotees`}</span>
@@ -83,18 +83,18 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
       {/* Editor & Live Preview Split */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Editor */}
-        <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl space-y-4">
-          <h3 className="font-extrabold text-sm text-stone-100 pb-2 border-b border-stone-800">
+        <div className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl space-y-4">
+          <h3 className="font-extrabold text-sm text-temple-100 pb-2 border-b border-temple-800">
             Broadcast Configuration
           </h3>
 
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block text-stone-300 font-semibold mb-1">Target Segment</label>
+              <label className="block text-temple-300 font-semibold mb-1">Target Segment</label>
               <select
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value as any)}
-                className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
               >
                 <option value="all">All Community Members ({devotees.length})</option>
                 <option value="Ratna">Ratna Diamond Patrons Only</option>
@@ -104,22 +104,22 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-stone-300 font-semibold mb-1">Occasion / Utsav</label>
+              <label className="block text-temple-300 font-semibold mb-1">Occasion / Utsav</label>
               <input
                 type="text"
                 value={occasion}
                 onChange={(e) => setOccasion(e.target.value)}
-                className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
               />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs text-stone-300 font-semibold">
+              <label className="block text-xs text-temple-300 font-semibold">
                 Message Body (Merge Tags Supported)
               </label>
-              <span className="text-[10px] text-stone-400 font-mono">
+              <span className="text-[10px] text-temple-400 font-mono">
                 {messageTemplate.length} chars
               </span>
             </div>
@@ -127,18 +127,18 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
               rows={6}
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
-              className="w-full bg-stone-800 border border-stone-700 rounded-xl p-3 text-xs text-stone-100 font-mono focus:outline-none focus:border-amber-500"
+              className="w-full bg-temple-800 border border-temple-700 rounded-xl p-3 text-xs text-temple-100 font-mono focus:outline-none focus:border-saffron-500"
             />
           </div>
 
           <div className="flex flex-wrap gap-1.5 pt-1">
-            <span className="text-[10px] text-stone-400 py-1">Quick Merge Tags:</span>
+            <span className="text-[10px] text-temple-400 py-1">Quick Merge Tags:</span>
             {['{{FullName}}', '{{Gotra}}', '{{Occasion}}', '{{MandirName}}', '{{PIN}}'].map((tag, idx) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => setMessageTemplate((prev) => `${prev} ${tag}`)}
-                className="px-2 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-[10px] font-mono text-amber-400 border border-stone-700 cursor-pointer"
+                className="px-2 py-0.5 rounded bg-temple-800 hover:bg-temple-700 text-[10px] font-mono text-saffron-400 border border-temple-700 cursor-pointer"
               >
                 {tag}
               </button>
@@ -147,23 +147,23 @@ export const WhatsAppBroadcasterDesk: React.FC = () => {
         </div>
 
         {/* Live Mobile WhatsApp Chat Preview */}
-        <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
+        <div className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-2 border-b border-stone-800">
+            <div className="flex items-center justify-between pb-2 border-b border-temple-800">
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-extrabold text-sm text-stone-100">Live Devotee Preview</h3>
+                <h3 className="font-extrabold text-sm text-temple-100">Live Devotee Preview</h3>
               </div>
-              <span className="text-[10px] text-stone-400 font-mono">
+              <span className="text-[10px] text-temple-400 font-mono">
                 Previewing for: {sampleDevotee.fullName}
               </span>
             </div>
 
             {/* Chat Bubble Canvas */}
-            <div className="bg-stone-950 p-4 rounded-2xl border border-stone-800 mt-4 space-y-3 min-h-[220px]">
-              <div className="bg-[#005c4b] text-stone-100 p-4 rounded-2xl rounded-tl-sm max-w-[90%] shadow-lg space-y-2 text-xs">
+            <div className="bg-temple-950 p-4 rounded-2xl border border-temple-800 mt-4 space-y-3 min-h-[220px]">
+              <div className="bg-[#005c4b] text-temple-100 p-4 rounded-2xl rounded-tl-sm max-w-[90%] shadow-lg space-y-2 text-xs">
                 <p className="whitespace-pre-wrap leading-relaxed">{previewMessage}</p>
-                <div className="flex items-center justify-end gap-1 text-[10px] text-stone-300">
+                <div className="flex items-center justify-end gap-1 text-[10px] text-temple-300">
                   <span>10:45 AM</span>
                   <CheckCheck className="w-3.5 h-3.5 text-sky-400" />
                 </div>

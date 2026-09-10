@@ -194,7 +194,7 @@ export default function PersonalSadhanaDesk() {
     return Object.values(userMap).sort((a, b) => b.karma - a.karma).slice(0, 10);
   }, [allLogs]);
 
-  if (loading) return <div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto"></div></div>;
+  if (loading) return <div className="p-10 text-center"><div className="animate-spin w-8 h-8 border-4 border-saffron-500 border-t-transparent rounded-full mx-auto"></div></div>;
 
   return (
     <div className="h-full flex flex-col bg-gray-50/50 relative">
@@ -209,7 +209,7 @@ export default function PersonalSadhanaDesk() {
       <div className="bg-white border-b border-gray-200 p-6 shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Flame size={100}/></div>
         <div className="relative z-10">
-          <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-1 flex items-center gap-1.5"><Sun size={14}/> {safeTranslate('sanatani_life', 'Individual Sanatani Life')}</p>
+          <p className="text-[10px] font-black text-saffron-600 uppercase tracking-widest mb-1 flex items-center gap-1.5"><Sun size={14}/> {safeTranslate('sanatani_life', 'Individual Sanatani Life')}</p>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Personal Sadhana</h1>
           <p className="text-sm text-gray-500 font-bold mt-1 max-w-xl">Track your spiritual progress, share with the community, and earn Karma.</p>
         </div>
@@ -218,7 +218,7 @@ export default function PersonalSadhanaDesk() {
       {/* Tabs */}
       <div className="bg-white border-b border-gray-200 px-6 shrink-0">
         <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
-          <button onClick={() => setActiveTab('MY_JOURNAL')} className={`py-4 text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border-b-2 flex items-center gap-2 ${activeTab === 'MY_JOURNAL' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}>
+          <button onClick={() => setActiveTab('MY_JOURNAL')} className={`py-4 text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border-b-2 flex items-center gap-2 ${activeTab === 'MY_JOURNAL' ? 'border-saffron-500 text-saffron-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}>
             <BookOpen size={16}/> My Journal
           </button>
           <button onClick={() => setActiveTab('COMMUNITY')} className={`py-4 text-xs font-black tracking-widest uppercase transition-all whitespace-nowrap border-b-2 flex items-center gap-2 ${activeTab === 'COMMUNITY' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}>
@@ -236,7 +236,7 @@ export default function PersonalSadhanaDesk() {
             {/* Stats Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in">
                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm flex flex-col items-center justify-center text-center hover:-translate-y-1 transition-all">
-                  <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mb-3"><Activity size={20}/></div>
+                  <div className="w-10 h-10 bg-saffron-50 text-saffron-600 rounded-full flex items-center justify-center mb-3"><Activity size={20}/></div>
                   <p className="text-3xl font-black text-gray-900">{totalJapa.toLocaleString()}</p>
                   <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Total Mantras</p>
                </div>
@@ -261,29 +261,29 @@ export default function PersonalSadhanaDesk() {
               {/* Form */}
               <div className="lg:col-span-1 space-y-6">
                 <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm relative overflow-hidden animate-in slide-in-from-left-4">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-10"></div>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-saffron-50 rounded-bl-full -z-10"></div>
                   <h2 className="text-lg font-black text-gray-900 flex items-center gap-2 mb-6"><CheckCircle2 className="text-green-500"/> Log Today's Sadhana</h2>
                   
                   <form onSubmit={handleLogSadhana} className="space-y-4">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Japa Count (Mantras)</label>
-                      <input type="number" required min={0} value={sadhanaForm.japaCount} onChange={e=>setSadhanaForm({...sadhanaForm, japaCount: Number(e.target.value)})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 transition-all shadow-sm" />
+                      <input type="number" required min={0} value={sadhanaForm.japaCount} onChange={e=>setSadhanaForm({...sadhanaForm, japaCount: Number(e.target.value)})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 transition-all shadow-sm" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Meditation (Minutes)</label>
-                      <input type="number" required min={0} value={sadhanaForm.meditationMins} onChange={e=>setSadhanaForm({...sadhanaForm, meditationMins: Number(e.target.value)})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 transition-all shadow-sm" />
+                      <input type="number" required min={0} value={sadhanaForm.meditationMins} onChange={e=>setSadhanaForm({...sadhanaForm, meditationMins: Number(e.target.value)})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 transition-all shadow-sm" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Scripture Read</label>
-                      <input type="text" placeholder="e.g. Ramayana Ch 2" value={sadhanaForm.scriptureRead} onChange={e=>setSadhanaForm({...sadhanaForm, scriptureRead: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 transition-all shadow-sm" />
+                      <input type="text" placeholder="e.g. Ramayana Ch 2" value={sadhanaForm.scriptureRead} onChange={e=>setSadhanaForm({...sadhanaForm, scriptureRead: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 transition-all shadow-sm" />
                     </div>
-                    <div className="flex items-center justify-between p-4 bg-orange-50 border border-orange-100 rounded-xl">
-                      <label htmlFor="vrat" className="text-sm font-bold text-orange-900 cursor-pointer">Observing Vrat/Fasting</label>
-                      <input type="checkbox" id="vrat" checked={sadhanaForm.vratFasting} onChange={e=>setSadhanaForm({...sadhanaForm, vratFasting: e.target.checked})} className="w-5 h-5 accent-orange-600 rounded cursor-pointer" />
+                    <div className="flex items-center justify-between p-4 bg-saffron-50 border border-saffron-100 rounded-xl">
+                      <label htmlFor="vrat" className="text-sm font-bold text-saffron-900 cursor-pointer">Observing Vrat/Fasting</label>
+                      <input type="checkbox" id="vrat" checked={sadhanaForm.vratFasting} onChange={e=>setSadhanaForm({...sadhanaForm, vratFasting: e.target.checked})} className="w-5 h-5 accent-saffron-600 rounded cursor-pointer" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">Journal / Notes</label>
-                      <textarea rows={2} value={sadhanaForm.notes} onChange={e=>setSadhanaForm({...sadhanaForm, notes: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-orange-500 transition-all resize-none shadow-sm" />
+                      <textarea rows={2} value={sadhanaForm.notes} onChange={e=>setSadhanaForm({...sadhanaForm, notes: e.target.value})} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:bg-white focus:border-saffron-500 transition-all resize-none shadow-sm" />
                     </div>
                     <div className="flex items-center gap-2 mt-2">
                       <input type="checkbox" id="public" checked={sadhanaForm.isPublic} onChange={e=>setSadhanaForm({...sadhanaForm, isPublic: e.target.checked})} className="w-4 h-4 accent-gray-900 rounded cursor-pointer" />
@@ -331,12 +331,12 @@ export default function PersonalSadhanaDesk() {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            {log.vratFasting && <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-[9px] font-black uppercase tracking-widest">Fasting</span>}
+                            {log.vratFasting && <span className="px-2 py-0.5 bg-saffron-100 text-saffron-700 rounded text-[9px] font-black uppercase tracking-widest">Fasting</span>}
                             <span className="text-xs font-bold text-gray-500">{new Date(log.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                             <span className="ml-auto text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">+${log.karmaEarned || 0} Karma</span>
                           </div>
                           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700 font-bold">
-                             <span className="flex items-center gap-1.5"><Activity size={14} className="text-orange-500"/> {log.japaCount} Mantras</span>
+                             <span className="flex items-center gap-1.5"><Activity size={14} className="text-saffron-500"/> {log.japaCount} Mantras</span>
                              <span className="flex items-center gap-1.5"><Sun size={14} className="text-blue-500"/> {log.meditationMins} Mins</span>
                              {log.scriptureRead && <span className="flex items-center gap-1.5"><Book size={14} className="text-purple-500"/> {log.scriptureRead}</span>}
                           </div>
@@ -378,7 +378,7 @@ export default function PersonalSadhanaDesk() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                   <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100 flex items-center gap-2">
-                    <Activity size={16} className="text-orange-500"/>
+                    <Activity size={16} className="text-saffron-500"/>
                     <div>
                       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Japa</p>
                       <p className="font-bold text-gray-800 text-sm">{log.japaCount}</p>
@@ -450,7 +450,7 @@ export default function PersonalSadhanaDesk() {
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-sm
                           ${idx === 0 ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' : 
                             idx === 1 ? 'bg-gray-200 text-gray-700 border border-gray-300' : 
-                            idx === 2 ? 'bg-orange-100 text-orange-800 border border-orange-300' : 
+                            idx === 2 ? 'bg-saffron-100 text-saffron-800 border border-saffron-300' : 
                             'bg-white text-gray-500 border border-gray-200'}
                         `}>
                           #{idx + 1}

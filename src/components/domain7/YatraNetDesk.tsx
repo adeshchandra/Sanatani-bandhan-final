@@ -296,16 +296,16 @@ export default function YatraNetDesk() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300 pb-24">
       {/* Tabs */}
-      <div className="flex bg-stone-200/50 p-1.5 rounded-2xl w-full sm:w-auto overflow-x-auto shadow-inner">
+      <div className="flex bg-temple-200/50 p-1.5 rounded-2xl w-full sm:w-auto overflow-x-auto shadow-inner">
         <button 
           onClick={() => setActiveTab('SOCIAL')}
-          className={`flex-1 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'SOCIAL' ? 'bg-white text-stone-900 shadow-md scale-100' : 'text-stone-500 scale-95 hover:text-stone-700'}`}
+          className={`flex-1 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'SOCIAL' ? 'bg-white text-temple-900 shadow-md scale-100' : 'text-temple-500 scale-95 hover:text-temple-700'}`}
         >
           Community Feed
         </button>
         <button 
           onClick={() => setActiveTab('MESH')}
-          className={`flex-1 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'MESH' ? 'bg-white text-rose-600 shadow-md scale-100' : 'text-stone-500 scale-95 hover:text-stone-700'}`}
+          className={`flex-1 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'MESH' ? 'bg-white text-rose-600 shadow-md scale-100' : 'text-temple-500 scale-95 hover:text-temple-700'}`}
         >
           Mesh Network & SOS
         </button>
@@ -314,26 +314,26 @@ export default function YatraNetDesk() {
       {activeTab === 'SOCIAL' ? (
         <div className="space-y-6 animate-in slide-in-from-bottom-4">
           {/* Create Post */}
-          <div className="bg-white p-6 rounded-3xl border border-stone-200 shadow-sm flex flex-col gap-4">
+          <div className="bg-white p-6 rounded-3xl border border-temple-200 shadow-sm flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center font-black">
+              <div className="w-10 h-10 bg-saffron-100 text-saffron-700 rounded-full flex items-center justify-center font-black">
                 {currentUser?.name?.charAt(0) || 'ॐ'}
               </div>
               <textarea 
                 value={newPostText}
                 onChange={e => setNewPostText(e.target.value)}
                 placeholder="Share a Kirtan update, Seva milestone, or Dharmic thought..."
-                className="w-full bg-stone-50 border border-stone-200 rounded-2xl p-4 text-sm font-bold text-stone-800 outline-none focus:border-amber-400 focus:bg-white resize-none"
+                className="w-full bg-temple-50 border border-temple-200 rounded-2xl p-4 text-sm font-bold text-temple-800 outline-none focus:border-saffron-400 focus:bg-white resize-none"
                 rows={2}
               />
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest flex items-center gap-1">
+              <span className="text-[10px] font-bold text-temple-400 uppercase tracking-widest flex items-center gap-1">
                 <CheckCircle2 size={12} className="text-green-500"/> Verified accounts only
               </span>
               <button 
                 onClick={handlePostSocial}
-                className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-md transition-all"
+                className="bg-saffron-600 hover:bg-saffron-700 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-md transition-all"
               >
                 Post Update
               </button>
@@ -343,22 +343,22 @@ export default function YatraNetDesk() {
           {/* Feed */}
           <div className="space-y-4">
             {socialFeed.filter(p => !p.isHidden).map(post => (
-              <div key={post.id} className="bg-white p-5 rounded-3xl border border-stone-200 shadow-sm flex flex-col gap-3 group">
+              <div key={post.id} className="bg-white p-5 rounded-3xl border border-temple-200 shadow-sm flex flex-col gap-3 group">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-stone-100 text-stone-600 rounded-full flex items-center justify-center font-black">
+                    <div className="w-10 h-10 bg-temple-100 text-temple-600 rounded-full flex items-center justify-center font-black">
                       {post.senderName?.charAt(0) || 'ॐ'}
                     </div>
                     <div>
-                      <h4 className="font-black text-stone-800 text-sm">{post.senderName}</h4>
-                      <p className="text-[10px] font-bold text-stone-400">{new Date(post.timestamp).toLocaleString()}</p>
+                      <h4 className="font-black text-temple-800 text-sm">{post.senderName}</h4>
+                      <p className="text-[10px] font-bold text-temple-400">{new Date(post.timestamp).toLocaleString()}</p>
                     </div>
                   </div>
                   {/* Admin Moderation */}
                   {(currentUser as any)?.role === 'MANAGER' && (
                     <button 
                       onClick={() => handleHidePost(post.id)}
-                      className="text-stone-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="text-temple-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       title="Hide Post (Admin)"
                     >
                       <X size={16} />
@@ -366,14 +366,14 @@ export default function YatraNetDesk() {
                   )}
                 </div>
                 
-                <p className="text-sm font-medium text-stone-700 ml-12 whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm font-medium text-temple-700 ml-12 whitespace-pre-wrap leading-relaxed">
                   {post.text}
                 </p>
 
-                <div className="ml-12 mt-2 pt-3 border-t border-stone-100 flex items-center gap-6">
+                <div className="ml-12 mt-2 pt-3 border-t border-temple-100 flex items-center gap-6">
                   <button 
                     onClick={() => handlePranam(post.id, post.pranams)}
-                    className="flex items-center gap-1.5 text-stone-500 hover:text-amber-600 transition-colors"
+                    className="flex items-center gap-1.5 text-temple-500 hover:text-saffron-600 transition-colors"
                   >
                     <span className="text-lg">🙏</span>
                     <span className="text-xs font-black">{post.pranams || 0} Pranams</span>
@@ -382,7 +382,7 @@ export default function YatraNetDesk() {
               </div>
             ))}
             {socialFeed.length === 0 && (
-              <div className="text-center py-20 text-stone-400">
+              <div className="text-center py-20 text-temple-400">
                 <div className="text-4xl mb-4 opacity-50">📿</div>
                 <p className="text-lg font-bold">No posts yet.</p>
                 <p className="text-xs uppercase tracking-widest">Be the first to share an update.</p>
@@ -394,8 +394,8 @@ export default function YatraNetDesk() {
       <div className="space-y-6 animate-in slide-in-from-bottom-4">
       {/* Hardware Requirement Banner */}
       {!isOnline && (
-        <div className="bg-amber-100 text-amber-900 px-4 py-3 rounded-2xl text-xs font-bold flex items-start gap-3 shadow-sm border border-amber-200">
-          <AlertTriangle className="w-5 h-5 shrink-0 text-amber-600 mt-0.5" />
+        <div className="bg-saffron-100 text-saffron-900 px-4 py-3 rounded-2xl text-xs font-bold flex items-start gap-3 shadow-sm border border-saffron-200">
+          <AlertTriangle className="w-5 h-5 shrink-0 text-saffron-600 mt-0.5" />
           <p>
             <strong>Hardware Required:</strong> Please ensure your phone's <strong>Bluetooth</strong> and <strong>Wi-Fi</strong> are turned ON for local mesh networking. 
             You do NOT need to manually pair with anyone or select a network.
@@ -426,14 +426,14 @@ export default function YatraNetDesk() {
         <div className="space-y-4 animate-in slide-in-from-right-4">
           <button 
             onClick={() => setActiveChatNode(null)}
-            className="flex items-center gap-2 text-sm font-bold text-stone-500 hover:text-stone-900 transition-colors"
+            className="flex items-center gap-2 text-sm font-bold text-temple-500 hover:text-temple-900 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Radar
           </button>
           
-          <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden flex flex-col h-[500px]">
+          <div className="bg-white rounded-3xl border border-temple-200 shadow-sm overflow-hidden flex flex-col h-[500px]">
             {/* Header */}
-            <div className="bg-stone-900 p-4 text-white flex items-center justify-between">
+            <div className="bg-temple-900 p-4 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center shrink-0">
                   <UserSquare2 className="w-5 h-5 text-emerald-400" />
@@ -446,7 +446,7 @@ export default function YatraNetDesk() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-stone-50 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-temple-50 custom-scrollbar">
               {broadcasts
                 .filter(b => b.type === 'DIRECT_MESSAGE' && (
                   (b.senderName === currentUser?.name && b.recipientName === activeChatNode) ||
@@ -458,11 +458,11 @@ export default function YatraNetDesk() {
                   return (
                     <div key={`${msg.id}-${idx}`} className={`flex flex-col max-w-[80%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
                       <div className={`p-3 rounded-2xl text-sm font-bold shadow-sm ${
-                        isMe ? 'bg-emerald-600 text-white rounded-br-sm' : 'bg-white border border-stone-200 text-stone-700 rounded-bl-sm'
+                        isMe ? 'bg-emerald-600 text-white rounded-br-sm' : 'bg-white border border-temple-200 text-temple-700 rounded-bl-sm'
                       }`}>
                         {msg.text}
                       </div>
-                      <span className="text-[9px] font-bold text-stone-400 mt-1 px-1">
+                      <span className="text-[9px] font-bold text-temple-400 mt-1 px-1">
                         {new Date(msg.originalTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         {isMe && <CheckCircle2 className="w-3 h-3 inline ml-1 opacity-70" />}
                       </span>
@@ -472,14 +472,14 @@ export default function YatraNetDesk() {
             </div>
 
             {/* Input Box */}
-            <div className="p-4 bg-white border-t border-stone-200 flex gap-2">
+            <div className="p-4 bg-white border-t border-temple-200 flex gap-2">
               <input 
                 type="text" 
                 placeholder="Direct P2P Message..."
                 value={directMessage}
                 onChange={(e) => setDirectMessage(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleDirectMessage()}
-                className="flex-1 p-3 rounded-xl bg-stone-100 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
+                className="flex-1 p-3 rounded-xl bg-temple-100 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
               />
               <button 
                 onClick={handleDirectMessage}
@@ -497,14 +497,14 @@ export default function YatraNetDesk() {
           <div className={`p-6 rounded-3xl border shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
             isOnline 
               ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-stone-900 border-stone-800 text-white'
+              : 'bg-temple-900 border-temple-800 text-white'
           }`}>
         <div>
           <h2 className="text-xl font-black flex items-center gap-3">
-            {isOnline ? <Wifi className="w-6 h-6 text-emerald-600" /> : <WifiOff className="w-6 h-6 text-amber-500" />}
+            {isOnline ? <Wifi className="w-6 h-6 text-emerald-600" /> : <WifiOff className="w-6 h-6 text-saffron-500" />}
             YatraNet Mesh Status
           </h2>
-          <p className={`text-sm font-medium mt-1 ${isOnline ? 'text-emerald-700' : 'text-stone-400'}`}>
+          <p className={`text-sm font-medium mt-1 ${isOnline ? 'text-emerald-700' : 'text-temple-400'}`}>
             {isOnline 
               ? 'Connected to Cloud. Broadcasting live.'
               : 'OFFLINE MODE ACTIVE. All actions are queued locally.'}
@@ -512,15 +512,15 @@ export default function YatraNetDesk() {
         </div>
         
         {/* Capacitor Plugin Readiness */}
-        <div className={`flex flex-col items-start sm:items-end text-xs font-bold ${isOnline ? 'text-emerald-600' : 'text-stone-400'}`}>
+        <div className={`flex flex-col items-start sm:items-end text-xs font-bold ${isOnline ? 'text-emerald-600' : 'text-temple-400'}`}>
           <span className="flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full"><Radio className="w-4 h-4"/> BLE Mesh Active</span>
           <span className="opacity-70 mt-1 pl-1">Capacitor Native Ready</span>
         </div>
       </div>
 
       {/* Radar Scanner Section */}
-      <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
-        <div className="p-6 bg-stone-900 text-white flex flex-col items-center justify-center relative overflow-hidden min-h-[160px]">
+      <div className="bg-white rounded-3xl border border-temple-200 shadow-sm overflow-hidden">
+        <div className="p-6 bg-temple-900 text-white flex flex-col items-center justify-center relative overflow-hidden min-h-[160px]">
           {/* Radar Background Animation */}
           {isScanning && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -542,15 +542,15 @@ export default function YatraNetDesk() {
               <h3 className="font-black tracking-widest uppercase text-sm">
                 {isScanning ? 'Scanning Area...' : 'Scan Nearby Devotees'}
               </h3>
-              <p className="text-xs text-stone-400 mt-1">Discover users within Bluetooth/Wi-Fi range</p>
+              <p className="text-xs text-temple-400 mt-1">Discover users within Bluetooth/Wi-Fi range</p>
             </div>
           </div>
         </div>
 
         {/* Scan Results */}
         {scanComplete && (
-          <div className="p-4 bg-stone-50 border-t border-stone-200 animate-in fade-in slide-in-from-top-2">
-            <h4 className="text-xs font-black text-stone-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+          <div className="p-4 bg-temple-50 border-t border-temple-200 animate-in fade-in slide-in-from-top-2">
+            <h4 className="text-xs font-black text-temple-500 uppercase tracking-widest mb-3 flex items-center gap-2">
               <Users className="w-4 h-4" /> Detected Nodes ({nearbyNodes.length})
             </h4>
             {nearbyNodes.length > 0 ? (
@@ -559,7 +559,7 @@ export default function YatraNetDesk() {
                   <button 
                     key={idx} 
                     onClick={() => setActiveChatNode(nodeName as string)}
-                    className="bg-white hover:bg-emerald-50 border border-stone-200 hover:border-emerald-200 text-stone-700 hover:text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="bg-white hover:bg-emerald-50 border border-temple-200 hover:border-emerald-200 text-temple-700 hover:text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     {nodeName}
@@ -567,7 +567,7 @@ export default function YatraNetDesk() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm font-medium text-stone-600">No active devices found in immediate range.</p>
+              <p className="text-sm font-medium text-temple-600">No active devices found in immediate range.</p>
             )}
           </div>
         )}
@@ -601,8 +601,8 @@ export default function YatraNetDesk() {
       </div>
 
       {/* Chat / Broadcast Box */}
-      <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-6 space-y-4">
-        <h3 className="text-sm font-black text-stone-900 uppercase tracking-widest border-b border-stone-100 pb-2">Group Broadcast Message</h3>
+      <div className="bg-white rounded-3xl border border-temple-200 shadow-sm p-6 space-y-4">
+        <h3 className="text-sm font-black text-temple-900 uppercase tracking-widest border-b border-temple-100 pb-2">Group Broadcast Message</h3>
         <div className="flex gap-3">
           <input 
             type="text" 
@@ -611,14 +611,14 @@ export default function YatraNetDesk() {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleBroadcast('MESSAGE')}
             className={`flex-1 p-4 rounded-xl text-sm font-bold outline-none transition-all ${
-              isOnline ? 'bg-stone-50 border border-stone-200 focus:bg-white focus:border-emerald-500' : 'bg-stone-100 placeholder:text-stone-500 border border-transparent'
+              isOnline ? 'bg-temple-50 border border-temple-200 focus:bg-white focus:border-emerald-500' : 'bg-temple-100 placeholder:text-temple-500 border border-transparent'
             }`}
           />
           <button 
             onClick={() => handleBroadcast('MESSAGE')}
             disabled={!message.trim()}
             className={`px-6 rounded-xl flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 ${
-              isOnline ? 'bg-stone-900 hover:bg-stone-800 text-white' : 'bg-amber-500 hover:bg-amber-600 text-stone-900'
+              isOnline ? 'bg-temple-900 hover:bg-temple-800 text-white' : 'bg-saffron-500 hover:bg-saffron-600 text-temple-900'
             }`}
           >
             <Send className="w-5 h-5" />
@@ -628,12 +628,12 @@ export default function YatraNetDesk() {
 
       {/* Live Broadcast Feed */}
       <div className="space-y-4">
-        <h3 className="text-sm font-black text-stone-500 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-black text-temple-500 uppercase tracking-widest flex items-center gap-2">
           <Activity className="w-4 h-4" /> Live Mesh Feed
         </h3>
         
         {broadcasts.length === 0 ? (
-          <div className="p-8 bg-white border border-stone-200 rounded-3xl text-center text-stone-500 text-sm font-bold shadow-sm">
+          <div className="p-8 bg-white border border-temple-200 rounded-3xl text-center text-temple-500 text-sm font-bold shadow-sm">
             No recent broadcasts in this area.
           </div>
         ) : (
@@ -651,27 +651,27 @@ export default function YatraNetDesk() {
                       ? 'bg-red-50 border-red-200 animate-in fade-in zoom-in' 
                       : isMe 
                         ? 'bg-emerald-50/50 border-emerald-100' 
-                        : 'bg-white border-stone-200'
+                        : 'bg-white border-temple-200'
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     {b.type === 'RICH_SOS' && b.senderPhoto ? (
                       <img src={b.senderPhoto || undefined} alt="User" className={`w-10 h-10 rounded-xl object-cover shrink-0 ${isSOS ? 'ring-2 ring-red-500 animate-pulse' : ''}`} />
                     ) : (
-                      <div className={`p-2 rounded-xl shrink-0 ${isSOS ? 'bg-red-100 text-red-600 animate-pulse' : isLocation ? 'bg-blue-100 text-blue-600' : 'bg-stone-100 text-stone-600'}`}>
+                      <div className={`p-2 rounded-xl shrink-0 ${isSOS ? 'bg-red-100 text-red-600 animate-pulse' : isLocation ? 'bg-blue-100 text-blue-600' : 'bg-temple-100 text-temple-600'}`}>
                         {isSOS ? <AlertTriangle className="w-5 h-5" /> : isLocation ? <MapPin className="w-5 h-5" /> : <Radio className="w-5 h-5" />}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className={`text-xs font-black uppercase tracking-widest ${isSOS ? 'text-red-700' : 'text-stone-900'}`}>
+                        <span className={`text-xs font-black uppercase tracking-widest ${isSOS ? 'text-red-700' : 'text-temple-900'}`}>
                           {b.senderName} {isMe && '(You)'}
                         </span>
-                        <span className="text-[10px] font-bold text-stone-400">
+                        <span className="text-[10px] font-bold text-temple-400">
                           {new Date(b.originalTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <p className={`text-sm font-bold ${isSOS ? 'text-red-600' : 'text-stone-600'}`}>
+                      <p className={`text-sm font-bold ${isSOS ? 'text-red-600' : 'text-temple-600'}`}>
                         {b.text}
                       </p>
                     </div>
@@ -722,7 +722,7 @@ export default function YatraNetDesk() {
 
                       {/* Triage & Forwarding Actions */}
                       {b.sosStatus === 'RESOLVED' ? (
-                        <div className="bg-stone-100 text-stone-600 text-xs font-bold p-2.5 rounded-xl border border-stone-200 flex items-center justify-between">
+                        <div className="bg-temple-100 text-temple-600 text-xs font-bold p-2.5 rounded-xl border border-temple-200 flex items-center justify-between">
                           <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Emergency Resolved</span>
                           <span>by {b.resolverName}</span>
                         </div>
@@ -735,14 +735,14 @@ export default function YatraNetDesk() {
                           <div className="flex gap-2">
                             <button 
                               onClick={() => handleExternalShare(b)}
-                              className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                              className="flex-1 py-2 bg-temple-900 hover:bg-temple-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
                               <Phone className="w-4 h-4" /> Share Externally
                             </button>
                             {(isMe || b.responderId === currentUser?.id) && (
                               <button 
                                 onClick={() => handleResolveSOS(b.id)}
-                                className="flex-1 py-2 bg-stone-200 hover:bg-stone-300 text-stone-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                                className="flex-1 py-2 bg-temple-200 hover:bg-temple-300 text-temple-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
                               >
                                 Mark Resolved
                               </button>
@@ -761,14 +761,14 @@ export default function YatraNetDesk() {
                             </button>
                             <button 
                               onClick={() => handleForwardSOS(b.id)}
-                              className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                              className="flex-1 py-2 bg-temple-900 hover:bg-temple-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
                               <Radio className="w-4 h-4" /> Boost / Relay {b.forwardCount > 0 && `(${b.forwardCount})`}
                             </button>
                           </div>
                           <button 
                             onClick={() => handleExternalShare(b)}
-                            className="w-full py-2 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-white hover:bg-temple-50 border border-temple-200 text-temple-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
                           >
                             <Phone className="w-4 h-4" /> Share to WhatsApp / SMS
                           </button>
@@ -785,21 +785,21 @@ export default function YatraNetDesk() {
 
       {/* Local Queue Viewer */}
       {queue.length > 0 && (
-        <div className="bg-amber-50 rounded-3xl border border-amber-200 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4">
-          <div className="p-4 bg-amber-100/50 border-b border-amber-200 flex items-center justify-between">
-            <h3 className="text-sm font-black text-amber-900 flex items-center gap-2">
+        <div className="bg-saffron-50 rounded-3xl border border-saffron-200 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4">
+          <div className="p-4 bg-saffron-100/50 border-b border-saffron-200 flex items-center justify-between">
+            <h3 className="text-sm font-black text-saffron-900 flex items-center gap-2">
               <Clock className="w-4 h-4"/> Offline Queue ({queue.length})
             </h3>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-amber-700">Auto-syncs on connection</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-saffron-700">Auto-syncs on connection</span>
           </div>
           <div className="p-2 space-y-2">
             {queue.map((item, idx) => (
               <div key={`${item.id}-${idx}`} className="p-3 bg-white/60 rounded-xl flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-black text-stone-900">{item.type}</span>
-                  <p className="text-[10px] font-bold text-stone-500 line-clamp-1">{item.payload.text}</p>
+                  <span className="text-xs font-black text-temple-900">{item.type}</span>
+                  <p className="text-[10px] font-bold text-temple-500 line-clamp-1">{item.payload.text}</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-md">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-saffron-600 bg-saffron-100 px-2 py-1 rounded-md">
                   <WifiOff className="w-3 h-3" /> PENDING
                 </div>
               </div>
@@ -824,29 +824,29 @@ export default function YatraNetDesk() {
             
             <div className="p-6 space-y-5 flex-1 overflow-y-auto">
               <div className="space-y-2">
-                <label className="text-xs font-black text-stone-500 uppercase tracking-widest">Type of Emergency</label>
+                <label className="text-xs font-black text-temple-500 uppercase tracking-widest">Type of Emergency</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button 
                     onClick={() => setSosSituation('LOST_PERSON')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'LOST_PERSON' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'LOST_PERSON' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <Users className="w-5 h-5" /> Lost Family
                   </button>
                   <button 
                     onClick={() => setSosSituation('MEDICAL')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'MEDICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'MEDICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <Activity className="w-5 h-5" /> Medical
                   </button>
                   <button 
                     onClick={() => setSosSituation('SEPARATED')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'SEPARATED' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'SEPARATED' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <MapPin className="w-5 h-5" /> Separated
                   </button>
                   <button 
                     onClick={() => setSosSituation('OTHER')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'OTHER' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-stone-200 text-stone-600'}`}
+                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'OTHER' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
                   >
                     <AlertTriangle className="w-5 h-5" /> Other Danger
                   </button>
@@ -854,23 +854,23 @@ export default function YatraNetDesk() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-stone-500 uppercase tracking-widest">Additional Details</label>
+                <label className="text-xs font-black text-temple-500 uppercase tracking-widest">Additional Details</label>
                 <textarea 
                   value={sosDetails}
                   onChange={e => setSosDetails(e.target.value)}
                   placeholder="e.g. 5 year old boy wearing blue shirt, near Gate 4..."
-                  className="w-full p-4 rounded-xl border border-stone-200 bg-stone-50 text-sm font-medium min-h-[100px] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+                  className="w-full p-4 rounded-xl border border-temple-200 bg-temple-50 text-sm font-medium min-h-[100px] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
                 />
               </div>
 
-              <div className="bg-stone-100 p-4 rounded-xl text-xs font-bold text-stone-600 flex flex-col gap-2">
+              <div className="bg-temple-100 p-4 rounded-xl text-xs font-bold text-temple-600 flex flex-col gap-2">
                 <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-600" /> Auto-attaching Live GPS Location</span>
                 <span className="flex items-center gap-2"><Battery className="w-4 h-4 text-emerald-600" /> Auto-attaching Device Battery %</span>
                 <span className="flex items-center gap-2"><UserSquare2 className="w-4 h-4 text-emerald-600" /> Auto-attaching Profile Identity & Photo</span>
               </div>
             </div>
 
-            <div className="p-4 border-t border-stone-200 bg-stone-50">
+            <div className="p-4 border-t border-temple-200 bg-temple-50">
               <button 
                 onClick={handleRichSOS}
                 disabled={!sosDetails.trim()}

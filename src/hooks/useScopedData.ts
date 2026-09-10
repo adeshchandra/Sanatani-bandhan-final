@@ -30,9 +30,8 @@ const useCollection = <T>(
         }
     });
 
-    if (options.orderBy) {
-      constraints.push(fsOrderBy(options.orderBy.field, options.orderBy.direction));
-    }
+    // In-memory sort will be applied after fetching to avoid requiring composite indexes
+    // (No fsOrderBy added to constraints)
     if (options.limit) {
       constraints.push(fsLimit(options.limit));
     }
@@ -40,7 +39,15 @@ const useCollection = <T>(
     const q = query(collection(db, collectionName), ...constraints);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as unknown as T);
+      let items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as unknown as T);
+      if (options.orderBy) {
+        const { field, direction } = options.orderBy;
+        items.sort((a: any, b: any) => {
+          if (a[field] < b[field]) return direction === 'asc' ? -1 : 1;
+          if (a[field] > b[field]) return direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+      }
       setData(items);
     }, (error) => {
       console.error(`Error fetching useCollection for ${collectionName}:`, error);
@@ -61,11 +68,11 @@ export const useScopedData = <T>(
     realtime?: boolean;
   } = {}
 ) => {
-  const { currentUser, activeWorkspace } = useAuthWorkspace();
+  const { currentUser, activeWorkspace, firebaseUser } = useAuthWorkspace();
   
   // Build RBAC filters
   const rbacFilters = useMemo(() => {
-    if (!currentUser || !activeWorkspace) {
+    if (!currentUser || !activeWorkspace || !firebaseUser || currentUser.id === 'temp-devotee-id') {
       return { _unauthorized: true };
     }
 

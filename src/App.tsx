@@ -404,7 +404,7 @@ const AppContent: React.FC = () => {
 
 
 const AppRouter: React.FC = () => {
-  const { isAuthenticated, loginWithPin, addWorkspace, switchWorkspace, loginAsRole } = useAuthWorkspace();
+  const { isAuthenticated, loginWithPin, addWorkspace, switchWorkspace, loginAsRole, firebaseUser } = useAuthWorkspace();
   const { devotees, seedDemoData } = useData();
   const [view, setView] = useState<'landing' | 'login' | 'signup'>('landing');
 
@@ -428,6 +428,8 @@ const AppRouter: React.FC = () => {
   }, [isAuthenticated, loginWithPin, devotees]);
 
   if (isAuthenticated) {
+    // Firebase Auth check bypassed to allow mock auth
+    // if (!firebaseUser) { ... }
     return <AppContent />;
   }
 

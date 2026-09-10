@@ -7,14 +7,14 @@ import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 
 export const GlobalSOSListener: React.FC = () => {
   const { addNotification } = useNotifications();
-  const { currentUser, isAuthenticated } = useAuthWorkspace();
+  const { currentUser, isAuthenticated, firebaseUser } = useAuthWorkspace();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const processedSOS = useRef<Set<string>>(new Set());
   const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
 
   useEffect(() => {
     // Only listen if user is authenticated to avoid permission errors
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !firebaseUser) return;
 
     // Request browser notification permission
     if ('Notification' in window && Notification.permission === 'default') {

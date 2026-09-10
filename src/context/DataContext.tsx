@@ -28,7 +28,7 @@ import { trackTreasuryPurchase, trackSignUp, trackGenerateLead } from '../utils/
 import { useAuthWorkspace } from './AuthWorkspaceContext';
 import { useToast } from './ToastContext';
 import { db } from '../lib/firebase';
-import { doc, setDoc, deleteDoc, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, onSnapshot, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
 // Master Initial Datasets
@@ -1030,6 +1030,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // FIREBASE SYNC EFFECT
   useEffect(() => {
     if (!activeWorkspace?.id || !isAuthenticated || !firebaseUser) return;
+    
     const collections = [
       { name: 'devotees', setter: setAllDevotees },
       { name: 'families', setter: setAllFamilies },
@@ -1048,13 +1049,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ];
 
     const unsubscribes = collections.map(c => {
-      return onSnapshot(collection(db, c.name), (snapshot) => {
+      let q;
+      
+      // Strict RBAC filtering for the global data sync
+      if (['SUPER_ADMIN', 'TRUSTEE', 'ACCOUNTANT', 'MANAGER'].includes(currentRole)) {
+        // Staff see all workspace data
+        q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id));
+      } else if (currentRole === 'PUROHIT') {
+        // Purohit sees pooja bookings assigned to them, but also basic workspace data
+        if (c.name === 'poojaBookings') {
+           q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id), where('assignedPurohit', '==', firebaseUser.uid));
+        } else {
+           q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id));
+        }
+      } else {
+        // DEVOTEE / VOLUNTEER see strictly their own data
+        if (c.name === 'devotees') {
+          q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id), where('id', '==', firebaseUser.uid));
+        } else if (c.name === 'poojaBookings' || c.name === 'treasury') {
+          q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id), where('devoteeId', '==', firebaseUser.uid));
+        } else {
+           // Skip fetching full collections for Devotees
+           c.setter([]);
+           return () => {};
+        }
+      }
+
+      return onSnapshot(q, (snapshot) => {
         if (!snapshot.empty) {
           const items = snapshot.docs.map(doc => doc.data() as any);
-          // Only update if there are items, to not overwrite initial mock data if db is empty
           c.setter(items);
         }
-      }, (err) => console.error("Firebase sync error", err));
+      }, (err) => console.error("Firebase sync error for " + c.name, err));
     });
 
     return () => unsubscribes.forEach(unsub => unsub());
@@ -1466,7 +1492,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addTreasuryTransaction = (tx: Omit<TreasuryTransaction, 'id' | 'auditVerified'>): boolean => {
     if (!checkAndIncrementModuleQuota('treasury')) return false;
-
     const id = `tx-${Date.now()}`;
     const now = Date.now();
     const newTx: any = {
@@ -1478,7 +1503,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       _createdAt: now,
       _expiresAt: now + AUTO_PURGE_TTL_MS,
     };
+    
+    // Optimistic UI Update
     setAllTreasury((prev) => [newTx, ...prev]);
+    
+    // Firestore DB Write
+    try {
+      addDoc(collection(db, 'treasury'), {
+        ...newTx,
+        timestamp: serverTimestamp()
+      }).catch(err => console.error("Firebase Treasury Write Error:", err));
+    } catch(e) {
+      console.error(e);
+    }
 
     if (tx.type === 'Income') {
       trackTreasuryPurchase({

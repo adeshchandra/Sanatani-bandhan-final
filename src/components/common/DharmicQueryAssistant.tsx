@@ -531,21 +531,21 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
   return (
     <div
       id="dharmic-query-assistant-container"
-      className={`flex flex-col bg-slate-900 border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden font-sans text-slate-100 ${
+      className={`flex flex-col bg-slate-900 border border-saffron-500/30 rounded-2xl shadow-2xl overflow-hidden font-sans text-slate-100 ${
         isDrawer
           ? 'fixed top-16 right-4 bottom-4 w-full sm:w-[500px] z-50 transition-all duration-300'
           : 'w-full h-full min-h-[600px]'
       }`}
     >
       {/* Auspicious Top Header */}
-      <div className="bg-gradient-to-r from-amber-950 via-slate-900 to-orange-950 px-4 sm:px-5 py-3.5 border-b border-amber-500/20 flex items-center justify-between shrink-0">
+      <div className="bg-gradient-to-r from-saffron-950 via-slate-900 to-saffron-950 px-4 sm:px-5 py-3.5 border-b border-saffron-500/20 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-amber-500/20 font-serif font-bold text-lg select-none">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-saffron-500 to-saffron-600 flex items-center justify-center text-white shadow-lg shadow-saffron-500/20 font-serif font-bold text-lg select-none">
             ॐ
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-amber-100 tracking-wide flex items-center gap-1.5">
+              <h3 className="text-sm sm:text-base font-bold text-saffron-100 tracking-wide flex items-center gap-1.5">
                 Universal Dharmic Assistant
               </h3>
               {hasValidKey ? (
@@ -554,13 +554,13 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                   Custom Key
                 </span>
               ) : (
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 font-bold flex items-center gap-1">
-                  <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-saffron-500/20 border border-saffron-500/30 text-saffron-300 font-bold flex items-center gap-1">
+                  <Sparkles className="w-2.5 h-2.5 text-saffron-400" />
                   Gemini Flash
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-amber-200/70 truncate max-w-[260px]">
+            <p className="text-[11px] text-saffron-200/70 truncate max-w-[260px]">
               Vedic Scriptures, Rituals, & Mandir ERP Support
             </p>
           </div>
@@ -572,7 +572,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
             type="button"
             onClick={() => setShowKeyModal(true)}
             title="Configure Custom Gemini API Key & Guide"
-            className="p-1.5 rounded-lg text-amber-300 hover:text-white bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-saffron-300 hover:text-white bg-saffron-500/10 hover:bg-saffron-500/20 border border-saffron-500/30 transition-colors cursor-pointer"
           >
             <Key className="w-4 h-4" />
           </button>
@@ -582,7 +582,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
               type="button"
               onClick={clearChat}
               title="Reset Conversation"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-white/5 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-saffron-300 hover:bg-white/5 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
@@ -609,7 +609,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
             onClick={() => setMainTab('ai')}
             className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               mainTab === 'ai'
-                ? 'bg-amber-500 text-slate-950 shadow-xs'
+                ? 'bg-saffron-500 text-slate-950 shadow-xs'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -633,7 +633,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
         {mainTab === 'ai' && (
           <div className="hidden sm:flex items-center gap-1 text-[11px] text-slate-400">
             <span>Context:</span>
-            <span className="font-mono text-amber-400 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+            <span className="font-mono text-saffron-400 font-bold bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
               {activeModule}
             </span>
           </div>
@@ -649,7 +649,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
               onClick={() => setAssistantMode('auto')}
               className={`px-2.5 py-1 rounded-md transition-colors cursor-pointer ${
                 assistantMode === 'auto'
-                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold'
+                  ? 'bg-saffron-500/20 border border-saffron-500/40 text-saffron-300 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -659,7 +659,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
               onClick={() => setAssistantMode('scriptural')}
               className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors cursor-pointer ${
                 assistantMode === 'scriptural'
-                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold'
+                  ? 'bg-saffron-500/20 border border-saffron-500/40 text-saffron-300 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -670,7 +670,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
               onClick={() => setAssistantMode('administrative')}
               className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors cursor-pointer ${
                 assistantMode === 'administrative'
-                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold'
+                  ? 'bg-saffron-500/20 border border-saffron-500/40 text-saffron-300 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -681,7 +681,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
               onClick={() => setAssistantMode('rituals')}
               className={`px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors cursor-pointer ${
                 assistantMode === 'rituals'
-                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold'
+                  ? 'bg-saffron-500/20 border border-saffron-500/40 text-saffron-300 font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -698,9 +698,9 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                 className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
               >
                 {msg.sender === 'user' ? (
-                  <div className="max-w-[85%] bg-amber-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-md">
+                  <div className="max-w-[85%] bg-saffron-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-md">
                     <p className="text-xs sm:text-sm leading-relaxed">{msg.query}</p>
-                    <span className="text-[10px] text-amber-200/80 block text-right mt-1">
+                    <span className="text-[10px] text-saffron-200/80 block text-right mt-1">
                       {msg.timestamp}
                     </span>
                   </div>
@@ -709,15 +709,15 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                     {/* Header of Assistant Card */}
                     <div className="flex items-start justify-between gap-3 border-b border-slate-800/80 pb-2.5">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-serif text-sm">
+                        <div className="w-7 h-7 rounded-lg bg-saffron-500/10 border border-saffron-500/30 flex items-center justify-center text-saffron-400 font-serif text-sm">
                           ॐ
                         </div>
                         <div>
-                          <h4 className="text-xs sm:text-sm font-bold text-amber-200 leading-tight">
+                          <h4 className="text-xs sm:text-sm font-bold text-saffron-200 leading-tight">
                             {msg.result?.title || 'Dharmic Guidance'}
                           </h4>
                           {msg.result?.scriptureSource && (
-                            <p className="text-[10px] text-amber-400/80 font-medium">
+                            <p className="text-[10px] text-saffron-400/80 font-medium">
                               Pramana: {msg.result.scriptureSource}
                             </p>
                           )}
@@ -735,8 +735,8 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                               )
                             }
                             title={isSpeaking ? 'Stop Audio' : 'Listen to Pronunciation'}
-                            className={`p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors cursor-pointer ${
-                              isSpeaking ? 'text-amber-400 bg-amber-500/10 animate-pulse' : ''
+                            className={`p-1.5 rounded-lg text-slate-400 hover:text-saffron-300 hover:bg-slate-800 transition-colors cursor-pointer ${
+                              isSpeaking ? 'text-saffron-400 bg-saffron-500/10 animate-pulse' : ''
                             }`}
                           >
                             {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
@@ -765,7 +765,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                             handleBookmark(msg.result?.title || 'Note', msg.result?.shloka)
                           }
                           title="Save to Notes"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-saffron-300 hover:bg-slate-800 transition-colors cursor-pointer"
                         >
                           <Bookmark className="w-3.5 h-3.5" />
                         </button>
@@ -774,28 +774,28 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
 
                     {/* Sanskrit Shloka Box (if present) */}
                     {msg.result?.shloka && (
-                      <div className="bg-gradient-to-br from-amber-950/40 via-slate-900 to-orange-950/30 border border-amber-500/30 rounded-xl p-3 space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] text-amber-400 uppercase tracking-widest font-bold">
+                      <div className="bg-gradient-to-br from-saffron-950/40 via-slate-900 to-saffron-950/30 border border-saffron-500/30 rounded-xl p-3 space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] text-saffron-400 uppercase tracking-widest font-bold">
                           <span className="flex items-center gap-1">
-                            <Sparkle className="w-3 h-3 text-amber-400" />
+                            <Sparkle className="w-3 h-3 text-saffron-400" />
                             Sacred Shastra Pramana
                           </span>
                           <span>{msg.result.scriptureSource}</span>
                         </div>
 
-                        <div className="font-serif text-sm sm:text-base text-amber-100 leading-relaxed font-semibold text-center py-1 tracking-wide">
+                        <div className="font-serif text-sm sm:text-base text-saffron-100 leading-relaxed font-semibold text-center py-1 tracking-wide">
                           ॥ {msg.result.shloka} ॥
                         </div>
 
                         {msg.result.shlokaTransliteration && (
-                          <div className="text-[11px] text-amber-200/80 italic text-center font-mono">
+                          <div className="text-[11px] text-saffron-200/80 italic text-center font-mono">
                             "{msg.result.shlokaTransliteration}"
                           </div>
                         )}
 
                         {msg.result.shlokaMeaning && (
-                          <div className="text-xs text-slate-300 border-t border-amber-500/20 pt-1.5 leading-relaxed">
-                            <strong className="text-amber-300 font-semibold">Meaning: </strong>
+                          <div className="text-xs text-slate-300 border-t border-saffron-500/20 pt-1.5 leading-relaxed">
+                            <strong className="text-saffron-300 font-semibold">Meaning: </strong>
                             {msg.result.shlokaMeaning}
                           </div>
                         )}
@@ -810,13 +810,13 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                     {/* Guidance Bullet Points */}
                     {msg.result?.guidancePoints && msg.result.guidancePoints.length > 0 && (
                       <div className="space-y-1 pt-1">
-                        <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">
+                        <span className="text-[10px] font-bold text-saffron-400 uppercase tracking-wider block">
                           Key Recommendations:
                         </span>
                         <ul className="space-y-1 text-xs text-slate-300">
                           {msg.result.guidancePoints.map((point, i) => (
                             <li key={i} className="flex items-start gap-1.5">
-                              <span className="text-amber-500 font-bold">•</span>
+                              <span className="text-saffron-500 font-bold">•</span>
                               <span>{point}</span>
                             </li>
                           ))}
@@ -838,10 +838,10 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                                   showToast(`Switched to ${action.label}`, 'info');
                                 }
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-saffron-500/10 hover:bg-saffron-500/20 border border-saffron-500/30 text-saffron-300 text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                             >
                               <span>{action.label}</span>
-                              <ArrowRight className="w-3 h-3 text-amber-400" />
+                              <ArrowRight className="w-3 h-3 text-saffron-400" />
                             </button>
                           ))}
                         </div>
@@ -853,12 +853,12 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
             ))}
 
             {isLoading && (
-              <div className="flex items-center gap-3 bg-slate-950 border border-amber-500/20 rounded-2xl p-4 animate-pulse">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400 font-serif">
+              <div className="flex items-center gap-3 bg-slate-950 border border-saffron-500/20 rounded-2xl p-4 animate-pulse">
+                <div className="w-7 h-7 rounded-lg bg-saffron-500/20 flex items-center justify-center text-saffron-400 font-serif">
                   ॐ
                 </div>
                 <div className="space-y-1.5 flex-1">
-                  <div className="h-2.5 bg-amber-500/20 rounded w-1/3"></div>
+                  <div className="h-2.5 bg-saffron-500/20 rounded w-1/3"></div>
                   <div className="h-2 bg-slate-800 rounded w-3/4"></div>
                 </div>
               </div>
@@ -871,13 +871,13 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
           <div className="bg-slate-950 border-t border-slate-800 px-3 py-2 shrink-0">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                <Sparkles className="w-2.5 h-2.5 text-saffron-400" />
                 Quick Inquiries:
               </span>
               <button
                 type="button"
                 onClick={() => setShowPresets(!showPresets)}
-                className="text-[10px] text-slate-400 hover:text-amber-300 cursor-pointer"
+                className="text-[10px] text-slate-400 hover:text-saffron-300 cursor-pointer"
               >
                 {showPresets ? 'Hide' : 'Show'}
               </button>
@@ -891,7 +891,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                     type="button"
                     onClick={() => handleSendQuery(prompt)}
                     disabled={isLoading}
-                    className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-amber-950/40 border border-slate-700/60 hover:border-amber-500/40 text-[11px] text-slate-300 hover:text-amber-200 whitespace-nowrap transition-colors shrink-0 cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-saffron-950/40 border border-slate-700/60 hover:border-saffron-500/40 text-[11px] text-slate-300 hover:text-saffron-200 whitespace-nowrap transition-colors shrink-0 cursor-pointer"
                   >
                     {prompt}
                   </button>
@@ -912,7 +912,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
               <select
                 value={selectedLang}
                 onChange={(e) => setSelectedLang(e.target.value as AssistantLang)}
-                className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-2 py-2.5 focus:outline-none focus:border-amber-500"
+                className="bg-slate-900 border border-slate-700 text-slate-300 text-xs rounded-xl px-2 py-2.5 focus:outline-none focus:border-saffron-500"
               >
                 <option value="en">EN</option>
                 <option value="hi">हिन्दी</option>
@@ -926,7 +926,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                   value={promptInput}
                   onChange={(e) => setPromptInput(e.target.value)}
                   placeholder={`Ask scriptural guidance or SOPs...`}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-3 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-3 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-saffron-500"
                   disabled={isLoading}
                 />
               </div>
@@ -936,7 +936,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                 disabled={!promptInput.trim() || isLoading}
                 className={`p-2.5 rounded-xl font-semibold flex items-center justify-center transition-all ${
                   promptInput.trim() && !isLoading
-                    ? 'bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-md cursor-pointer'
+                    ? 'bg-saffron-500 text-slate-950 hover:bg-saffron-400 shadow-md cursor-pointer'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                 }`}
               >
@@ -1056,16 +1056,16 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
       {/* API KEY CONFIGURATION MODAL & 3-STEP QUICK GUIDE */}
       {showKeyModal && (
         <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 rounded-3xl w-full max-w-lg border border-amber-500/30 shadow-2xl overflow-hidden flex flex-col text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-slate-900 rounded-3xl w-full max-w-lg border border-saffron-500/30 shadow-2xl overflow-hidden flex flex-col text-slate-100 animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="px-6 py-4 bg-gradient-to-r from-amber-950 to-slate-900 border-b border-amber-500/20 flex items-center justify-between">
+            <div className="px-6 py-4 bg-gradient-to-r from-saffron-950 to-slate-900 border-b border-saffron-500/20 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
+                <div className="w-8 h-8 rounded-xl bg-saffron-500 text-slate-950 flex items-center justify-center font-bold">
                   <Key className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-amber-100">Personal Gemini API Key</h4>
-                  <p className="text-[10px] text-amber-300/70">Connect your Google Gemini key for unrestricted AI calls</p>
+                  <h4 className="text-sm font-bold text-saffron-100">Personal Gemini API Key</h4>
+                  <p className="text-[10px] text-saffron-300/70">Connect your Google Gemini key for unrestricted AI calls</p>
                 </div>
               </div>
               <button
@@ -1079,10 +1079,10 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
             {/* Modal Content */}
             <div className="p-6 space-y-4 overflow-y-auto text-xs">
               {/* 3-Step Free Key Guide */}
-              <div className="p-4 bg-slate-950 rounded-2xl border border-amber-500/20 space-y-3">
+              <div className="p-4 bg-slate-950 rounded-2xl border border-saffron-500/20 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h5 className="font-bold text-amber-300 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <h5 className="font-bold text-saffron-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-saffron-400" />
                     How to get your free Gemini Key in 3 Steps
                   </h5>
                   <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full">
@@ -1092,21 +1092,21 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
                   <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] inline-flex items-center justify-center mb-1">1</span>
+                    <span className="w-5 h-5 rounded-full bg-saffron-500 text-slate-950 font-bold text-[10px] inline-flex items-center justify-center mb-1">1</span>
                     <p className="font-bold text-white mb-0.5">Visit AI Studio</p>
                     <p className="text-slate-400 text-[10px]">
-                      Open <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-amber-400 underline font-bold inline-flex items-center gap-0.5">aistudio.google.com <ExternalLink className="w-2 h-2" /></a>
+                      Open <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-saffron-400 underline font-bold inline-flex items-center gap-0.5">aistudio.google.com <ExternalLink className="w-2 h-2" /></a>
                     </p>
                   </div>
 
                   <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] inline-flex items-center justify-center mb-1">2</span>
+                    <span className="w-5 h-5 rounded-full bg-saffron-500 text-slate-950 font-bold text-[10px] inline-flex items-center justify-center mb-1">2</span>
                     <p className="font-bold text-white mb-0.5">Create Key</p>
                     <p className="text-slate-400 text-[10px]">Click "Create API key in new project" (takes 2 seconds).</p>
                   </div>
 
                   <div className="p-2.5 bg-slate-900 rounded-xl border border-slate-800">
-                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold text-[10px] inline-flex items-center justify-center mb-1">3</span>
+                    <span className="w-5 h-5 rounded-full bg-saffron-500 text-slate-950 font-bold text-[10px] inline-flex items-center justify-center mb-1">3</span>
                     <p className="font-bold text-white mb-0.5">Paste Below</p>
                     <p className="text-slate-400 text-[10px]">Paste the copied string below and click Save & Test.</p>
                   </div>
@@ -1124,7 +1124,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                     value={customKeyInput}
                     onChange={(e) => setCustomKeyInput(e.target.value)}
                     placeholder="AIzaSy..."
-                    className="w-full pl-3 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-amber-500"
+                    className="w-full pl-3 pr-10 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-mono text-white focus:outline-none focus:border-saffron-500"
                   />
                   <button
                     type="button"
@@ -1150,7 +1150,7 @@ export const DharmicQueryAssistant: React.FC<DharmicQueryAssistantProps> = ({
                 type="button"
                 onClick={handleSaveKey}
                 disabled={isValidatingKey}
-                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-saffron-500 hover:bg-saffron-400 text-slate-950 font-black rounded-xl shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 {isValidatingKey ? (
                   <>

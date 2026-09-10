@@ -117,26 +117,26 @@ export const QRPassWidget: React.FC = () => {
   const photo = currentDevotee.photoUrl || currentDevotee.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentDevotee.fullName || 'Devotee')}&background=fde68a&color=92400e`;
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl border border-amber-100 max-w-md mx-auto w-full relative overflow-hidden">
+    <div className="bg-white rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-xl border border-saffron-100 max-w-md mx-auto w-full relative overflow-hidden">
       {/* Dynamic Brightness Enhancer */}
       <div className="absolute inset-0 bg-white pointer-events-none mix-blend-overlay brightness-150 z-0" />
       
       <div className="relative z-10 flex flex-col items-center w-full">
         {/* Header */}
         <div className="flex justify-between items-center w-full mb-6">
-          <h2 className="text-xl font-black text-amber-900 flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-saffron-900 flex items-center gap-2">
             <Shield className="w-6 h-6 text-emerald-600" />
             Digital Entry Pass
           </h2>
           {isOffline && (
-            <span className="flex items-center gap-1 text-xs font-bold bg-stone-100 text-stone-500 px-2 py-1 rounded-full">
+            <span className="flex items-center gap-1 text-xs font-bold bg-temple-50 text-temple-500 px-2 py-1 rounded-full">
               <WifiOff className="w-3 h-3" /> Offline
             </span>
           )}
         </div>
 
         {/* QR Code Canvas Container */}
-        <div className="bg-white p-4 rounded-2xl shadow-inner border-2 border-stone-100 mb-6 relative">
+        <div className="bg-white p-4 rounded-xl shadow-inner border-2 border-temple-100 mb-6 relative">
           {qrData ? (
             <div className="brightness-125 contrast-125">
               <QRCodeSVG 
@@ -144,12 +144,12 @@ export const QRPassWidget: React.FC = () => {
                 size={220} 
                 level="H" 
                 includeMargin={true}
-                fgColor="#1c1917" // stone-900
+                fgColor="#1c1917" // temple-900
                 bgColor="#ffffff"
               />
             </div>
           ) : (
-            <div className="w-[220px] h-[220px] bg-stone-50 flex flex-col items-center justify-center text-stone-400 rounded-xl">
+            <div className="w-[220px] h-[220px] bg-temple-50 flex flex-col items-center justify-center text-temple-400 rounded-xl">
               <RefreshCw className="w-8 h-8 animate-spin mb-2" />
               <span className="text-xs font-bold">Generating Secure Pass...</span>
             </div>
@@ -157,25 +157,25 @@ export const QRPassWidget: React.FC = () => {
           
           {/* Logo overlay */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-full shadow-sm">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center border-2 border-white">
-              <Shield className="w-5 h-5 text-amber-700" />
+            <div className="w-10 h-10 bg-saffron-100 rounded-full flex items-center justify-center border-2 border-white">
+              <Shield className="w-5 h-5 text-saffron-700" />
             </div>
           </div>
         </div>
 
         {/* Devotee Info */}
-        <div className="flex items-center gap-4 bg-stone-50 w-full p-4 rounded-2xl border border-stone-100 mb-6">
+        <div className="flex items-center gap-4 bg-temple-50 w-full p-4 rounded-xl border border-temple-100 mb-6">
           <img src={photo} alt={currentDevotee.fullName} className="w-14 h-14 rounded-full border-2 border-white shadow-sm object-cover" />
           <div className="text-left">
-            <h3 className="font-bold text-stone-900">{currentDevotee.fullName}</h3>
-            <p className="text-xs text-stone-500 font-medium tracking-wide">{currentDevotee.sevaTier} • {activeWorkspace?.name}</p>
+            <h3 className="font-bold text-temple-900">{currentDevotee.fullName}</h3>
+            <p className="text-xs text-temple-500 font-medium tracking-wide">{currentDevotee.sevaTier} • {activeWorkspace?.name}</p>
           </div>
         </div>
 
         {/* Expiry & Refresh */}
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 text-xs font-bold text-stone-500">
-            <Clock className="w-4 h-4 text-amber-600" />
+          <div className="flex items-center gap-2 text-xs font-bold text-temple-500">
+            <Clock className="w-4 h-4 text-saffron-600" />
             {expiryTime > 0 ? (
               <span>Valid for {hoursLeft} hours</span>
             ) : (
@@ -186,7 +186,7 @@ export const QRPassWidget: React.FC = () => {
           <button 
             onClick={() => generateQR(true)}
             disabled={isGenerating || isOffline}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-temple-50 hover:bg-temple-200 text-temple-700 text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
             Refresh

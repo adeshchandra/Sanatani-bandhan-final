@@ -64,9 +64,9 @@ export const AppStoreDesk: React.FC = () => {
   }, {} as Record<string, typeof processedModules>);
 
   return (
-    <div className="flex flex-col h-full bg-stone-950 text-stone-200">
+    <div className="flex flex-col h-full bg-temple-950 text-temple-200">
       {/* Header */}
-      <div className="shrink-0 border-b border-stone-800 bg-stone-900/50">
+      <div className="shrink-0 border-b border-temple-800 bg-temple-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
@@ -77,7 +77,7 @@ export const AppStoreDesk: React.FC = () => {
                 <Blocks className="w-8 h-8 text-indigo-500" />
                 App Store & Add-ons
               </h1>
-              <p className="text-sm text-stone-400 mt-2 font-medium max-w-2xl leading-relaxed">
+              <p className="text-sm text-temple-400 mt-2 font-medium max-w-2xl leading-relaxed">
                 Customize your workspace beyond its base archetype. Install specialized modules like the Crisis Command Center, Raktha Seva, or Asset Tracking to solve real-world organizational pain points.
               </p>
             </div>
@@ -91,7 +91,7 @@ export const AppStoreDesk: React.FC = () => {
                     className={`px-4 py-2 text-xs font-bold rounded-lg transition-all border ${
                       activeFilter === f 
                         ? 'bg-indigo-600 text-white border-indigo-500 shadow-md' 
-                        : 'bg-stone-900 text-stone-400 border-stone-800 hover:text-stone-200 hover:bg-stone-800'
+                        : 'bg-temple-900 text-temple-400 border-temple-800 hover:text-temple-200 hover:bg-temple-800'
                     }`}
                   >
                     {f}
@@ -99,13 +99,13 @@ export const AppStoreDesk: React.FC = () => {
                 ))}
               </div>
               <div className="relative">
-                <Search className="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-temple-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Search modules..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 bg-stone-900 border border-stone-800 rounded-lg text-sm text-stone-200 placeholder-stone-600 focus:outline-none focus:border-indigo-500 transition-all"
+                  className="w-full pl-9 pr-4 py-2.5 bg-temple-900 border border-temple-800 rounded-lg text-sm text-temple-200 placeholder-temple-600 focus:outline-none focus:border-indigo-500 transition-all"
                 />
               </div>
             </div>
@@ -117,11 +117,11 @@ export const AppStoreDesk: React.FC = () => {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
         {Object.keys(groupedModules).length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-stone-900 rounded-full flex items-center justify-center mb-4 border border-stone-800">
-              <Layers className="w-8 h-8 text-stone-600" />
+            <div className="w-20 h-20 bg-temple-900 rounded-full flex items-center justify-center mb-4 border border-temple-800">
+              <Layers className="w-8 h-8 text-temple-600" />
             </div>
-            <h3 className="text-xl font-black text-stone-300">No Modules Found</h3>
-            <p className="text-stone-500 text-sm mt-2 max-w-sm">
+            <h3 className="text-xl font-black text-temple-300">No Modules Found</h3>
+            <p className="text-temple-500 text-sm mt-2 max-w-sm">
               Adjust your search filters or browse the complete catalog.
             </p>
           </div>
@@ -131,19 +131,19 @@ export const AppStoreDesk: React.FC = () => {
               <div key={domain}>
                 <div className="flex items-center gap-3 mb-6">
                   <h2 className="text-lg font-black text-white">{domain}</h2>
-                  <div className="h-px bg-stone-800 flex-1"></div>
+                  <div className="h-px bg-temple-800 flex-1"></div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {mods.map(mod => {
                     const Icon = mod.icon;
                     return (
-                      <div key={mod.id} className="bg-stone-900 border border-stone-800 rounded-2xl p-5 hover:border-stone-700 transition-all flex flex-col group relative overflow-hidden shadow-sm hover:shadow-xl">
+                      <div key={mod.id} className="bg-temple-900 border border-temple-800 rounded-2xl p-5 hover:border-temple-700 transition-all flex flex-col group relative overflow-hidden shadow-sm hover:shadow-xl">
                         
                         {/* Native Badge Overlay */}
                         {mod.status === 'Native' && (
                           <div className="absolute top-0 right-0">
-                             <div className="bg-stone-800 text-[9px] font-black uppercase tracking-widest text-stone-400 px-3 py-1 rounded-bl-xl border-l border-b border-stone-700/50 flex items-center gap-1">
+                             <div className="bg-temple-800 text-[9px] font-black uppercase tracking-widest text-temple-400 px-3 py-1 rounded-bl-xl border-l border-b border-temple-700/50 flex items-center gap-1">
                                <Settings size={10} /> Base Archetype
                              </div>
                           </div>
@@ -151,14 +151,14 @@ export const AppStoreDesk: React.FC = () => {
                         
                         <div className="flex items-start gap-4 mb-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border shadow-inner ${
-                            mod.status === 'Native' ? 'bg-stone-800 border-stone-700 text-stone-400' :
+                            mod.status === 'Native' ? 'bg-temple-800 border-temple-700 text-temple-400' :
                             mod.status === 'Installed' ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400' :
-                            'bg-stone-950 border-stone-800 text-stone-500'
+                            'bg-temple-950 border-temple-800 text-temple-500'
                           }`}>
                             <Icon className="w-6 h-6" />
                           </div>
                           <div className="pr-4">
-                            <h3 className="font-bold text-stone-100 leading-tight mb-1">{mod.name}</h3>
+                            <h3 className="font-bold text-temple-100 leading-tight mb-1">{mod.name}</h3>
                             {mod.badge && (
                               <span className="inline-block px-1.5 py-0.5 rounded border border-indigo-500/30 bg-indigo-500/10 text-[9px] font-black uppercase tracking-widest text-indigo-400">
                                 {mod.badge}
@@ -168,7 +168,7 @@ export const AppStoreDesk: React.FC = () => {
                         </div>
 
                         {/* Description Mapper (Hardcoded context for life savers to explain the pain they solve) */}
-                        <p className="text-xs text-stone-400 leading-relaxed mb-6 mt-1 flex-1">
+                        <p className="text-xs text-temple-400 leading-relaxed mb-6 mt-1 flex-1">
                           {mod.id === 'rakthaSeva' && "A vital medical registry connecting donors to critical patients during emergencies."}
                           {mod.id === 'crisis-command' && "Centralized emergency broadcast and handling for lost children, fires, and medical crises."}
                           {mod.id === 'sevadarRoster' && "Solve volunteer scheduling chaos with structured shifts and check-ins."}
@@ -178,9 +178,9 @@ export const AppStoreDesk: React.FC = () => {
                             `Integrate the ${mod.name} module into your workspace to enhance your operational capabilities.`}
                         </p>
 
-                        <div className="pt-4 border-t border-stone-800/50 mt-auto">
+                        <div className="pt-4 border-t border-temple-800/50 mt-auto">
                           {mod.status === 'Native' ? (
-                            <button disabled className="w-full py-2.5 rounded-xl bg-stone-950 border border-stone-800 text-stone-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 opacity-70 cursor-not-allowed">
+                            <button disabled className="w-full py-2.5 rounded-xl bg-temple-950 border border-temple-800 text-temple-500 text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 opacity-70 cursor-not-allowed">
                               <CheckCircle2 size={16} /> Included in {activeWorkspace.type}
                             </button>
                           ) : mod.status === 'Installed' ? (

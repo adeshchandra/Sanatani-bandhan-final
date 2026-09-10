@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import {
   Landmark,
   Plus,
@@ -162,22 +163,23 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
   };
 
   return (
+    <ErrorBoundary moduleName="Treasury Ledger">
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
               Double-Entry Dharma Accounting
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               Audit Verified & Section 80G Compliant
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             Treasury & Expense Ledger
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Real-time balance sheet, cash/UPI custody tracking, and instant tax exemption receipts
           </p>
         </div>
@@ -204,7 +206,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
           <button
             type="button"
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-750 border border-stone-700 text-stone-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-temple-800 hover:bg-temple-750 border border-temple-700 text-temple-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             <span>CSV</span>
@@ -233,71 +235,71 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
 
       {/* 3 Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-stone-400">
+        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg">
+          <div className="flex items-center justify-between text-xs text-temple-400">
             <span className="font-bold uppercase tracking-wider">Total Inflow (Chanda)</span>
             <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-emerald-400 mt-2">
             + ₹{totalIncome.toLocaleString()}
           </p>
-          <p className="text-[11px] text-stone-400 mt-1">Pranami, Pujas & Donations</p>
+          <p className="text-[11px] text-temple-400 mt-1">Pranami, Pujas & Donations</p>
         </div>
 
-        <div className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-stone-400">
+        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg">
+          <div className="flex items-center justify-between text-xs text-temple-400">
             <span className="font-bold uppercase tracking-wider">Total Outflow (Seva)</span>
             <ArrowUpRight className="w-4 h-4 text-rose-400" />
           </div>
           <p className="text-2xl font-black text-rose-400 mt-2">
             - ₹{totalExpense.toLocaleString()}
           </p>
-          <p className="text-[11px] text-stone-400 mt-1">Ghee, Utilities, Maintenance</p>
+          <p className="text-[11px] text-temple-400 mt-1">Ghee, Utilities, Maintenance</p>
         </div>
 
-        <div className="bg-stone-900/90 border border-stone-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-stone-400">
+        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg">
+          <div className="flex items-center justify-between text-xs text-temple-400">
             <span className="font-bold uppercase tracking-wider">Net Available Treasury</span>
-            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <ShieldCheck className="w-4 h-4 text-saffron-400" />
           </div>
-          <p className="text-2xl font-black text-stone-100 mt-2">
+          <p className="text-2xl font-black text-temple-100 mt-2">
             ₹{netBalance.toLocaleString()}
           </p>
-          <p className="text-[11px] text-amber-400/90 mt-1 font-semibold">100% Reconciled</p>
+          <p className="text-[11px] text-saffron-400/90 mt-1 font-semibold">100% Reconciled</p>
         </div>
       </div>
 
       {/* Filter & Search */}
-      <div className="bg-stone-900/90 border border-stone-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-temple-900/90 border border-temple-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="relative w-full sm:w-80">
-          <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
+          <Search className="w-3.5 h-3.5 text-temple-400 absolute left-3 top-3" />
           <input
             type="text"
             placeholder="Search by category, donor, custody..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-stone-800 border border-stone-700 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-200 placeholder-stone-400 focus:outline-none focus:border-amber-500"
+            className="w-full bg-temple-800 border border-temple-700 rounded-xl pl-9 pr-3 py-2 text-xs text-temple-200 placeholder-temple-400 focus:outline-none focus:border-saffron-500"
           />
         </div>
 
         <div className="flex items-center gap-3 ml-auto overflow-x-auto w-full sm:w-auto no-scrollbar pb-1 sm:pb-0">
           {filterType === 'Expense' && (
-            <div className="flex items-center gap-1 bg-stone-950 p-1 rounded-xl border border-stone-800 shadow-inner">
+            <div className="flex items-center gap-1 bg-temple-950 p-1 rounded-xl border border-temple-800 shadow-inner">
               {(['all', 'org', 'personal'] as const).map(ef => (
                 <button
                   key={ef}
                   onClick={() => setExpenseFilter(ef)}
                   className={`px-3 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase transition-all whitespace-nowrap ${
-                    expenseFilter === ef ? 'bg-rose-500 text-white shadow-xs' : 'text-stone-400 hover:text-stone-200 hover:bg-stone-800'
+                    expenseFilter === ef ? 'bg-rose-500 text-white shadow-xs' : 'text-temple-400 hover:text-temple-200 hover:bg-temple-800'
                   }`}
                 >
                   {ef === 'all' ? 'All Expenses' : ef === 'org' ? 'Org Ops' : 'Personal (Sevadar)'}
                 </button>
               ))}
-              <div className="w-px h-4 bg-stone-700 mx-1"></div>
+              <div className="w-px h-4 bg-temple-700 mx-1"></div>
             </div>
           )}
-          <div className="flex items-center gap-1 bg-stone-800 p-1 rounded-xl border border-stone-700">
+          <div className="flex items-center gap-1 bg-temple-800 p-1 rounded-xl border border-temple-700">
             {(['all', 'Income', 'Expense'] as const).map((t, idx) => (
               <button
                 key={t}
@@ -305,8 +307,8 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                 onClick={() => setFilterType(t)}
                 className={`px-3 py-1.5 rounded-lg font-bold text-[11px] transition-all cursor-pointer whitespace-nowrap ${
                   filterType === t
-                    ? (t === 'Income' ? 'bg-emerald-500 text-stone-950' : t === 'Expense' ? 'bg-rose-500 text-white' : 'bg-amber-500 text-stone-950')
-                    : 'text-stone-400 hover:text-stone-200 hover:bg-stone-750'
+                    ? (t === 'Income' ? 'bg-emerald-500 text-temple-950' : t === 'Expense' ? 'bg-rose-500 text-white' : 'bg-saffron-500 text-temple-950')
+                    : 'text-temple-400 hover:text-temple-200 hover:bg-temple-750'
                 }`}
               >
                 {t === 'all' ? 'All Entries' : t === 'Income' ? 'Inflows (Income)' : 'Outflows (Expense)'}
@@ -317,10 +319,10 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
       </div>
 
       {/* Ledger Table */}
-      <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl overflow-hidden">
+      <div className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl overflow-hidden">
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-left text-xs">
-            <thead className="text-[10px] text-stone-400 uppercase bg-stone-950/60 font-semibold border-b border-stone-800">
+            <thead className="text-[10px] text-temple-400 uppercase bg-temple-950/60 font-semibold border-b border-temple-800">
               <tr>
                 <th className="p-3">Date & ID</th>
                 <th className="p-3">Type & Category</th>
@@ -331,12 +333,12 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-800">
+            <tbody className="divide-y divide-temple-800">
               {filteredTreasury.map((tx, idx) => (
-                <tr key={`${tx.id}-${idx}`} className="hover:bg-stone-800/40 transition-colors">
+                <tr key={`${tx.id}-${idx}`} className="hover:bg-temple-800/40 transition-colors">
                   <td className="p-3">
-                    <p className="font-mono text-stone-200 font-semibold">{tx.date}</p>
-                    <p className="text-[10px] text-stone-400 font-mono">{tx.id}</p>
+                    <p className="font-mono text-temple-200 font-semibold">{tx.date}</p>
+                    <p className="text-[10px] text-temple-400 font-mono">{tx.id}</p>
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1.5 mb-1">
@@ -361,16 +363,16 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                         </span>
                       )}
                     </div>
-                    <p className="font-semibold text-stone-200">{tx.category}</p>
+                    <p className="font-semibold text-temple-200">{tx.category}</p>
                     {tx.eventName && (
-                      <span className="mt-1 inline-block px-1.5 py-0.5 rounded bg-stone-800 text-stone-400 text-[9px] font-bold uppercase border border-stone-700">
+                      <span className="mt-1 inline-block px-1.5 py-0.5 rounded bg-temple-800 text-temple-400 text-[9px] font-bold uppercase border border-temple-700">
                         {tx.eventName}
                       </span>
                     )}
                   </td>
                   <td className="p-3">
-                    <p className="font-bold text-stone-100">{tx.devoteeName || '-'}</p>
-                    <p className="text-[11px] text-stone-400 truncate max-w-[200px]">{tx.purpose}</p>
+                    <p className="font-bold text-temple-100">{tx.devoteeName || '-'}</p>
+                    <p className="text-[11px] text-temple-400 truncate max-w-[200px]">{tx.purpose}</p>
                   </td>
                   <td className="p-3">
                     <p
@@ -381,20 +383,20 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                       {tx.type === 'Income' ? '+' : '-'} ₹{(tx.amount || 0).toLocaleString()}
                     </p>
                     {tx.is80GEligible && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-saffron-500/20 text-saffron-300 font-mono">
                         80G Eligible
                       </span>
                     )}
                   </td>
                   <td className="p-3">
-                    <p className="text-stone-300 font-medium">{tx.handledBy}</p>
+                    <p className="text-temple-300 font-medium">{tx.handledBy}</p>
                   </td>
                   <td className="p-3">
-                    <span className="px-2 py-0.5 rounded bg-stone-800 text-stone-300 text-[10px] font-mono border border-stone-700">
+                    <span className="px-2 py-0.5 rounded bg-temple-800 text-temple-300 text-[10px] font-mono border border-temple-700">
                       {tx.paymentMode}
                     </span>
                     {tx.referenceNo && (
-                      <p className="text-[10px] text-stone-400 font-mono mt-0.5 truncate max-w-[120px]">
+                      <p className="text-[10px] text-temple-400 font-mono mt-0.5 truncate max-w-[120px]">
                         {tx.referenceNo}
                       </p>
                     )}
@@ -405,10 +407,10 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                         <button
                           type="button"
                           onClick={() => setSelectedMemoUrl(tx.memoImageUrl!)}
-                          className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300"
+                          className="p-1.5 rounded-lg bg-temple-800 hover:bg-temple-700 text-temple-300"
                           title="View Payment Memo"
                         >
-                          <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                          <ImageIcon className="w-3.5 h-3.5 text-saffron-400" />
                         </button>
                       )}
                       {tx.type === 'Income' && (
@@ -423,7 +425,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                                 showToast('Error printing slip', 'error');
                               }
                             }}
-                            className="px-2.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-indigo-400 border border-stone-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg bg-temple-800 hover:bg-temple-750 text-indigo-400 border border-temple-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                             title="Thermal Print Slip"
                           >
                             <span>Print Slip</span>
@@ -431,7 +433,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                           <button
                             type="button"
                             onClick={() => handlePrintReceipt(tx)}
-                            className="px-2.5 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-750 text-amber-400 border border-stone-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg bg-temple-800 hover:bg-temple-750 text-saffron-400 border border-temple-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                             title="Download 80G Tax Receipt PDF"
                           >
                             <Receipt className="w-3.5 h-3.5" />
@@ -450,14 +452,14 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
 
       {/* Memo Modal */}
       {selectedMemoUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/85 backdrop-blur-md">
-          <div className="bg-stone-900 border border-stone-700 rounded-2xl max-w-md w-full p-4 text-stone-100 shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-stone-800 mb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/85 backdrop-blur-md">
+          <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-md w-full p-4 text-temple-100 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-temple-800 mb-3">
               <h4 className="font-bold text-xs">Attached Payment Memo / Voucher</h4>
               <button
                 type="button"
                 onClick={() => setSelectedMemoUrl(null)}
-                className="text-stone-400 hover:text-stone-100"
+                className="text-temple-400 hover:text-temple-100"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -465,7 +467,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
             <img
               src={selectedMemoUrl || undefined}
               alt="Payment Memo"
-              className="rounded-xl w-full max-h-96 object-contain border border-stone-800"
+              className="rounded-xl w-full max-h-96 object-contain border border-temple-800"
               referrerPolicy="no-referrer"
             />
           </div>
@@ -473,17 +475,17 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
       )}
       {/* Add Utsav Expense Modal */}
       {showExpenseModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-stone-950/85 backdrop-blur-md animate-in fade-in">
-          <div className="bg-stone-900 border border-stone-700 rounded-3xl w-full max-w-lg p-6 shadow-2xl text-stone-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-temple-950/85 backdrop-blur-md animate-in fade-in">
+          <div className="bg-temple-900 border border-temple-700 rounded-3xl w-full max-w-lg p-6 shadow-2xl text-temple-200">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-xl font-bold text-white flex items-center gap-2">
                   <ArrowUpRight className="w-5 h-5 text-rose-500" />
                   Log Organization Expense
                 </h3>
-                <p className="text-xs text-stone-400 mt-1">Record a general operational cost or an event-specific expense.</p>
+                <p className="text-xs text-temple-400 mt-1">Record a general operational cost or an event-specific expense.</p>
               </div>
-              <button onClick={() => setShowExpenseModal(false)} className="w-8 h-8 rounded-full bg-stone-800 flex items-center justify-center hover:bg-stone-700 text-stone-400 hover:text-white transition-colors">
+              <button onClick={() => setShowExpenseModal(false)} className="w-8 h-8 rounded-full bg-temple-800 flex items-center justify-center hover:bg-temple-700 text-temple-400 hover:text-white transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -511,20 +513,20 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
               setShowExpenseModal(false);
             }} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-stone-400 uppercase mb-1.5">Event / Utsav Name (Optional)</label>
-                <input name="eventName" type="text" placeholder="Optional: e.g., Durga Puja 2026" list="utsav-list" className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:border-rose-500 focus:outline-none" />
+                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Event / Utsav Name (Optional)</label>
+                <input name="eventName" type="text" placeholder="Optional: e.g., Durga Puja 2026" list="utsav-list" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-rose-500 focus:outline-none" />
                 <datalist id="utsav-list">
                   {availableUtsavs.map(ev => <option key={ev} value={ev} />)}
                 </datalist>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-400 uppercase mb-1.5">Amount (₹)</label>
-                  <input required name="amount" type="number" placeholder="0.00" min="1" className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:border-rose-500 focus:outline-none" />
+                  <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Amount (₹)</label>
+                  <input required name="amount" type="number" placeholder="0.00" min="1" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-rose-500 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-400 uppercase mb-1.5">Category</label>
-                  <select required name="category" className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:border-rose-500 focus:outline-none">
+                  <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Category</label>
+                  <select required name="category" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-rose-500 focus:outline-none">
                     <optgroup label="Operational">
                       <option value="Utilities & Maintenance">Utilities & Maintenance</option>
                       <option value="Staff / Sevadar Reimbursement">Staff / Sevadar Reimbursement</option>
@@ -542,7 +544,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-stone-400 uppercase mb-1.5">Vendor / Payee Name (Search Devotee or enter new)</label>
+                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Vendor / Payee Name (Search Devotee or enter new)</label>
                 <MemberSearchSelect 
                   name="vendor"
                   value=""
@@ -551,12 +553,12 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-stone-400 uppercase mb-1.5">Purpose / Notes</label>
-                <input required name="purpose" type="text" placeholder="What was this for?" className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:border-amber-500 focus:outline-none" />
+                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Purpose / Notes</label>
+                <input required name="purpose" type="text" placeholder="What was this for?" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-saffron-500 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-stone-400 uppercase mb-1.5">Payment Mode</label>
-                <select required name="paymentMode" className="w-full bg-stone-950 border border-stone-800 rounded-xl px-4 py-2.5 text-sm text-stone-200 focus:border-amber-500 focus:outline-none">
+                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Payment Mode</label>
+                <select required name="paymentMode" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-saffron-500 focus:outline-none">
                   <option value="Bank Transfer (NEFT/RTGS)">Bank Transfer (NEFT/RTGS)</option>
                   <option value="UPI">UPI</option>
                   <option value="Cash">Cash</option>
@@ -564,23 +566,23 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
                 </select>
               </div>
               
-              <div className="bg-stone-950/50 border border-stone-800 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="bg-temple-950/50 border border-temple-800 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input 
                       type="checkbox" 
-                      className="w-4 h-4 rounded border-stone-700 bg-stone-900 text-rose-500 focus:ring-rose-500 focus:ring-offset-stone-900"
+                      className="w-4 h-4 rounded border-temple-700 bg-temple-900 text-rose-500 focus:ring-rose-500 focus:ring-offset-temple-900"
                       checked={isRecurring}
                       onChange={(e) => setIsRecurring(e.target.checked)}
                     />
-                    <span className="text-[12px] font-bold text-stone-200">Recurring Transaction</span>
+                    <span className="text-[12px] font-bold text-temple-200">Recurring Transaction</span>
                   </label>
-                  <p className="text-[10px] text-stone-400 mt-1 pl-6">Schedule automatic utility or operational cost entries.</p>
+                  <p className="text-[10px] text-temple-400 mt-1 pl-6">Schedule automatic utility or operational cost entries.</p>
                 </div>
                 
                 {isRecurring && (
                   <div className="w-full sm:w-auto">
-                    <select name="recurringInterval" className="w-full sm:w-40 bg-stone-900 border border-stone-700 rounded-lg px-3 py-1.5 text-xs text-stone-200 focus:border-rose-500 focus:outline-none">
+                    <select name="recurringInterval" className="w-full sm:w-40 bg-temple-900 border border-temple-700 rounded-lg px-3 py-1.5 text-xs text-temple-200 focus:border-rose-500 focus:outline-none">
                       <option value="Monthly">Monthly</option>
                       <option value="Annually">Annually</option>
                     </select>
@@ -597,5 +599,6 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
         </div>
       )}
     </div>
+    </ErrorBoundary>
   );
 };

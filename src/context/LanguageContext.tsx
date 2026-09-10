@@ -17,7 +17,7 @@ export interface TaxonomyMatrix {
 
 const TAXONOMY_MAP: Record<
   AppLanguage,
-  Record<WorkspaceType, TaxonomyMatrix>
+  Record<string, TaxonomyMatrix>
 > = {
   en: {
     "crisis-command": "Crisis Command Center",
@@ -892,15 +892,18 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getTaxonomy = (workspaceType: WorkspaceType): TaxonomyMatrix => {
-    const matrix =
-      TAXONOMY_MAP[language]?.[workspaceType] ||
-      TAXONOMY_MAP.en[workspaceType] ||
-      TAXONOMY_MAP.en.MANDIR;
+    const key = (workspaceType || 'MANDIR').toUpperCase() as WorkspaceType;
+    let matrix = TAXONOMY_MAP[language]?.[key] || TAXONOMY_MAP.en[key] || TAXONOMY_MAP.en.MANDIR as any;
+    
+    if (typeof matrix === 'string' || !matrix) {
+      matrix = TAXONOMY_MAP.en.MANDIR as any;
+    }
+
     return {
       ...matrix,
-      memberNoun: matrix.memberTerm,
-      kartaNoun: matrix.memberTerm,
-      offeringNoun: matrix.fundsTerm,
+      memberNoun: matrix?.memberTerm || 'Bhaktas',
+      kartaNoun: matrix?.memberTerm || 'Bhaktas',
+      offeringNoun: matrix?.fundsTerm || 'Chanda',
     };
   };
 

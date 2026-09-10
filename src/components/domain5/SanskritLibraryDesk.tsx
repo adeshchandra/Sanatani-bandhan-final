@@ -93,44 +93,44 @@ export const SanskritLibraryDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full bg-saffron-500/10 border border-saffron-500/30 text-saffron-400 text-[10px] font-bold uppercase tracking-wider">
               Vedic Granthalaya & Digital Shastras
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               Preserving Vedic Sanatana Dharma Manuscripts
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             Sanskrit Library & Scripture Repository Desk
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Original Devanagari manuscripts, translations, audio chanting stotrams, and authentic commentaries
           </p>
         </div>
       </div>
 
       {/* Filter & Search */}
-      <div className="bg-stone-900/90 border border-stone-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div className="bg-temple-900/90 border border-temple-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
         <div className="relative w-full sm:w-80">
-          <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-3" />
+          <Search className="w-3.5 h-3.5 text-temple-400 absolute left-3 top-3" />
           <input
             type="text"
             placeholder="Search Vedas, Upanishads, Gita, Stotrams..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-stone-800 border border-stone-700 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-200 placeholder-stone-400 focus:outline-none focus:border-amber-500"
+            className="w-full bg-temple-800 border border-temple-700 rounded-xl pl-9 pr-3 py-2 text-xs text-temple-200 placeholder-temple-400 focus:outline-none focus:border-saffron-500"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-stone-400 font-medium">Category:</span>
+          <span className="text-temple-400 font-medium">Category:</span>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="bg-stone-800 border border-stone-700 rounded-xl px-2.5 py-1.5 text-xs text-stone-200"
+            className="bg-temple-800 border border-temple-700 rounded-xl px-2.5 py-1.5 text-xs text-temple-200"
           >
             <option value="all">All Shastra Categories</option>
             <option value="Vedas">Vedas</option>
@@ -147,31 +147,31 @@ export const SanskritLibraryDesk: React.FC = () => {
         {filteredShastras.map((s, idx) => (
           <div
             key={`${s.id}-${idx}`}
-            className="bg-stone-900/90 border border-stone-800 hover:border-amber-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4 transition-all"
+            className="bg-temple-900/90 border border-temple-800 hover:border-saffron-500/40 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4 transition-all"
           >
             <div>
-              <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800">
+              <div className="flex items-start justify-between gap-2 pb-3 border-b border-temple-800">
                 <div>
-                  <span className="text-[10px] font-bold uppercase text-amber-400">
+                  <span className="text-[10px] font-bold uppercase text-saffron-400">
                     {s.category}
                   </span>
-                  <h3 className="font-extrabold text-base text-stone-100 mt-1">{s.title}</h3>
-                  <p className="text-xs font-serif text-amber-300 font-medium">{s.sanskritTitle}</p>
+                  <h3 className="font-extrabold text-base text-temple-100 mt-1">{s.title}</h3>
+                  <p className="text-xs font-serif text-saffron-300 font-medium">{s.sanskritTitle}</p>
                 </div>
-                <BookMarked className="w-5 h-5 text-amber-400/80 shrink-0" />
+                <BookMarked className="w-5 h-5 text-saffron-400/80 shrink-0" />
               </div>
 
-              <div className="py-2 space-y-2 text-xs text-stone-300">
+              <div className="py-2 space-y-2 text-xs text-temple-300">
                 <p>
-                  <span className="text-stone-400">Rishi / Author:</span>{' '}
-                  <span className="font-medium text-stone-100">{s.authorOrRishi}</span>
+                  <span className="text-temple-400">Rishi / Author:</span>{' '}
+                  <span className="font-medium text-temple-100">{s.authorOrRishi}</span>
                 </p>
-                <p className="text-[11px] text-stone-300 leading-relaxed italic">
+                <p className="text-[11px] text-temple-300 leading-relaxed italic">
                   "{s.description}"
                 </p>
                 <p>
-                  <span className="text-stone-400">Language:</span>{' '}
-                  <span className="text-amber-400">{s.language}</span>
+                  <span className="text-temple-400">Language:</span>{' '}
+                  <span className="text-saffron-400">{s.language}</span>
                 </p>
               </div>
             </div>
@@ -179,7 +179,7 @@ export const SanskritLibraryDesk: React.FC = () => {
             <button
               type="button"
               onClick={() => handleRead(s)}
-              className="w-full py-2.5 rounded-xl bg-stone-800 hover:bg-amber-600 hover:text-stone-950 text-stone-200 font-bold text-xs flex items-center justify-center gap-2 border border-stone-700 transition-all cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-temple-800 hover:bg-saffron-600 hover:text-temple-950 text-temple-200 font-bold text-xs flex items-center justify-center gap-2 border border-temple-700 transition-all cursor-pointer"
             >
               <BookOpen className="w-4 h-4" />
               <span>Read Sacred Manuscript</span>

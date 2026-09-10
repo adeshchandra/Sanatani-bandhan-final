@@ -51,10 +51,10 @@ export const AppLogo: React.FC<AppLogoProps> = ({
     <div id={id} className={`inline-flex items-center gap-3 ${className}`}>
       <div className={`relative flex-shrink-0 ${sizeClass} ${glow ? 'group' : ''}`}>
         {glow && (
-          <div className={`absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 ${effectiveRadius} blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300 pointer-events-none`} />
+          <div className={`absolute -inset-1 bg-gradient-to-r from-saffron-500 to-saffron-600 ${effectiveRadius} blur-sm opacity-50 group-hover:opacity-75 transition-opacity duration-300 pointer-events-none`} />
         )}
         <img
-          src="/logo.svg"
+          src="/logo.png"
           alt={alt}
           referrerPolicy="no-referrer"
           className={`relative w-full h-full object-contain ${effectiveRadius} shadow-sm transition-transform duration-200 hover:scale-105`}
@@ -74,12 +74,12 @@ export const AppLogo: React.FC<AppLogoProps> = ({
             size === 'xs' || size === 'sm' ? 'text-sm' :
             size === 'md' ? 'text-base' :
             size === 'lg' ? 'text-xl' : 'text-2xl'
-          } ${textVariant === 'light' ? 'text-white' : 'text-stone-900'}`}>
-            Sanatani<span className="text-[#FF9933]">Bandhan</span>
+          } ${textVariant === 'light' ? 'text-white' : 'text-temple-900'}`}>
+            Sanatani<span className="text-saffron-500">Bandhan</span>
           </span>
           {subtitle && (
             <span className={`text-[10px] font-bold tracking-wider uppercase mt-0.5 ${
-              textVariant === 'light' ? 'text-amber-200/80' : 'text-stone-500'
+              textVariant === 'light' ? 'text-saffron-200/80' : 'text-temple-500'
             }`}>
               {subtitle}
             </span>

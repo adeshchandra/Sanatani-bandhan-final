@@ -26,7 +26,7 @@ export const PrivacyPolicy: React.FC<{ onClose: () => void }> = ({ onClose }) =>
           </button>
         </div>
 
-        <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar prose prose-slate max-w-none prose-headings:font-bold prose-h3:text-slate-900 prose-p:text-slate-600 prose-a:text-[#FF9933]">
+        <div className="p-6 md:p-10 overflow-y-auto custom-scrollbar prose prose-slate max-w-none prose-headings:font-bold prose-h3:text-slate-900 prose-p:text-slate-600 prose-a:text-saffron-500">
           <h3>1. Introduction and Core Philosophy</h3>
           <p>
             Sanatani Bandhan ("we", "our", or "us") is deeply committed to protecting the privacy and security of the Dharmic institutions we serve. We recognize that temple management software handles highly sensitive community data, including donor information, lineage (Vanshavali) records, and internal organizational communications. This Privacy Policy details our offline-first architecture approach, ensuring that your data belongs to you, always.

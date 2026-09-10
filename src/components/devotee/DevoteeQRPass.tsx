@@ -125,8 +125,8 @@ export const DevoteeQRPass: React.FC<DevoteeQRPassProps> = ({ isOpen, onClose, d
   const photo = devotee.avatarUrl || devotee.photoUrl;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-stone-900/90 backdrop-blur-md">
-      <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 border border-stone-200 brightness-110">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-temple-900/90 backdrop-blur-md">
+      <div className="bg-white rounded-xl w-full max-w-sm shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 border border-temple-200 brightness-110">
         
         {/* Header Pattern */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-emerald-600 overflow-hidden">
@@ -141,32 +141,32 @@ export const DevoteeQRPass: React.FC<DevoteeQRPassProps> = ({ isOpen, onClose, d
         </button>
 
         {isOffline && (
-          <div className="absolute top-4 left-4 z-20 bg-stone-900/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 backdrop-blur-md">
+          <div className="absolute top-4 left-4 z-20 bg-temple-900/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1 backdrop-blur-md">
             <WifiOff className="w-3 h-3" /> Offline Mode
           </div>
         )}
         
         <div className="p-8 text-center relative z-10 mt-10">
           {/* Avatar */}
-          <div className="w-20 h-20 mx-auto bg-white rounded-2xl p-1 shadow-md mb-3 rotate-3 hover:rotate-0 transition-transform">
-            <div className="w-full h-full rounded-xl bg-stone-100 overflow-hidden flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto bg-white rounded-xl p-1 shadow-sm mb-3 rotate-3 hover:rotate-0 transition-transform">
+            <div className="w-full h-full rounded-xl bg-temple-50 overflow-hidden flex items-center justify-center">
               {photo ? (
                 <img src={photo} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-10 h-10 text-stone-300" />
+                <User className="w-10 h-10 text-temple-300" />
               )}
             </div>
           </div>
           
-          <h3 className="text-xl font-black text-stone-900 mb-1 leading-tight">
+          <h3 className="text-xl font-semibold text-temple-900 mb-1 leading-tight">
             {devotee.spiritualName || devotee.fullName || devotee.name}
           </h3>
-          <p className="text-xs text-stone-500 font-bold uppercase tracking-widest mb-6">
+          <p className="text-xs text-temple-500 font-bold uppercase tracking-widest mb-6">
             {workspaceName || 'Digital Pass'}
           </p>
           
           {/* QR Container */}
-          <div className="bg-white p-4 rounded-3xl shadow-lg border-2 border-stone-100 inline-block mb-6 relative">
+          <div className="bg-white p-4 rounded-xl shadow-lg border-2 border-temple-100 inline-block mb-6 relative">
             {qrData ? (
               <div className="brightness-110 contrast-125">
                 <QRCodeSVG 
@@ -179,7 +179,7 @@ export const DevoteeQRPass: React.FC<DevoteeQRPassProps> = ({ isOpen, onClose, d
                 />
               </div>
             ) : (
-              <div className="w-[200px] h-[200px] bg-stone-50 flex flex-col items-center justify-center text-stone-400 rounded-2xl">
+              <div className="w-[200px] h-[200px] bg-temple-50 flex flex-col items-center justify-center text-temple-400 rounded-xl">
                 <RefreshCw className="w-8 h-8 animate-spin mb-2" />
                 <span className="text-xs font-bold">Securing...</span>
               </div>
@@ -187,7 +187,7 @@ export const DevoteeQRPass: React.FC<DevoteeQRPassProps> = ({ isOpen, onClose, d
           </div>
           
           <div className="flex items-center justify-between w-full px-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-stone-500">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-temple-500">
               <Clock className="w-4 h-4 text-emerald-600" />
               {expiryTime > 0 ? (
                 <span>Valid {hoursLeft}h</span>
@@ -199,7 +199,7 @@ export const DevoteeQRPass: React.FC<DevoteeQRPassProps> = ({ isOpen, onClose, d
             <button 
               onClick={() => generateQR(true)}
               disabled={isGenerating || isOffline}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-temple-50 hover:bg-temple-200 text-temple-700 text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
               Refresh

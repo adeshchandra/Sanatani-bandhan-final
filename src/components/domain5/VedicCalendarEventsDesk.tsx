@@ -120,20 +120,20 @@ export const VedicCalendarEventsDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-full bg-saffron-500/10 border border-saffron-500/30 text-saffron-400 text-[10px] font-bold uppercase tracking-wider">
               Utsav & Mahotsav Planner
             </span>
-            <span className="text-xs text-stone-400 font-mono">
+            <span className="text-xs text-temple-400 font-mono">
               {events.length} Major Annual Festivals
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             Vedic Festival & Mahotsav Calendar Desk
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Coordinate pilgrim footfall, security barriers, Bhandara budgets, and seva shift assignments
           </p>
         </div>
@@ -141,7 +141,7 @@ export const VedicCalendarEventsDesk: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-600/20 transition-all cursor-pointer"
+          className="px-4 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-saffron-600/20 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Schedule New Utsav</span>
@@ -153,41 +153,41 @@ export const VedicCalendarEventsDesk: React.FC = () => {
         {events.map((ev, idx) => (
           <div
             key={`${ev.id}-${idx}`}
-            className="bg-stone-900/90 border border-stone-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4"
+            className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4"
           >
             <div>
-              <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800">
+              <div className="flex items-start justify-between gap-2 pb-3 border-b border-temple-800">
                 <div>
-                  <span className="text-[10px] font-bold text-amber-400 uppercase">
+                  <span className="text-[10px] font-bold text-saffron-400 uppercase">
                     {ev.tithi}
                   </span>
-                  <h3 className="font-extrabold text-base text-stone-100 mt-1">{ev.title}</h3>
+                  <h3 className="font-extrabold text-base text-temple-100 mt-1">{ev.title}</h3>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-stone-300 block">{ev.startDate}</span>
+                  <span className="text-xs font-mono font-bold text-temple-300 block">{ev.startDate}</span>
                 </div>
               </div>
 
-              <div className="py-2 space-y-1.5 text-xs text-stone-300">
+              <div className="py-2 space-y-1.5 text-xs text-temple-300">
                 <p>
-                  <span className="text-stone-400">Expected Footfall:</span>{' '}
-                  <span className="font-bold text-amber-400">~{(ev.expectedFootfall || 0).toLocaleString()} Devotees</span>
+                  <span className="text-temple-400">Expected Footfall:</span>{' '}
+                  <span className="font-bold text-saffron-400">~{(ev.expectedFootfall || 0).toLocaleString()} Devotees</span>
                 </p>
                 <p>
-                  <span className="text-stone-400">Chief Coordinator:</span>{' '}
-                  <span className="text-stone-100">{ev.chiefCoordinator}</span>
+                  <span className="text-temple-400">Chief Coordinator:</span>{' '}
+                  <span className="text-temple-100">{ev.chiefCoordinator}</span>
                 </p>
                 <p>
-                  <span className="text-stone-400">Budget:</span>{' '}
+                  <span className="text-temple-400">Budget:</span>{' '}
                   <span className="font-mono text-emerald-400 font-bold">₹{(ev.budgetAllocated || 0).toLocaleString()}</span>
                 </p>
 
                 <div className="pt-2">
-                  <span className="text-stone-400 text-[10px] uppercase font-bold block mb-1">Key Highlights:</span>
+                  <span className="text-temple-400 text-[10px] uppercase font-bold block mb-1">Key Highlights:</span>
                   <ul className="space-y-1">
                     {ev.highlights.map((h, i) => (
-                      <li key={i} className="text-[11px] text-stone-300 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                      <li key={i} className="text-[11px] text-temple-300 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-saffron-500 shrink-0" />
                         <span>{h}</span>
                       </li>
                     ))}
@@ -196,13 +196,13 @@ export const VedicCalendarEventsDesk: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-stone-800 flex items-center justify-between text-xs">
-              <span className="text-[10px] text-stone-400 font-mono">ID: {ev.id}</span>
+            <div className="pt-2 border-t border-temple-800 flex items-center justify-between text-xs">
+              <span className="text-[10px] text-temple-400 font-mono">ID: {ev.id}</span>
               <div className="flex gap-4 items-center">
                 <button
                   type="button"
                   onClick={() => handleExportICS(ev)}
-                  className="flex items-center gap-1.5 text-stone-300 font-semibold hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 text-temple-300 font-semibold hover:text-white transition-colors"
                   title="Export to Calendar (.ics)"
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -211,7 +211,7 @@ export const VedicCalendarEventsDesk: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => showToast(`Roster opened for ${ev.title}`, 'info')}
-                  className="text-amber-400 font-bold hover:underline cursor-pointer"
+                  className="text-saffron-400 font-bold hover:underline cursor-pointer"
                 >
                   View Seva Roster &rarr;
                 </button>
@@ -223,14 +223,14 @@ export const VedicCalendarEventsDesk: React.FC = () => {
 
       {/* Add Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/80 backdrop-blur-md">
-          <div className="bg-stone-900 border border-stone-700 rounded-2xl max-w-md w-full p-6 text-stone-100 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-800 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/80 backdrop-blur-md">
+          <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-md w-full p-6 text-temple-100 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-temple-800 mb-4">
               <h3 className="font-bold text-sm">Schedule Annual Utsav / Mahotsav</h3>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-stone-400 hover:text-stone-100"
+                className="text-temple-400 hover:text-temple-100"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -238,72 +238,72 @@ export const VedicCalendarEventsDesk: React.FC = () => {
 
             <form onSubmit={handleAdd} className="space-y-3 text-xs">
               <div>
-                <label className="block text-stone-300 font-semibold mb-1">Festival Title *</label>
+                <label className="block text-temple-300 font-semibold mb-1">Festival Title *</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Deepotsav Maha Parva"
-                  className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                  className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Lunar Tithi</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Lunar Tithi</label>
                   <input
                     type="text"
                     value={tithi}
                     onChange={(e) => setTithi(e.target.value)}
                     placeholder="Kartika Amavasya"
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Start Date</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Start Date</label>
                   <input
                     type="date"
                     required
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Expected Footfall</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Expected Footfall</label>
                   <input
                     type="number"
                     value={expectedFootfall}
                     onChange={(e) => setExpectedFootfall(Number(e.target.value))}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200"
                   />
                 </div>
                 <div>
-                  <label className="block text-stone-300 font-semibold mb-1">Budget (₹)</label>
+                  <label className="block text-temple-300 font-semibold mb-1">Budget (₹)</label>
                   <input
                     type="number"
                     value={budgetAllocated}
                     onChange={(e) => setBudgetAllocated(Number(e.target.value))}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-xl px-3 py-2 text-stone-200 font-bold text-amber-400"
+                    className="w-full bg-temple-800 border border-temple-700 rounded-xl px-3 py-2 text-temple-200 font-bold text-saffron-400"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-temple-800">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-stone-800 text-stone-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-temple-800 text-temple-300 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold"
+                  className="px-5 py-2 rounded-xl bg-saffron-600 hover:bg-saffron-500 text-temple-950 font-bold"
                 >
                   Save Utsav
                 </button>

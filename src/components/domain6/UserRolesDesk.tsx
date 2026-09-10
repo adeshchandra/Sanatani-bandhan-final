@@ -41,7 +41,7 @@ export const UserRolesDesk: React.FC = () => {
       canApprovePooja: true,
       canBroadcastWhatsApp: true,
       canManageVault: true,
-      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      badgeColor: 'bg-saffron-500/20 text-saffron-300 border-saffron-500/40',
     },
     {
       role: 'ACCOUNTANT',
@@ -85,7 +85,7 @@ export const UserRolesDesk: React.FC = () => {
       canApprovePooja: false,
       canBroadcastWhatsApp: false,
       canManageVault: false,
-      badgeColor: 'bg-stone-800 text-stone-300 border-stone-700',
+      badgeColor: 'bg-temple-800 text-temple-300 border-temple-700',
     },
   ];
 
@@ -97,20 +97,20 @@ export const UserRolesDesk: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/90 border border-stone-800 p-6 rounded-3xl shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-bold uppercase tracking-wider">
               Role-Based Access Control (RBAC)
             </span>
-            <span className="text-xs text-stone-400 font-mono">
-              Current Session: <span className="font-bold text-amber-400">{currentUser.role.toUpperCase()}</span>
+            <span className="text-xs text-temple-400 font-mono">
+              Current Session: <span className="font-bold text-saffron-400">{currentUser.role.toUpperCase()}</span>
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-100">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
             User Roles & Permissions Matrix
           </h2>
-          <p className="text-xs text-stone-400 mt-0.5">
+          <p className="text-xs text-temple-400 mt-0.5">
             Granular permissions governing Treasury ledger, Member data, Pooja approvals, and Sanctum Vault
           </p>
         </div>
@@ -127,60 +127,60 @@ export const UserRolesDesk: React.FC = () => {
               className={`border rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4 transition-all ${
                 isCurrent
                   ? 'bg-purple-950/20 border-purple-500/70 shadow-purple-500/10'
-                  : 'bg-stone-900/90 border-stone-800'
+                  : 'bg-temple-900/90 border-temple-800'
               }`}
             >
               <div>
-                <div className="flex items-start justify-between gap-2 pb-3 border-b border-stone-800">
+                <div className="flex items-start justify-between gap-2 pb-3 border-b border-temple-800">
                   <div>
                     <span className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold uppercase ${def.badgeColor}`}>
                       {def.role}
                     </span>
-                    <h3 className="font-extrabold text-base text-stone-100 mt-2">{def.title}</h3>
+                    <h3 className="font-extrabold text-base text-temple-100 mt-2">{def.title}</h3>
                   </div>
                   {isCurrent && (
-                    <span className="px-2 py-0.5 rounded bg-purple-500 text-stone-950 text-[10px] font-black uppercase">
+                    <span className="px-2 py-0.5 rounded bg-purple-500 text-temple-950 text-[10px] font-black uppercase">
                       Current
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-stone-400 mt-2 mb-4 leading-relaxed">
+                <p className="text-xs text-temple-400 mt-2 mb-4 leading-relaxed">
                   {def.description}
                 </p>
 
                 {/* Permissions Checklist */}
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-stone-300">Treasury & Chanda Ledger:</span>
+                    <span className="text-temple-300">Treasury & Chanda Ledger:</span>
                     {def.canAccessTreasury ? (
                       <span className="text-emerald-400 font-bold">Granted</span>
                     ) : (
-                      <span className="text-stone-600 font-mono">Restricted</span>
+                      <span className="text-temple-600 font-mono">Restricted</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-stone-300">Edit Member / Gotra Records:</span>
+                    <span className="text-temple-300">Edit Member / Gotra Records:</span>
                     {def.canEditDevotees ? (
                       <span className="text-emerald-400 font-bold">Granted</span>
                     ) : (
-                      <span className="text-stone-600 font-mono">Restricted</span>
+                      <span className="text-temple-600 font-mono">Restricted</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-stone-300">Approve Sankalp & Poojas:</span>
+                    <span className="text-temple-300">Approve Sankalp & Poojas:</span>
                     {def.canApprovePooja ? (
                       <span className="text-emerald-400 font-bold">Granted</span>
                     ) : (
-                      <span className="text-stone-600 font-mono">Restricted</span>
+                      <span className="text-temple-600 font-mono">Restricted</span>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-stone-300">Bulk WhatsApp Broadcaster:</span>
+                    <span className="text-temple-300">Bulk WhatsApp Broadcaster:</span>
                     {def.canBroadcastWhatsApp ? (
                       <span className="text-emerald-400 font-bold">Granted</span>
                     ) : (
-                      <span className="text-stone-600 font-mono">Restricted</span>
+                      <span className="text-temple-600 font-mono">Restricted</span>
                     )}
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export const UserRolesDesk: React.FC = () => {
                 className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${
                   isCurrent
                     ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40 cursor-default'
-                    : 'bg-stone-800 hover:bg-stone-700 text-stone-200 cursor-pointer'
+                    : 'bg-temple-800 hover:bg-temple-700 text-temple-200 cursor-pointer'
                 }`}
               >
                 {isCurrent ? 'Active Persona' : `Assume ${def.role.toUpperCase()} Persona`}

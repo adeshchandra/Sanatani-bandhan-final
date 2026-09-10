@@ -2,15 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useInitialData } from './AppInitializer';
 import { set } from 'idb-keyval';
 import { auth, db } from "../lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged, signOut, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { DevoteeMember, UserRole, WorkspaceConfig, WorkspaceType } from '../types';
 
 export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-mandir',
     name: 'Sri Sanatan Dharma Mandir',
-    type: 'MANDIR',
+    type: 'Mandir',
     tagline: 'Preserving Sanatan Samskriti & Sacred Darshan',
     address: 'Mandir Marg, Sector 4',
     city: 'Varanasi',
@@ -30,7 +30,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-goshala',
     name: 'Surabhi Gau Seva Dham',
-    type: 'GOSHALA',
+    type: 'Goshala',
     tagline: 'Sanctuary for 500+ Indigenous Desi Gir & Sahiwal Gomata',
     address: 'Govardhan Parikrama Marg',
     city: 'Vrindavan',
@@ -50,7 +50,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-sangha',
     name: 'Bharat Dharma Raksha Sangha',
-    type: 'SANGHA',
+    type: 'Sangha',
     tagline: 'Youth Character Building, Shakha Discipline & Dharma Seva',
     address: 'Shivaji Marg, Keshav Kunj',
     city: 'Nagpur',
@@ -70,7 +70,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-ashram',
     name: 'Ananda Kutir Spiritual Ashram',
-    type: 'ASHRAM',
+    type: 'Ashram',
     tagline: 'Silent Meditation, Sadhana Retreats & Vedanta Study',
     address: 'Tapovan, Muni Ki Reti',
     city: 'Rishikesh',
@@ -90,7 +90,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-gurukul',
     name: 'Sandipani Veda Vidyapeeth',
-    type: 'GURUKUL',
+    type: 'Gurukul',
     tagline: 'Reviving Vedic Recitation, Grammar, Nyaya & Shastras',
     address: 'Narmada Ghat Road',
     city: 'Ujjain',
@@ -110,7 +110,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-satsang',
     name: 'Sri Krishna Chaitanya Satsang Kendra',
-    type: 'SATSANG',
+    type: 'Satsang',
     tagline: 'Harinam Sankirtan & Shrimad Bhagavatam Kathas',
     address: 'Mayapur Road',
     city: 'Nabadwip',
@@ -130,7 +130,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-yoga',
     name: 'Patanjali Yogashala & Wellness Kendra',
-    type: 'YOGA_CENTER',
+    type: 'Yoga',
     tagline: 'Authentic Ashtanga Yoga, Pranayama & Holistic Healing',
     address: 'Chamundi Hill Road',
     city: 'Mysuru',
@@ -150,7 +150,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-trust',
     name: 'Dharma Jagriti Seva Trust',
-    type: 'TRUST',
+    type: 'Trust',
     tagline: 'Disaster Relief, Free Medical Camps & Education Grants',
     address: 'Ring Road, Lajpat Nagar',
     city: 'New Delhi',
@@ -170,7 +170,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-tirth',
     name: 'Sri Somnath Yatri & Tirth Seva Kshetra',
-    type: 'TIRTH',
+    type: 'Tirth',
     tagline: 'Pilgrim Dharamshala, Pavitra Darshan & Pinda Daan Support',
     address: 'Prabhas Patan',
     city: 'Veraval',
@@ -190,7 +190,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
     id: 'ws-samaj',
     name: 'Akhil Bharatiya Gaur Brahman Mahasabha',
-    type: 'SAMAJ',
+    type: 'Samaj',
     tagline: 'Community Welfare, Gotra Vivah Bandhan & Samaj Bhawan',
     address: 'Civil Lines, Station Road',
     city: 'Jaipur',
@@ -367,6 +367,8 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const loginWithPin = (pin: string, devoteeList: DevoteeMember[]): boolean => {
+    // Firebase Auth is bypassed due to IAM lock. Local state governs the prototype UI.
+
     // Admin Master Override PIN
     if (pin === '1008' || pin === activeWorkspace.adminPin) {
       setCurrentRole('SUPER_ADMIN');
@@ -388,6 +390,8 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const loginAsRole = (role: UserRole, customName?: string) => {
+    // Firebase Auth is bypassed due to IAM lock. Local state governs the prototype UI.
+    
     setCurrentRole(role);
     setIsAuthenticated(true);
     setViewMode('MANAGER');

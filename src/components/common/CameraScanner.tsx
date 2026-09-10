@@ -82,15 +82,15 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose })
   }, [onScan, isScanning, onClose]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-stone-950">
-      <div className="flex items-center justify-between p-4 bg-stone-900 border-b border-stone-800">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-temple-950">
+      <div className="flex items-center justify-between p-4 bg-temple-900 border-b border-temple-800">
         <div className="flex items-center gap-2">
-          <Camera className="w-5 h-5 text-amber-500" />
-          <h2 className="text-sm font-bold text-stone-100">Scan Digital Puja Pass</h2>
+          <Camera className="w-5 h-5 text-saffron-500" />
+          <h2 className="text-sm font-bold text-temple-100">Scan Digital Puja Pass</h2>
         </div>
         <button
           onClick={onClose}
-          className="p-2 rounded-full bg-stone-800 hover:bg-stone-700 text-stone-400"
+          className="p-2 rounded-full bg-temple-800 hover:bg-temple-700 text-temple-400"
         >
           <X className="w-5 h-5" />
         </button>
@@ -108,12 +108,12 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose })
             <div className={`absolute inset-0 z-10 pointer-events-none border-[40px] sm:border-[80px] transition-all duration-300 ${
               scanResult === 'valid' ? 'border-emerald-500/60' : 
               scanResult === 'invalid' ? 'border-rose-500/60' : 
-              'border-stone-950/60'
+              'border-temple-950/60'
             }`}>
               <div className={`w-full h-full border-2 border-dashed relative transition-colors duration-300 ${
                 scanResult === 'valid' ? 'border-emerald-400 text-emerald-400' : 
                 scanResult === 'invalid' ? 'border-rose-400 text-rose-400' : 
-                'border-amber-500/50 text-amber-500'
+                'border-saffron-500/50 text-saffron-500'
               }`}>
                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-current rounded-tl-lg" />
                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-current rounded-tr-lg" />
@@ -141,9 +141,9 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ onScan, onClose })
               <div className={`backdrop-blur text-white text-xs font-bold px-5 py-2.5 rounded-full flex items-center gap-2 shadow-xl transition-colors duration-300 ${
                 scanResult === 'valid' ? 'bg-emerald-500/90' : 
                 scanResult === 'invalid' ? 'bg-rose-500/90' : 
-                'bg-stone-900/80 text-stone-300'
+                'bg-temple-900/80 text-temple-300'
               }`}>
-                {scanResult === 'idle' && <Loader2 className="w-4 h-4 animate-spin text-amber-500" />}
+                {scanResult === 'idle' && <Loader2 className="w-4 h-4 animate-spin text-saffron-500" />}
                 {scanResult === 'valid' && <CheckCircle2 className="w-4 h-4" />}
                 {scanResult === 'invalid' && <XCircle className="w-4 h-4" />}
                 

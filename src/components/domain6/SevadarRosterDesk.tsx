@@ -116,7 +116,7 @@ export const SevadarRosterDesk: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-lg font-bold text-slate-800">{shift.role}</h3>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${shift.status === 'FILLED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200'}`}>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${shift.status === 'FILLED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-saffron-100 text-saffron-800 border-saffron-200'}`}>
                         {shift.status.replace('_', ' ')}
                       </span>
                     </div>
@@ -153,7 +153,7 @@ export const SevadarRosterDesk: React.FC = () => {
                       </button>
                       <button 
                         onClick={() => handleSmartAssign(shift)}
-                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-xl text-sm transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md"
+                        className="px-4 py-2 bg-gradient-to-r from-saffron-500 to-saffron-500 hover:from-saffron-600 hover:to-saffron-600 text-white font-bold rounded-xl text-sm transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md"
                       >
                         <Sparkles className="w-4 h-4" />
                         Smart Assign
@@ -185,45 +185,45 @@ export const SevadarRosterDesk: React.FC = () => {
 
       {/* Smart Assign Modal */}
       {smartAssignShift && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/50 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-900/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+            <div className="p-6 border-b border-temple-100 flex items-center justify-between bg-temple-50/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center text-amber-600">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-saffron-100 to-saffron-100 flex items-center justify-center text-saffron-600">
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-stone-800">AI Smart Assign</h2>
-                  <p className="text-sm text-stone-500 font-medium">Finding best matches for {smartAssignShift.role}</p>
+                  <h2 className="text-xl font-bold text-temple-800">AI Smart Assign</h2>
+                  <p className="text-sm text-temple-500 font-medium">Finding best matches for {smartAssignShift.role}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setSmartAssignShift(null)}
-                className="w-8 h-8 rounded-full bg-stone-200/50 flex items-center justify-center text-stone-500 hover:bg-stone-200 transition-colors"
+                className="w-8 h-8 rounded-full bg-temple-200/50 flex items-center justify-center text-temple-500 hover:bg-temple-200 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto space-y-4 bg-stone-50/30 flex-1">
+            <div className="p-6 overflow-y-auto space-y-4 bg-temple-50/30 flex-1">
               {suggestedVolunteers.map((vol, idx) => (
-                <div key={vol.id} className="bg-white border border-stone-100 p-4 rounded-2xl shadow-sm hover:border-amber-200 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between gap-4">
+                <div key={vol.id} className="bg-white border border-temple-100 p-4 rounded-2xl shadow-sm hover:border-saffron-200 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between gap-4">
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 rounded-full bg-stone-100 border-2 border-white shadow-sm flex items-center justify-center font-bold text-stone-600 text-lg shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-temple-100 border-2 border-white shadow-sm flex items-center justify-center font-bold text-temple-600 text-lg shrink-0">
                       {vol.name.charAt(0)}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-stone-800">{vol.name}</h4>
+                        <h4 className="font-bold text-temple-800">{vol.name}</h4>
                         <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-md">{vol.availability}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-stone-500 font-medium mb-2">
-                        <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" /> {vol.rating} Rating</span>
+                      <div className="flex items-center gap-3 text-xs text-temple-500 font-medium mb-2">
+                        <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-saffron-500 fill-saffron-500" /> {vol.rating} Rating</span>
                         <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-indigo-400" /> {vol.pastShifts} Shifts</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {vol.skills.map((s, i) => (
-                          <span key={i} className="bg-stone-100 text-stone-600 text-[10px] font-bold px-2 py-0.5 rounded-md border border-stone-200">
+                          <span key={i} className="bg-temple-100 text-temple-600 text-[10px] font-bold px-2 py-0.5 rounded-md border border-temple-200">
                             {s}
                           </span>
                         ))}
@@ -231,17 +231,17 @@ export const SevadarRosterDesk: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex sm:flex-col items-center justify-between sm:justify-center sm:items-end gap-3 sm:border-l sm:border-stone-100 sm:pl-4">
+                  <div className="flex sm:flex-col items-center justify-between sm:justify-center sm:items-end gap-3 sm:border-l sm:border-temple-100 sm:pl-4">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">
+                      <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-saffron-500 to-saffron-500">
                         {vol.match}%
                       </span>
-                      <span className="text-[10px] uppercase font-bold text-stone-400 leading-tight">Match<br/>Score</span>
+                      <span className="text-[10px] uppercase font-bold text-temple-400 leading-tight">Match<br/>Score</span>
                     </div>
                     <button 
                       onClick={() => confirmAssignment(vol)}
                       disabled={isAssigning}
-                      className="px-4 py-2 bg-stone-900 hover:bg-black text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
+                      className="px-4 py-2 bg-temple-900 hover:bg-black text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
                     >
                       {isAssigning ? 'Assigning...' : 'Assign to Shift'}
                     </button>

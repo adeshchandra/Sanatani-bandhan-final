@@ -345,7 +345,7 @@ export const MasterSettingsDesk: React.FC = () => {
                     {workspaceInfo.logoUrl ? (
                       <img src={workspaceInfo.logoUrl || undefined} alt="Organization Logo" className="w-full h-full object-cover bg-white" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-orange-50 to-orange-100 text-sanatani-orange flex items-center justify-center font-black text-4xl shadow-inner border border-orange-200">
+                      <div className="w-full h-full bg-gradient-to-br from-saffron-50 to-saffron-100 text-sanatani-orange flex items-center justify-center font-black text-4xl shadow-inner border border-saffron-200">
                         {workspaceInfo.name ? workspaceInfo.name.charAt(0).toUpperCase() : 'ॐ'}
                       </div>
                     )}
@@ -374,7 +374,7 @@ export const MasterSettingsDesk: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{workspaceInfo.type} {localSafeTranslate('name', 'Name')} *</label>
-                      <input type="text" required value={workspaceInfo.name} onChange={e=>setWorkspaceInfo({...workspaceInfo, name: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" />
+                      <input type="text" required value={workspaceInfo.name} onChange={e=>setWorkspaceInfo({...workspaceInfo, name: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" />
                     </div>
                     {/* LOCKED ORGANIZATION TYPE */}
                     <div className="relative">
@@ -387,7 +387,7 @@ export const MasterSettingsDesk: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Globe size={12}/> {localSafeTranslate('operating_currency', 'Operating Currency')}</label>
-                      <select value={workspaceInfo.currencyCode} onChange={e=>setWorkspaceInfo({...workspaceInfo, currencyCode: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm cursor-pointer appearance-none disabled:text-gray-500 disabled:cursor-not-allowed">
+                      <select value={workspaceInfo.currencyCode} onChange={e=>setWorkspaceInfo({...workspaceInfo, currencyCode: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm cursor-pointer appearance-none disabled:text-gray-500 disabled:cursor-not-allowed">
                         <option value="BDT">BDT (৳) - Bangladesh</option>
                         <option value="INR">INR (₹) - India</option>
                         <option value="NPR">NPR (रु) - Nepal</option>
@@ -398,25 +398,25 @@ export const MasterSettingsDesk: React.FC = () => {
 
                     <div className="relative">
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><MapPin size={12}/> {localSafeTranslate('country', 'Country')}</label>
-                      <input type="text" value={workspaceInfo.country} onChange={e=>setWorkspaceInfo({...workspaceInfo, country: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm uppercase tracking-wider disabled:text-gray-500 disabled:cursor-not-allowed" />
+                      <input type="text" value={workspaceInfo.country} onChange={e=>setWorkspaceInfo({...workspaceInfo, country: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm uppercase tracking-wider disabled:text-gray-500 disabled:cursor-not-allowed" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="relative">
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Phone size={12}/> {localSafeTranslate('official_phone', 'Official Phone')}</label>
-                      <input type="tel" value={workspaceInfo.phone} onChange={e=>setWorkspaceInfo({...workspaceInfo, phone: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" />
+                      <input type="tel" value={workspaceInfo.phone} onChange={e=>setWorkspaceInfo({...workspaceInfo, phone: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" />
                     </div>
                     <div className="relative">
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><Mail size={12}/> {localSafeTranslate('official_email', 'Official Email')}</label>
-                      <input type="email" value={workspaceInfo.email} onChange={e=>setWorkspaceInfo({...workspaceInfo, email: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" />
+                      <input type="email" value={workspaceInfo.email} onChange={e=>setWorkspaceInfo({...workspaceInfo, email: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5">
                     <div className="w-full">
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><MapPin size={12}/> {localSafeTranslate('physical_address', 'Physical Address')}</label>
-                      <input type="text" value={workspaceInfo.address} onChange={e=>setWorkspaceInfo({...workspaceInfo, address: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="House, Street, City, Region..."/>
+                      <input type="text" value={workspaceInfo.address} onChange={e=>setWorkspaceInfo({...workspaceInfo, address: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="House, Street, City, Region..."/>
                     </div>
                   </div>
 
@@ -425,16 +425,16 @@ export const MasterSettingsDesk: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                       <div>
                         <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{localSafeTranslate('reg_no', 'Registration No.')}</label>
-                        <input type="text" value={workspaceInfo.registrationNo} onChange={e=>setWorkspaceInfo({...workspaceInfo, registrationNo: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="Trust/Society Reg No."/>
+                        <input type="text" value={workspaceInfo.registrationNo} onChange={e=>setWorkspaceInfo({...workspaceInfo, registrationNo: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="Trust/Society Reg No."/>
                       </div>
                       <div>
                         <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5">{localSafeTranslate('tax_id', 'Tax ID (PAN/BIN/EIN)')}</label>
-                        <input type="text" value={workspaceInfo.taxId} onChange={e=>setWorkspaceInfo({...workspaceInfo, taxId: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="Official Tax Identity"/>
+                        <input type="text" value={workspaceInfo.taxId} onChange={e=>setWorkspaceInfo({...workspaceInfo, taxId: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="Official Tax Identity"/>
                       </div>
                     </div>
                     <div>
                       <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1.5 flex items-center gap-1"><FileSignature size={12}/> {localSafeTranslate('mission_desc', 'Mission / Description')}</label>
-                      <textarea rows={3} value={workspaceInfo.description} onChange={e=>setWorkspaceInfo({...workspaceInfo, description: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-orange-50 outline-none transition-all shadow-sm resize-none disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="Describe your organization's mission..."></textarea>
+                      <textarea rows={3} value={workspaceInfo.description} onChange={e=>setWorkspaceInfo({...workspaceInfo, description: e.target.value})} disabled={!isAdmin} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-900 focus:bg-white focus:border-sanatani-orange focus:ring-4 focus:ring-saffron-50 outline-none transition-all shadow-sm resize-none disabled:text-gray-500 disabled:cursor-not-allowed" placeholder="Describe your organization's mission..."></textarea>
                     </div>
                   </div>
 
@@ -551,12 +551,12 @@ export const MasterSettingsDesk: React.FC = () => {
           </div>
 
           {!['PREMIUM', 'SMART_PRO'].includes(limits.plan) ? (
-             <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 sm:p-8 rounded-3xl shadow-lg text-white text-center relative overflow-hidden group">
+             <div className="bg-gradient-to-br from-saffron-500 to-red-600 p-6 sm:p-8 rounded-3xl shadow-lg text-white text-center relative overflow-hidden group">
                 <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
                 <Crown size={48} className="mx-auto mb-3 text-yellow-300 drop-shadow-md" />
                 <h3 className="text-2xl font-black mb-1 tracking-tight">{localSafeTranslate('upgrade_title', 'Upgrade to Smart Pro')}</h3>
 
-                <p className="text-[10px] font-black text-orange-100 uppercase tracking-widest mb-5 bg-black/10 inline-block px-3 py-1 rounded-full">{saasConfig.duration} • {saasConfig.subtitle}</p>
+                <p className="text-[10px] font-black text-saffron-100 uppercase tracking-widest mb-5 bg-black/10 inline-block px-3 py-1 rounded-full">{saasConfig.duration} • {saasConfig.subtitle}</p>
                 
                 <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-5 py-4 mb-6 flex flex-col gap-3 text-[11px] font-black uppercase tracking-widest text-white shadow-inner text-left">
                    {saasConfig.features.map((feat, idx) => (
@@ -575,7 +575,7 @@ export const MasterSettingsDesk: React.FC = () => {
                 )}
              </div>
           ) : (
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-8 rounded-3xl shadow-sm border border-orange-200 text-center relative overflow-hidden">
+            <div className="bg-gradient-to-br from-saffron-50 to-saffron-50 p-8 rounded-3xl shadow-sm border border-saffron-200 text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10"><Crown size={120}/></div>
                 <Crown size={48} className="mx-auto mb-4 text-sanatani-orange relative z-10" />
                 <h3 className="text-xl font-black text-gray-900 mb-2 relative z-10">You are on Smart Pro!</h3>

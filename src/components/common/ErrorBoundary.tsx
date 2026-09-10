@@ -1,8 +1,9 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertOctagon, RotateCcw } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
+  moduleName?: string;
 }
 
 interface State {
@@ -11,7 +12,7 @@ interface State {
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  public override state: State = {
+  public state: State = {
     hasError: false,
     error: null,
   };
@@ -20,41 +21,34 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught Dharmic ERP Error:', error, errorInfo);
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error in ErrorBoundary:", error, errorInfo);
   }
 
-  private handleReset = () => {
-    localStorage.removeItem('sanatani_active_workspace_id');
-    window.location.reload();
-  };
-
-  public override render() {
+  public render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
       return (
-        <div className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-stone-900 border border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-4">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto">
-              <AlertOctagon className="w-6 h-6" />
-            </div>
-            <h2 className="text-lg font-bold text-stone-100">Application State Recovered</h2>
-            <p className="text-xs text-stone-400 leading-relaxed">
-              A temporary runtime condition occurred. Click below to safely reboot the workspace into a fresh, stable state.
-            </p>
-            {this.state.error && (
-              <div className="p-2.5 rounded-xl bg-stone-950/80 border border-stone-800 text-[11px] font-mono text-rose-300 text-left overflow-x-auto max-h-28">
-                {this.state.error.message}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={this.handleReset}
-              className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reboot Workspace & Restore</span>
-            </button>
+        <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="flex items-center space-x-2 text-red-600 mb-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <h2 className="text-lg font-semibold">
+              {this.props.moduleName ? `${this.props.moduleName} Error` : "Something went wrong"}
+            </h2>
           </div>
+          <p className="text-sm text-red-700 font-mono bg-red-100 p-2 rounded overflow-auto max-h-32">
+            {this.state.error?.message || "An unexpected error occurred in this module."}
+          </p>
+          <button
+            className="mt-3 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+            onClick={() => this.setState({ hasError: false, error: null })}
+          >
+            Try Again
+          </button>
         </div>
       );
     }
