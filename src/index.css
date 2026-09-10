@@ -1,29 +1,87 @@
 @import "tailwindcss";
 
+:root {
+  /* Default Saffron Theme */
+  --saffron-50: #FFF9F0;
+  --saffron-100: #FFF0D4;
+  --saffron-200: #FFE0A3;
+  --saffron-300: #FFCA6B;
+  --saffron-400: #FFAD2E;
+  --saffron-500: #FF8E00;
+  --saffron-600: #EB7100;
+  --saffron-700: #C25300;
+  --saffron-800: #993F08;
+  --saffron-900: #7A340C;
+  --saffron-950: #421802;
+  --sanatani-orange: #FF8E00;
+
+  --temple-50: #F6F5F4;
+  --temple-100: #EAE8E5;
+  --temple-200: #D3CFCB;
+  --temple-300: #B4AEA9;
+  --temple-400: #968F89;
+  --temple-500: #7D756F;
+  --temple-600: #645D58;
+  --temple-700: #524C48;
+  --temple-800: #46413E;
+  --temple-900: #3D3836;
+  --temple-950: #262321;
+}
+
+:root[data-theme="classic"] {
+  /* Classic Theme - Indigo/Slate */
+  --saffron-50: #EEF2FF;
+  --saffron-100: #E0E7FF;
+  --saffron-200: #C7D2FE;
+  --saffron-300: #A5B4FC;
+  --saffron-400: #818CF8;
+  --saffron-500: #6366F1;
+  --saffron-600: #4F46E5;
+  --saffron-700: #4338CA;
+  --saffron-800: #3730A3;
+  --saffron-900: #312E81;
+  --saffron-950: #1E1B4B;
+  --sanatani-orange: #6366F1;
+
+  --temple-50: #F8FAFC;
+  --temple-100: #F1F5F9;
+  --temple-200: #E2E8F0;
+  --temple-300: #CBD5E1;
+  --temple-400: #94A3B8;
+  --temple-500: #64748B;
+  --temple-600: #475569;
+  --temple-700: #334155;
+  --temple-800: #1E293B;
+  --temple-900: #0F172A;
+  --temple-950: #020617;
+}
+
 @theme {
-  --color-saffron-50: #FFF9F0;
-  --color-saffron-100: #FFF0D4;
-  --color-saffron-200: #FFE0A3;
-  --color-saffron-300: #FFCA6B;
-  --color-saffron-400: #FFAD2E;
-  --color-saffron-500: #FF8E00;
-  --color-saffron-600: #EB7100;
-  --color-saffron-700: #C25300;
-  --color-saffron-800: #993F08;
-  --color-saffron-900: #7A340C;
-  --color-saffron-950: #421802;
+  --color-saffron-50: var(--saffron-50);
+  --color-saffron-100: var(--saffron-100);
+  --color-saffron-200: var(--saffron-200);
+  --color-saffron-300: var(--saffron-300);
+  --color-saffron-400: var(--saffron-400);
+  --color-saffron-500: var(--saffron-500);
+  --color-saffron-600: var(--saffron-600);
+  --color-saffron-700: var(--saffron-700);
+  --color-saffron-800: var(--saffron-800);
+  --color-saffron-900: var(--saffron-900);
+  --color-saffron-950: var(--saffron-950);
   
-  --color-temple-50: #F6F5F4;
-  --color-temple-100: #EAE8E5;
-  --color-temple-200: #D3CFCB;
-  --color-temple-300: #B4AEA9;
-  --color-temple-400: #968F89;
-  --color-temple-500: #7D756F;
-  --color-temple-600: #645D58;
-  --color-temple-700: #524C48;
-  --color-temple-800: #46413E;
-  --color-temple-900: #3D3836;
-  --color-temple-950: #262321;
+  --color-sanatani-orange: var(--sanatani-orange);
+  
+  --color-temple-50: var(--temple-50);
+  --color-temple-100: var(--temple-100);
+  --color-temple-200: var(--temple-200);
+  --color-temple-300: var(--temple-300);
+  --color-temple-400: var(--temple-400);
+  --color-temple-500: var(--temple-500);
+  --color-temple-600: var(--temple-600);
+  --color-temple-700: var(--temple-700);
+  --color-temple-800: var(--temple-800);
+  --color-temple-900: var(--temple-900);
+  --color-temple-950: var(--temple-950);
 }
 
 

@@ -10,8 +10,9 @@ import jsQR from 'jsqr';
 import AppLogo from '../common/AppLogo'; 
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { WorkspaceConfig, WorkspaceType } from '../../types';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../../lib/firebase';
+import { sendPasswordResetEmail, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../../lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const translations = {
   en: {
@@ -264,29 +265,24 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
 
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate auth delay
-      
       const identTrim = ident.trim();
       
       if (!isNaN(Number(cred)) && cred.length === 4) {
-        const success = loginWithPin(cred, []);
-        if (success) {
-          showToast("Quick PIN Login Successful", "success");
-          onSuccess();
-          return;
-        }
+         return setError("Security Upgrade: PIN login is disabled. Please log in using your registered Email and Password.");
       }
       
-      let role = 'DEVOTEE';
-      if (identTrim.toLowerCase().startsWith('manager') || identTrim.toLowerCase().startsWith('admin')) role = 'SUPER_ADMIN';
-      if (identTrim.toLowerCase().startsWith('trustee')) role = 'TRUSTEE';
-      if (identTrim.toLowerCase().startsWith('purohit')) role = 'PUROHIT';
+      if (cred === 'QR_SCAN') {
+         return setError("Security Upgrade: QR Scanner login requires a paired device. Please use Email/Password.");
+      }
       
-      loginAsRole(role as any, identTrim);
+      // REAL FIREBASE AUTH
+      await signInWithEmailAndPassword(auth, identTrim, cred);
+      
       showToast("Secure Login Successful", "success");
       onSuccess();
     } catch (err: any) {
-      setError(err.message || "Failed to login securely.");
+      console.error(err);
+      setError(err.message || "Failed to login securely. Check email/password.");
     } finally {
       setLoading(false);
     }
@@ -303,7 +299,10 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
 
     setLoading(true);
     try {
-      await new Promise(res => setTimeout(res, 1500));
+      // 1. Create Firebase Auth User
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
       const newWorkspace: WorkspaceConfig = {
         id: "WS-" + Math.floor(1000 + Math.random() * 9000),
         name: commName,
@@ -319,9 +318,22 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
         adminPin: '1008', tagline: '', sampradaya: '', kuladevata: '', pinRequired: true
       };
 
+      // 2. Write User Document (Crucial for RBAC rules)
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: email,
+        phone: phone,
+        name: adminName,
+        role: 'SUPER_ADMIN',
+        workspaceId: newWorkspace.id,
+        createdAt: serverTimestamp()
+      });
+
+      // 3. Write Workspace Document
+      await setDoc(doc(db, 'workspaces', newWorkspace.id), newWorkspace);
+
       addWorkspace(newWorkspace);
       switchWorkspace(newWorkspace.id);
-      loginAsRole('SUPER_ADMIN', adminName);
       
       showToast("Workspace Provisioned Successfully", "success");
       onSuccess();

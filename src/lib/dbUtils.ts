@@ -179,14 +179,12 @@ export const purgeDemoRecordsFromFirestore = async () => {
  * This sets up an interval that checks for expired records.
  */
 export const startDemoBackgroundService = () => {
-  console.log('[Demo Sandbox] Data isolation and expiration service initialized (24h cycle).');
+  console.log('[Offline Sync] Background service initialized.');
   // Initial check on load
-  purgeDemoRecordsFromFirestore();
   processOfflineQueue();
   
   // Set up periodic check every hour
   const interval = setInterval(() => {
-    purgeDemoRecordsFromFirestore();
     processOfflineQueue();
   }, 60 * 60 * 1000);
   

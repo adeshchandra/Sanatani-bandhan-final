@@ -6,7 +6,7 @@ import {
   Settings, Shield, Building2, Key, Loader2, Save, Crown, 
   AlertTriangle, CreditCard, Send, CheckCircle2, Globe,
   WifiOff, MapPin, Phone, Mail, Copy, Camera, FileText, Image as ImageIcon, Briefcase, FileSignature, 
-  X, Lock, QrCode, HelpCircle, Users, FileDigit, Navigation, AlertCircle
+  X, Lock, QrCode, HelpCircle, Users, FileDigit, Navigation, AlertCircle, Palette
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
@@ -33,6 +33,29 @@ export const MasterSettingsDesk: React.FC = () => {
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [saving, setSaving] = useState(false);
+  
+  const [appTheme, setAppTheme] = useState<'saffron' | 'classic'>(() => {
+    return (localStorage.getItem('app-theme') as 'saffron' | 'classic') || 'saffron';
+  });
+
+  const toggleTheme = (newTheme: 'saffron' | 'classic') => {
+    setAppTheme(newTheme);
+    localStorage.setItem('app-theme', newTheme);
+    if (newTheme === 'classic') {
+      document.documentElement.setAttribute('data-theme', 'classic');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    showToast(`Theme updated to ${newTheme === 'saffron' ? 'Saffron' : 'Classic'} Mode`, "success");
+  };
+
+  useEffect(() => {
+    if (appTheme === 'classic') {
+      document.documentElement.setAttribute('data-theme', 'classic');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [appTheme]);
   
   const [confirmDialog, setConfirmDialog] = useState<any>(null);
 
@@ -501,6 +524,27 @@ export const MasterSettingsDesk: React.FC = () => {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden ring-1 ring-black/5">
+            <h3 className="text-sm font-black text-gray-900 flex items-center gap-2 mb-6 border-b border-gray-100 pb-4 uppercase tracking-widest"><Palette size={18} className="text-sanatani-orange" /> {localSafeTranslate('theme_appearance', 'Theme & Appearance')}</h3>
+            <p className="text-[11px] font-bold text-gray-500 leading-relaxed uppercase tracking-widest mb-4">
+              {localSafeTranslate('theme_desc', 'Customize the visual atmosphere of the portal. This preference is saved securely on this device.')}
+            </p>
+            <div className="flex bg-gray-100 p-1.5 rounded-2xl shadow-inner border border-gray-200 w-full">
+              <button 
+                type="button"
+                onClick={() => toggleTheme('saffron')} 
+                className={`flex-1 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex justify-center gap-2 items-center ${appTheme === 'saffron' ? 'bg-white text-saffron-600 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
+                <Crown size={16} /> Saffron Mode
+              </button>
+              <button 
+                type="button"
+                onClick={() => toggleTheme('classic')} 
+                className={`flex-1 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex justify-center gap-2 items-center ${appTheme === 'classic' ? 'bg-white text-blue-600 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}>
+                <Shield size={16} /> Classic Mode
+              </button>
             </div>
           </div>
 
