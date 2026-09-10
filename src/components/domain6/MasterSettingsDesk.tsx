@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { updatePassword, User as FirebaseUser } from 'firebase/auth';
-import { auth, db, doc, collection, setDoc, serverTimestamp } from '../../firebase';
+import { auth, db, doc, collection, setDoc, serverTimestamp, query, where, getDocs } from '../../firebase';
 import { 
   Settings, Shield, Building2, Key, Loader2, Save, Crown, 
   AlertTriangle, CreditCard, Send, CheckCircle2, Globe,
   WifiOff, MapPin, Phone, Mail, Copy, Camera, FileText, Image as ImageIcon, Briefcase, FileSignature, 
-  X, Lock, QrCode, HelpCircle, Users, FileDigit, Navigation, AlertCircle, Palette
+  X, Lock, QrCode, HelpCircle, Users, FileDigit, Navigation, AlertCircle, Palette, History
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
@@ -33,6 +33,10 @@ export const MasterSettingsDesk: React.FC = () => {
   
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [saving, setSaving] = useState(false);
+  
+  const [activeTab, setActiveTab] = useState<'GENERAL' | 'BILLING'>('GENERAL');
+  const [paymentHistory, setPaymentHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   
   const [appTheme, setAppTheme] = useState<'saffron' | 'classic'>(() => {
     return (localStorage.getItem('app-theme') as 'saffron' | 'classic') || 'saffron';
@@ -130,6 +134,30 @@ export const MasterSettingsDesk: React.FC = () => {
       window.removeEventListener('offline', handleOffline); 
     };
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'BILLING' && activeWorkspace?.id) {
+      const fetchHistory = async () => {
+        setLoadingHistory(true);
+        try {
+          const q = query(collection(db, 'upgrade_requests'), where('communityId', '==', activeWorkspace.id));
+          const snapshot = await getDocs(q);
+          const history = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+          history.sort((a, b) => {
+            const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
+            const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
+            return timeB - timeA;
+          });
+          setPaymentHistory(history);
+        } catch (err) {
+          console.error("Failed to fetch payment history", err);
+        } finally {
+          setLoadingHistory(false);
+        }
+      };
+      fetchHistory();
+    }
+  }, [activeTab, activeWorkspace?.id]);
 
   if (!activeWorkspace) return null;
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'banner'|'logo') => {
@@ -260,7 +288,7 @@ export const MasterSettingsDesk: React.FC = () => {
         adminName: currentUser?.name || 'Admin',
         contactInfo: upgradeForm.contact.trim(),
         senderNumber: paymentTab === 'BD' ? upgradeForm.senderNumber.trim() : 'N/A', 
-        paymentMethod: paymentTab === 'BD' ? upgradeForm.paymentMethod : 'Wise (International)', 
+        paymentMethod: paymentTab === 'BD' ? upgradeForm.paymentMethod : 'INTL Gateway (Wise/Payoneer)', 
         transactionId: upgradeForm.trxId.trim(),
         timestamp: serverTimestamp(),
         status: "PENDING",
@@ -323,7 +351,7 @@ export const MasterSettingsDesk: React.FC = () => {
       )}
 
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-6 bg-white p-5 sm:p-6 rounded-3xl shadow-sm ring-1 ring-black/5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl shadow-sm ring-1 ring-black/5">
         <div>
           <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 tracking-tight">
             <Settings className="text-sanatani-orange" size={28} /> {localSafeTranslate('nav_settings', 'Workspace Settings')}
@@ -337,9 +365,20 @@ export const MasterSettingsDesk: React.FC = () => {
         )}
       </div>
 
+      {/* TABS NAVIGATION */}
+      <div className="flex gap-2 border-b border-gray-200 mb-2 overflow-x-auto scrollbar-hide">
+         <button onClick={() => setActiveTab('GENERAL')} className={`pb-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center gap-2 whitespace-nowrap px-2 ${activeTab === 'GENERAL' ? 'text-sanatani-orange border-b-2 border-sanatani-orange' : 'text-gray-400 hover:text-gray-700'}`}>
+           <Settings size={16}/> General Settings
+         </button>
+         <button onClick={() => setActiveTab('BILLING')} className={`pb-3 text-sm font-black uppercase tracking-widest transition-colors flex items-center gap-2 whitespace-nowrap px-2 ${activeTab === 'BILLING' ? 'text-sanatani-orange border-b-2 border-sanatani-orange' : 'text-gray-400 hover:text-gray-700'}`}>
+           <CreditCard size={16}/> Billing & Subscription
+         </button>
+      </div>
+
+      {activeTab === 'GENERAL' && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* LEFT COLUMN: Workspace Info & Security */}
+        {/* LEFT COLUMN: Workspace Info & Geolocation */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden ring-1 ring-black/5">
 
@@ -526,7 +565,10 @@ export const MasterSettingsDesk: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
 
+        {/* RIGHT COLUMN: Theme & Security */}
+        <div className="space-y-6">
           <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden ring-1 ring-black/5">
             <h3 className="text-sm font-black text-gray-900 flex items-center gap-2 mb-6 border-b border-gray-100 pb-4 uppercase tracking-widest"><Palette size={18} className="text-sanatani-orange" /> {localSafeTranslate('theme_appearance', 'Theme & Appearance')}</h3>
             <p className="text-[11px] font-bold text-gray-500 leading-relaxed uppercase tracking-widest mb-4">
@@ -569,6 +611,55 @@ export const MasterSettingsDesk: React.FC = () => {
                </form>
             </div>
           )}
+        </div>
+      </div>
+      )}
+
+      {activeTab === 'BILLING' && (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* LEFT COLUMN: Payment History */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-gray-100 ring-1 ring-black/5">
+            <h3 className="text-sm font-black text-gray-900 flex items-center gap-2 mb-6 border-b border-gray-100 pb-4 uppercase tracking-widest">
+              <History size={18} className="text-blue-600" /> Payment & Request History
+            </h3>
+            
+            {loadingHistory ? (
+              <div className="flex justify-center p-12">
+                <Loader2 className="animate-spin text-gray-400" size={32} />
+              </div>
+            ) : paymentHistory.length === 0 ? (
+              <div className="text-center py-16 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
+                <FileText size={40} className="mx-auto text-gray-300 mb-4" />
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No payment records found.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {paymentHistory.map(record => (
+                  <div key={record.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-gray-50 border border-gray-100 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
+                    <div className="mb-3 sm:mb-0">
+                      <div className="flex items-center gap-3 mb-2">
+                         <span className="text-sm font-black text-gray-900 tracking-tight">{record.requestedPlan || 'SMART_PRO'}</span>
+                         <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md border ${
+                           record.status === 'APPROVED' ? 'bg-green-50 text-green-600 border-green-200' :
+                           record.status === 'REJECTED' ? 'bg-red-50 text-red-600 border-red-200' :
+                           'bg-orange-50 text-orange-600 border-orange-200'
+                         }`}>{record.status}</span>
+                      </div>
+                      <p className="text-[10px] font-bold text-gray-500 font-mono tracking-widest flex items-center gap-1.5"><FileDigit size={12}/> TRX: {record.transactionId}</p>
+                      <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{record.timestamp?.toDate ? record.timestamp.toDate().toLocaleString() : new Date().toLocaleString()}</p>
+                    </div>
+                    <div className="text-left sm:text-right">
+                      <p className="text-[10px] font-black text-gray-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200 inline-flex items-center gap-1.5 uppercase tracking-widest shadow-sm">
+                        <CreditCard size={12}/> {record.paymentMethod}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* RIGHT COLUMN: Limits & Upgrades */}
@@ -628,6 +719,7 @@ export const MasterSettingsDesk: React.FC = () => {
           )}
         </div>
       </div>
+      )}
 
       {/* ✨ SECURE UPGRADE & PAYMENT MODAL */}
       {showUpgradeModal && createPortal(
@@ -714,13 +806,20 @@ export const MasterSettingsDesk: React.FC = () => {
                  <div className="bg-blue-50/50 border border-blue-200 rounded-3xl p-8 mb-6 text-center shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
                     <div className="flex justify-center items-center gap-3 mb-4">
-                      <p className="text-xs font-black text-blue-800 uppercase tracking-widest flex items-center gap-2"><Globe size={16}/> Pay securely via Wise</p>
+                      <p className="text-xs font-black text-blue-800 uppercase tracking-widest flex items-center gap-2"><Globe size={16}/> Pay securely via International Gateways</p>
                       <span className="text-[10px] font-black text-gray-400 line-through">${saasConfig.originalUsdPrice} USD</span>
                     </div>
-                    <button type="button" onClick={() => window.open(INTL_PAYMENT_LINK, '_blank')} className="w-full bg-blue-600 text-white px-6 py-4 rounded-xl text-xs uppercase tracking-widest font-black flex justify-center items-center gap-2 mx-auto hover:bg-blue-700 transition-all shadow-md hover:-translate-y-0.5">
-                      OPEN SECURE CHECKOUT
-                    </button>
-                    <p className="text-[10px] font-bold text-gray-500 mt-4 leading-relaxed bg-white p-3 rounded-xl border border-blue-100">Please copy your Wise Transaction ID after payment is complete.</p>
+
+                    <div className="flex flex-col gap-3 mt-4">
+                      <button type="button" onClick={() => window.open(INTL_PAYMENT_LINK, '_blank')} className="w-full bg-blue-600 text-white px-6 py-4 rounded-xl text-xs uppercase tracking-widest font-black flex justify-center items-center gap-2 mx-auto hover:bg-blue-700 transition-all shadow-md hover:-translate-y-0.5">
+                        OPEN SECURE CHECKOUT (WISE)
+                      </button>
+                      <button type="button" onClick={() => window.open('https://www.payoneer.com/', '_blank')} className="w-full bg-orange-600 text-white px-6 py-4 rounded-xl text-xs uppercase tracking-widest font-black flex justify-center items-center gap-2 mx-auto hover:bg-orange-700 transition-all shadow-md hover:-translate-y-0.5">
+                        PAY VIA PAYONEER (REQUEST LINK)
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] font-bold text-gray-500 mt-4 leading-relaxed bg-white p-3 rounded-xl border border-blue-100">Please copy your Wise or Payoneer Transaction ID after payment is complete and paste it below to verify.</p>
                  </div>
                )}
 
