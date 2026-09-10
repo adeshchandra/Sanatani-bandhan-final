@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "sanatanibandhan",
     "public": "dist",
     "ignore": [
       "firebase.json",
