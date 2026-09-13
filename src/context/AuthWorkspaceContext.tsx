@@ -390,11 +390,10 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const loginAsRole = (role: UserRole, customName?: string) => {
-    // Firebase Auth is bypassed due to IAM lock. Local state governs the prototype UI.
-    
     setCurrentRole(role);
     setIsAuthenticated(true);
     setViewMode('MANAGER');
+    signInAnonymously(auth).catch(console.error);
     if (role === 'DEVOTEE') {
       setCurrentDevotee({
         id: 'dev-demo-self',
