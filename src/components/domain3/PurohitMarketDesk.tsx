@@ -150,7 +150,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
         ]);
       }
       setLoading(false);
-    });
+    }, (err) => console.warn("Firebase PurohitMarketDesk sync:", err.message));
 
     const conRef = collection(db, `communities/${session.communityId}/purohit_contracts`);
     const unsubCon = onSnapshot(conRef, (snap) => {
@@ -162,13 +162,13 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
       } else {
         setContracts([]);
       }
-    });
+    }, (err) => console.warn("Firebase PurohitMarketDesk sync:", err.message));
 
     const myPurohitRef = doc(db, `communities/${session.communityId}/purohits/${session.uid}`);
     const unsubMyPurohit = onSnapshot(myPurohitRef, (docSnap) => {
       if (docSnap.exists()) setIsVerifiedPurohit(true);
       else setIsVerifiedPurohit(false);
-    });
+    }, (err) => console.warn("Firebase PurohitMarketDesk sync:", err.message));
 
     const failsafe = setTimeout(() => setLoading(false), 1200);
     return () => { unsubGigs(); unsubCon(); unsubMyPurohit(); clearTimeout(failsafe); };

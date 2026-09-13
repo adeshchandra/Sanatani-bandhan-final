@@ -1080,7 +1080,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const items = snapshot.docs.map(doc => doc.data() as any);
           c.setter(items);
         }
-      }, (err) => console.error("Firebase sync error for " + c.name, err));
+      }, (err) => {
+        if (err.code === 'permission-denied') {
+          console.warn(`[Firebase] Expected permission issue for ${c.name} - role restricted.`);
+        } else {
+          console.warn(`[Firebase] Sync info for ${c.name}:`, err.message);
+        }
+      });
     });
 
     return () => unsubscribes.forEach(unsub => unsub());

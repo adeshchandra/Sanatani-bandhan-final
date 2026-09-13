@@ -42,7 +42,7 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
         // Fallback simulation: Assume online for demo if active in last 10 mins
         setIsRecipientOnline(Math.random() > 0.3); // 70% chance online for demo feel
       }
-    });
+    }, (err) => console.warn("Firebase DM Chat sync (presence):", err.message));
     return () => unsubPresence();
   }, [recipientId]);
 
@@ -70,7 +70,7 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
           setIsRecipientTyping(false);
         }
       }
-    });
+    }, (err) => console.warn("Firebase DM Chat sync (chatDoc):", err.message));
 
     const q = query(
       collection(db, 'chats', chatId, 'messages'),
@@ -84,7 +84,7 @@ export const DirectMessageChat: React.FC<DirectMessageChatProps> = ({
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
-    });
+    }, (err) => console.warn("Firebase DM Chat sync (messages):", err.message));
 
     return () => { unsub(); unsubChatDoc(); };
   }, [chatId, session, recipientId]);

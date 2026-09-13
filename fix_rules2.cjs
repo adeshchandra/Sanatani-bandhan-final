@@ -22,8 +22,8 @@ service cloud.firestore {
     function belongsToWorkspace(workspaceId) {
       return isAuthenticated() && workspaceId != null && (
         isDemoWorkspace(workspaceId) ||
-        (getUserData() != null && getUserData().workspaceId == workspaceId) ||
-        (getUserData() != null && getUserData().defaultWorkspaceId == workspaceId) ||
+        (getUserData() != null && getUserData().get('workspaceId', null) == workspaceId) ||
+        (getUserData() != null && getUserData().get('defaultWorkspaceId', null) == workspaceId) ||
         workspaceId == 'PUROHIT_' + request.auth.uid
       );
     }
@@ -31,14 +31,14 @@ service cloud.firestore {
     function hasWorkspaceRole(workspaceId, allowedRoles) {
       return belongsToWorkspace(workspaceId) && (
         isDemoWorkspace(workspaceId) || 
-        (getUserData() != null && getUserData().role in allowedRoles)
+        (getUserData() != null && getUserData().get('role', null) in allowedRoles)
       );
     }
     
     function isBlocked() {
       return isAuthenticated() && ( 
         exists(/databases/$(database)/documents/blocked_users/$(request.auth.uid)) ||
-        (getUserData() != null && getUserData().status == 'BLOCKED')
+        (getUserData() != null && getUserData().get('status', null) == 'BLOCKED')
       );
     }
 
@@ -50,7 +50,7 @@ service cloud.firestore {
     match /yatra_broadcasts/{bId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
     match /global_support_threads/{tId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
     match /global_support_replies/{rId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
-    match /polls/{pollId} { allow read: if isAuthenticated(); allow write: if (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'MANAGER']) || isGlobalAdmin(); }
+    match /polls/{pollId} { allow read: if isAuthenticated(); allow write: if (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'MANAGER']) || isGlobalAdmin(); }
 
     match /users/{userId} {
       allow read: if (isAuthenticated() && request.auth.uid == userId) || isGlobalAdmin();
@@ -58,13 +58,13 @@ service cloud.firestore {
         && !request.resource.data.keys().hasAny(['admin', 'isGlobalAdmin', 'status'])
         && (
            !request.resource.data.keys().hasAny(['workspaceId', 'defaultWorkspaceId', 'role']) 
-           || isDemoWorkspace(request.resource.data.workspaceId)
+           || isDemoWorkspace(request.resource.data.get('workspaceId', null))
         );
       allow update: if (
         isAuthenticated() && request.auth.uid == userId && !isBlocked()
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isGlobalAdmin', 'status'])
         && (
-             isDemoWorkspace(request.resource.data.workspaceId) 
+             isDemoWorkspace(request.resource.data.get('workspaceId', null)) 
              || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'workspaceId', 'defaultWorkspaceId', 'membership'])
         )
       ) || isGlobalAdmin();
@@ -83,7 +83,7 @@ service cloud.firestore {
         'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
         'checkIns', 'audit_logs', 'festivals'
       ] && (
-        (isAuthenticated() && belongsToWorkspace(resource.data.workspaceId)) || isGlobalAdmin()
+        (isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null))) || isGlobalAdmin()
       );
       
       allow create: if collection in [
@@ -92,7 +92,7 @@ service cloud.firestore {
         'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
         'checkIns', 'audit_logs', 'festivals'
       ] && (
-        (isAuthenticated() && belongsToWorkspace(request.resource.data.workspaceId)) || isGlobalAdmin()
+        (isAuthenticated() && belongsToWorkspace(request.resource.data.get('workspaceId', null))) || isGlobalAdmin()
       );
 
       allow update: if collection in [
@@ -101,7 +101,7 @@ service cloud.firestore {
         'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
         'checkIns', 'audit_logs', 'festivals'
       ] && (
-        (isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) && belongsToWorkspace(request.resource.data.workspaceId)) || isGlobalAdmin()
+        (isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) && belongsToWorkspace(request.resource.data.get('workspaceId', null))) || isGlobalAdmin()
       );
 
       allow delete: if collection in [
@@ -110,7 +110,7 @@ service cloud.firestore {
         'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
         'checkIns', 'audit_logs', 'festivals'
       ] && (
-        (isAuthenticated() && belongsToWorkspace(resource.data.workspaceId)) || isGlobalAdmin()
+        (isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null))) || isGlobalAdmin()
       );
     }
 
@@ -118,7 +118,7 @@ service cloud.firestore {
       allow read, write: if (
         isAuthenticated() && ( 
           chatId.matches('.*' + request.auth.uid + '.*') || 
-          (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+          (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
         )
       ) || isGlobalAdmin();
 
@@ -126,7 +126,7 @@ service cloud.firestore {
         allow read, write: if (
           isAuthenticated() && ( 
              chatId.matches('.*' + request.auth.uid + '.*') || 
-             (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+             (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
           )
         ) || isGlobalAdmin();
       }
@@ -138,7 +138,7 @@ service cloud.firestore {
         belongsToWorkspace(communityId) && (
           collectionName in ['vivah_profiles', 'vivah_connections', 'sadhana_logs', 'social_feed', 'yatra_social_feed', 'purohit_gigs', 'purohit_applications']
           || isDemoWorkspace(communityId)
-          || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'PUROHIT'])
+          || (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'PUROHIT'])
         )
       ) || isGlobalAdmin();
     }

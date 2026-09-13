@@ -1,4 +1,6 @@
+const fs = require('fs');
 
+const tests = `
 import { assertFails, assertSucceeds, initializeTestEnvironment, RulesTestEnvironment } from '@firebase/rules-unit-testing';
 import * as fs from 'fs';
 
@@ -197,3 +199,6 @@ describe('Firestore Security Rules', () => {
     await assertFails(user1Db.collection('users').doc('user-2').set({ role: 'SUPER_ADMIN' }));
   });
 });
+`;
+
+fs.writeFileSync('tests/firestore.rules.spec.ts', tests);

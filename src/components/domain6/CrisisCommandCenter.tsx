@@ -59,7 +59,7 @@ export const CrisisCommandCenter: React.FC = () => {
       const dynamicScore = 500 + (resolvedCount * 50) - (activeCount * 10);
       setOrgResilienceScore(Math.max(100, Math.min(1000, dynamicScore)));
       setKarmaPool(10000 + (resolvedCount * 150));
-    });
+    }, (err) => console.warn("Firebase CrisisCommandCenter sync:", err.message));
 
     return () => unsubscribe();
   }, []);

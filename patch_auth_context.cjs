@@ -1,27 +1,25 @@
 const fs = require('fs');
-const file = 'src/context/AuthWorkspaceContext.tsx';
-let code = fs.readFileSync(file, 'utf8');
+let content = fs.readFileSync('src/context/AuthWorkspaceContext.tsx', 'utf8');
 
-if (!code.includes('signInAnonymously')) {
-  code = code.replace(
-    'import { onAuthStateChanged, signOut } from "firebase/auth";',
-    'import { onAuthStateChanged, signOut, signInAnonymously } from "firebase/auth";'
-  );
+// The user states: "Document the remaining authentication migration requirement."
+const warningMsg = `\n      // TODO: PHASE 1B - Production authentication migration required. \n      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.\n      signInAnonymously(auth).catch(console.error);\n`;
 
-  code = code.replace(
-    /const loginWithPin = \(pin: string, devoteeList: DevoteeMember\[\]\): boolean => \{/g,
-    `const loginWithPin = (pin: string, devoteeList: DevoteeMember[]): boolean => {
-    if (!firebaseUser) {
-       signInAnonymously(auth).catch(e => console.error("Anonymous auth failed", e));
-    }`
-  );
+// Inject into loginWithPin (Admin)
+content = content.replace(
+  `setCurrentRole('SUPER_ADMIN');\n      setIsAuthenticated(true);`,
+  `setCurrentRole('SUPER_ADMIN');\n      setIsAuthenticated(true);${warningMsg}`
+);
 
-  code = code.replace(
-    /const loginAsRole = \(role: UserRole, customName\?: string\) => \{/g,
-    `const loginAsRole = (role: UserRole, customName?: string) => {
-    if (!firebaseUser) {
-       signInAnonymously(auth).catch(e => console.error("Anonymous auth failed", e));
-    }`
-  );
-}
-fs.writeFileSync(file, code);
+// Inject into loginWithPin (Devotee match)
+content = content.replace(
+  `setCurrentRole(match.role || 'DEVOTEE');\n      setIsAuthenticated(true);`,
+  `setCurrentRole(match.role || 'DEVOTEE');\n      setIsAuthenticated(true);${warningMsg}`
+);
+
+// Inject into loginAsRole
+content = content.replace(
+  `setCurrentRole(role);\n    setIsAuthenticated(true);`,
+  `setCurrentRole(role);\n    setIsAuthenticated(true);${warningMsg}`
+);
+
+fs.writeFileSync('src/context/AuthWorkspaceContext.tsx', content);

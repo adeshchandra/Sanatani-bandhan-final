@@ -50,7 +50,7 @@ const useCollection = <T>(
       }
       setData(items);
     }, (error) => {
-      console.error(`Error fetching useCollection for ${collectionName}:`, error);
+      console.warn(`Firebase sync warning for ${collectionName}:`, error.message);
     });
 
     return () => unsubscribe();

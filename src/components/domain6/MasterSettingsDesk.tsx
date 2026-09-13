@@ -141,7 +141,7 @@ export const MasterSettingsDesk: React.FC = () => {
         setLoadingHistory(true);
         try {
           const q = query(collection(db, 'upgrade_requests'), where('communityId', '==', activeWorkspace.id));
-          const snapshot = await getDocs(q);
+          const snapshot = (await getDocs(q).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
           const history = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
           history.sort((a, b) => {
             const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;

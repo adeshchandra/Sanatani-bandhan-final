@@ -155,7 +155,7 @@ export const purgeDemoRecordsFromFirestore = async () => {
         where('_expiresAt', '<=', now)
       );
       
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = (await getDocs(q).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
       const deletePromises: Promise<void>[] = [];
       
       querySnapshot.forEach((docSnapshot) => {

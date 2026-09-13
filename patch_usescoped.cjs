@@ -1,10 +1,4 @@
 const fs = require('fs');
-const file = 'src/hooks/useScopedData.ts';
-let code = fs.readFileSync(file, 'utf8');
-
-code = code.replace(
-  "if (!currentUser || !activeWorkspace) {\n      return { _unauthorized: true };\n    }",
-  "if (!currentUser || !activeWorkspace || currentUser.id === 'temp-devotee-id') {\n      return { _unauthorized: true };\n    }"
-);
-
-fs.writeFileSync(file, code);
+let code = fs.readFileSync('src/hooks/useScopedData.ts', 'utf8');
+code = code.replace(/console\.error\(\`Error fetching useCollection for \$\{collectionName\}\:\`, error\);/g, `console.warn(\`Firebase sync warning for \$\{collectionName\}\:\`, error.message);`);
+fs.writeFileSync('src/hooks/useScopedData.ts', code);

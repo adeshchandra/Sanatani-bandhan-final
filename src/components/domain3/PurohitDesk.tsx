@@ -92,7 +92,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         setPurohits(arr);
         localStorage.setItem(`sb_purohits_${session.communityId}`, JSON.stringify(arr));
       } else setPurohits([]);
-    });
+    }, (err) => console.warn("Firebase PurohitDesk sync:", err.message));
 
     const unsubYaj = onSnapshot(yajRef, (snap) => {
       if (!snap.empty) {
@@ -100,7 +100,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         setYajamans(arr);
         localStorage.setItem(`sb_yajamans_${session.communityId}`, JSON.stringify(arr));
       } else setYajamans([]);
-    });
+    }, (err) => console.warn("Firebase PurohitDesk sync:", err.message));
 
     const unsubAnu = onSnapshot(anuRef, (snap) => {
       if (!snap.empty) {
@@ -109,7 +109,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         setAnushthans(arr);
         localStorage.setItem(`sb_anushthans_${session.communityId}`, JSON.stringify(arr));
       } else setAnushthans([]);
-    });
+    }, (err) => console.warn("Firebase PurohitDesk sync:", err.message));
 
     const appRef = collection(db, `communities/${session.communityId}/purohit_applications`);
     const unsubApp = onSnapshot(appRef, (snap) => {
@@ -118,7 +118,7 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
       } else {
         setApplications([]);
       }
-    });
+    }, (err) => console.warn("Firebase PurohitDesk sync:", err.message));
     
     const unsubSam = onSnapshot(samRef, (snap) => {
       if (!snap.empty) {
@@ -127,7 +127,8 @@ export function PurohitDesk({ isOnline = navigator.onLine }: { isOnline?: boolea
         localStorage.setItem(`sb_samagri_${session.communityId}`, JSON.stringify(arr));
       } else setSamagri([]);
       setLoading(false);
-    });
+      setLoading(false);
+    }, (err) => console.warn("Firebase PurohitDesk sync:", err.message));
 
     const failsafe = setTimeout(() => setLoading(false), 1200);
     return () => { unsubPur(); unsubYaj(); unsubAnu(); unsubSam(); unsubApp(); clearTimeout(failsafe); };

@@ -64,7 +64,7 @@ export const CommunityPollsTab: React.FC = () => {
       setPolls(pollArray);
       setLoading(false);
     }, (error) => {
-      console.error("Firestore poll fetch error:", error);
+      console.warn("Firebase CommunityPollsTab sync:", error.message);
       setLoading(false);
     });
     return () => unsub();

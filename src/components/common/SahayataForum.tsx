@@ -79,7 +79,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       });
       setThreads(fetched);
     }, (error) => {
-      console.error("Error fetching threads:", error);
+      console.warn("Firebase SahayataForum sync (threads):", error.message);
     });
     return () => unsubscribe();
   }, []);
@@ -100,7 +100,7 @@ export const SahayataForum: React.FC<{ onClose: () => void }> = ({ onClose }) =>
       setReplies(fetched);
     }, (error) => {
       // If index is missing, it will throw. Fallback to fetching all and filtering in memory if needed.
-      console.error("Error fetching replies:", error);
+      console.warn("Firebase SahayataForum sync (replies):", error.message);
     });
     return () => unsubscribe();
   }, [selectedThread]);

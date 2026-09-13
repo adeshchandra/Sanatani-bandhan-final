@@ -66,7 +66,7 @@ export const QRScanner: React.FC = () => {
 
       // Fetch User
       const userRef = doc(db, 'devotees', payload.uid);
-      const userSnap = await getDoc(userRef);
+      const userSnap = (await getDoc(userRef).catch(e => { console.warn("Firebase getDoc error", e.message); return { exists: () => false, data: () => null }; }));
       
       if (!userSnap.exists()) {
         throw new Error('Devotee not found');
@@ -99,7 +99,7 @@ export const QRScanner: React.FC = () => {
         where('timestamp', '>', fiveMinsAgo)
       );
       
-      const recentDocs = await getDocs(recentQuery);
+      const recentDocs = (await getDocs(recentQuery).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
       if (!recentDocs.empty) {
         // Just show success but don't double log
         setScanResult({

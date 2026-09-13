@@ -206,7 +206,7 @@ export const SanataniSocialFeed: React.FC = () => {
       const emergencies = snapshot.docs.map((doc, idx) => ({ id: doc.id, ...doc.data() })) as any[];
       // Filter out resolved emergencies client-side
       setActiveEmergencies(emergencies.filter(e => e.sosStatus !== 'RESOLVED').sort((a, b) => b.originalTimestamp - a.originalTimestamp));
-    });
+    }, (err) => console.warn("Firebase social feed sync:", err.message));
     
     return () => unsubscribe();
   }, []);
@@ -396,7 +396,7 @@ export const SanataniSocialFeed: React.FC = () => {
         
         return combined;
       });
-    });
+    }, (err) => console.warn("Firebase social feed sync:", err.message));
     return () => unsubscribe();
   }, [activeWorkspace?.id]);
 

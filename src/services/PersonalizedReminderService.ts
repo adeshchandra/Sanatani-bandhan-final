@@ -74,7 +74,7 @@ export class PersonalizedReminderService {
   static async getUpcomingShradhReminders(devoteeId: string): Promise<ShradhReminder[]> {
     const recordsRef = collection(db, 'pitru_records');
     const q = query(recordsRef, where('devoteeId', '==', devoteeId));
-    const snapshot = await getDocs(q);
+    const snapshot = (await getDocs(q).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
     
     const reminders: ShradhReminder[] = [];
     const today = new Date();
@@ -107,7 +107,7 @@ export class PersonalizedReminderService {
   static async getPersonalizedFestivals(devoteeId: string): Promise<Festival[]> {
     // 1. Fetch Devotee
     const devoteeRef = doc(db, 'devotees', devoteeId);
-    const devoteeSnap = await getDoc(devoteeRef);
+    const devoteeSnap = (await getDoc(devoteeRef).catch(e => { console.warn("Firebase getDoc error", e.message); return { exists: () => false, data: () => null }; }));
     if (!devoteeSnap.exists()) return [];
     
     const devoteeData = devoteeSnap.data() as DevoteeMember;
@@ -118,7 +118,7 @@ export class PersonalizedReminderService {
     // 2. Fetch festivals 
     const festivalsRef = collection(db, 'festivals');
     const q = query(festivalsRef, where('relatedDeities', 'array-contains', kuladevata));
-    const festSnap = await getDocs(q);
+    const festSnap = (await getDocs(q).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
     
     const festivals: Festival[] = [];
     festSnap.forEach(fDoc => {
@@ -143,7 +143,7 @@ export class PersonalizedReminderService {
     // 1. Fetch Donations
     const treasuryRef = collection(db, 'treasury');
     const qTreasury = query(treasuryRef, where('devoteeId', '==', devoteeId), where('type', '==', 'Income'));
-    const treasurySnap = await getDocs(qTreasury);
+    const treasurySnap = (await getDocs(qTreasury).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
     
     let totalDonations = 0;
     treasurySnap.forEach(tDoc => {
@@ -153,7 +153,7 @@ export class PersonalizedReminderService {
     
     // 2. Fetch Volunteer Hours (If stored on devotee doc)
     const devoteeRef = doc(db, 'devotees', devoteeId);
-    const devoteeSnap = await getDoc(devoteeRef);
+    const devoteeSnap = (await getDoc(devoteeRef).catch(e => { console.warn("Firebase getDoc error", e.message); return { exists: () => false, data: () => null }; }));
     let volunteerHours = 0;
     if (devoteeSnap.exists()) {
       const dd = devoteeSnap.data();
@@ -201,7 +201,7 @@ export class PersonalizedReminderService {
 
   static async getFamilySnapshot(devoteeId: string): Promise<FamilySnapshot> {
     const devoteeRef = doc(db, 'devotees', devoteeId);
-    const devoteeSnap = await getDoc(devoteeRef);
+    const devoteeSnap = (await getDoc(devoteeRef).catch(e => { console.warn("Firebase getDoc error", e.message); return { exists: () => false, data: () => null }; }));
     if (!devoteeSnap.exists()) {
       return { familyName: 'Unknown', members: [], totalMembers: 0 };
     }
@@ -219,7 +219,7 @@ export class PersonalizedReminderService {
     
     const devoteesRef = collection(db, 'devotees');
     const q = query(devoteesRef, where('familyId', '==', familyId));
-    const familySnap = await getDocs(q);
+    const familySnap = (await getDocs(q).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
     
     const members: DevoteeMember[] = [];
     familySnap.forEach(d => {
@@ -246,7 +246,7 @@ export class PersonalizedReminderService {
     // Fetch Donations (Fetch all matching, sort in memory to avoid index errors)
     const treasuryRef = collection(db, 'treasury');
     const qTreasury = query(treasuryRef, where('devoteeId', '==', devoteeId), where('type', '==', 'Income'));
-    const tSnap = await getDocs(qTreasury);
+    const tSnap = (await getDocs(qTreasury).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
     
     tSnap.forEach(tDoc => {
       const d = tDoc.data() as TreasuryTransaction;
@@ -263,7 +263,7 @@ export class PersonalizedReminderService {
     // Fetch Bookings
     const bookingsRef = collection(db, 'pooja_bookings');
     const qBookings = query(bookingsRef, where('devoteeId', '==', devoteeId));
-    const bSnap = await getDocs(qBookings);
+    const bSnap = (await getDocs(qBookings).catch(e => { console.warn("Firebase getDocs error", e.message); return { empty: true, forEach: () => {}, docs: [] }; }));
     
     bSnap.forEach(bDoc => {
       const d = bDoc.data() as PoojaBooking;

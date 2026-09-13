@@ -106,7 +106,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
         ]);
       }
       setLoading(false);
-    });
+    }, (err) => console.warn("Firebase SanataniVivahDesk sync:", err.message));
 
     // Load Connections (Bidirectional)
     const connRef = collection(db, `communities/${workspaceId}/vivah_connections`);
@@ -120,7 +120,7 @@ export default function SanataniVivahDesk({ isOnline = navigator.onLine }: { isO
         }
       });
       setConnections(connMap);
-    });
+    }, (err) => console.warn("Firebase SanataniVivahDesk sync:", err.message));
 
     return () => { unsubProf(); unsubConn(); };
   }, [workspaceId, currentUser?.id]);

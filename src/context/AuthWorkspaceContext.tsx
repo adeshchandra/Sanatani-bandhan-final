@@ -373,6 +373,10 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     if (pin === '1008' || pin === activeWorkspace.adminPin) {
       setCurrentRole('SUPER_ADMIN');
       setIsAuthenticated(true);
+      // TODO: PHASE 1B - Production authentication migration required. 
+      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
+      signInAnonymously(auth).catch(console.error);
+
       return true;
     }
 
@@ -382,6 +386,10 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       setCurrentDevotee(match);
       setCurrentRole(match.role || 'DEVOTEE');
       setIsAuthenticated(true);
+      // TODO: PHASE 1B - Production authentication migration required. 
+      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
+      signInAnonymously(auth).catch(console.error);
+
       set('sanatani_current_devotee', match);
       return true;
     }
@@ -392,6 +400,10 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   const loginAsRole = (role: UserRole, customName?: string) => {
     setCurrentRole(role);
     setIsAuthenticated(true);
+      // TODO: PHASE 1B - Production authentication migration required. 
+      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
+      signInAnonymously(auth).catch(console.error);
+
     setViewMode('MANAGER');
     signInAnonymously(auth).catch(console.error);
     if (role === 'DEVOTEE') {

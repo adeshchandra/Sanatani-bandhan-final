@@ -1,0 +1,218 @@
+const fs = require('fs');
+const content = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Core Auth Helpers
+    function isAuthenticated() { return request.auth != null; }
+    function isGlobalAdmin() { 
+      return isAuthenticated() && 
+      exists(/databases/$(database)/documents/platform_admins/$(request.auth.uid)) &&
+      get(/databases/$(database)/documents/platform_admins/$(request.auth.uid)).data.active == true; 
+    }
+    
+    function getUserData() { 
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data : null; 
+    }
+    
+    function isDemoWorkspace(workspaceId) {
+      return workspaceId != null && workspaceId.matches('^DEMO_.*');
+    }
+    
+    // Belongs to workspace: if they have a defaultWorkspaceId or workspaceId that matches
+    function belongsToWorkspace(workspaceId) {
+      return isAuthenticated() && (
+        isDemoWorkspace(workspaceId) ||
+        (getUserData() != null && getUserData().workspaceId == workspaceId) ||
+        (getUserData() != null && getUserData().defaultWorkspaceId == workspaceId) ||
+        workspaceId == 'PUROHIT_' + request.auth.uid
+      );
+    }
+    
+    function hasWorkspaceRole(workspaceId, allowedRoles) {
+      return belongsToWorkspace(workspaceId) && (
+        isDemoWorkspace(workspaceId) || 
+        (getUserData() != null && getUserData().role in allowedRoles)
+      );
+    }
+    
+    function isBlocked() {
+      return isAuthenticated() && (
+         exists(/databases/$(database)/documents/blocked_users/$(request.auth.uid)) ||
+         (getUserData() != null && getUserData().status == 'BLOCKED')
+      );
+    }
+
+    // GLOBAL & SYSTEM NODES
+    match /platform_leads/{leadId} { allow create: if true; allow read, update, delete: if isGlobalAdmin(); }
+    match /app_config/{configId} { allow read: if isAuthenticated(); allow write: if isGlobalAdmin(); }
+    match /global_purohits/{purohitId} { allow read: if isAuthenticated(); allow write: if isAuthenticated() && request.auth.uid == purohitId; }
+    match /upgrade_requests/{reqId} { allow create: if isAuthenticated(); allow read, update, delete: if isGlobalAdmin(); }
+
+    // GLOBAL SOCIAL & SUPPORT
+    match /yatra_broadcasts/{bId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
+    match /global_support_threads/{tId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
+    match /global_support_replies/{rId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
+    match /polls/{pollId} { allow read: if isAuthenticated(); allow write: if isGlobalAdmin() || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'MANAGER']); }
+
+    match /users/{userId} {
+      allow read: if isGlobalAdmin() || (isAuthenticated() && request.auth.uid == userId);
+      allow create: if isAuthenticated() && request.auth.uid == userId 
+        && !request.resource.data.keys().hasAny(['admin', 'isGlobalAdmin', 'status'])
+        && (
+           !request.resource.data.keys().hasAny(['workspaceId', 'defaultWorkspaceId', 'role']) 
+           || isDemoWorkspace(request.resource.data.workspaceId)
+        );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && request.auth.uid == userId && !isBlocked()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isGlobalAdmin', 'status'])
+        && (
+             isDemoWorkspace(request.resource.data.workspaceId) 
+             || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'workspaceId', 'defaultWorkspaceId', 'membership'])
+        )
+      );
+      allow delete: if false; 
+    }
+
+    match /workspaces/{workspaceId} {
+      allow read: if isGlobalAdmin() || belongsToWorkspace(workspaceId);
+      allow write: if isGlobalAdmin() || hasWorkspaceRole(workspaceId, ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']);
+    }
+
+    match /treasury/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        (
+          isDemoWorkspace(resource.data.workspaceId) ||
+          (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']) ||
+          resource.data.devoteeId == request.auth.uid 
+        )
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.workspaceId) &&
+        (isDemoWorkspace(request.resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']))
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        belongsToWorkspace(request.resource.data.workspaceId) &&
+        (isDemoWorkspace(resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']))
+      );
+      allow delete: if false; 
+    }
+
+    match /devotees/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        (
+          isDemoWorkspace(resource.data.workspaceId) ||
+          (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER']) ||
+          docId == request.auth.uid
+        )
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.workspaceId) &&
+        (isDemoWorkspace(request.resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER']))
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        belongsToWorkspace(request.resource.data.workspaceId) &&
+        (isDemoWorkspace(resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER']))
+      );
+      allow delete: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        (isDemoWorkspace(resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']))
+      );
+    }
+
+    match /chats/{chatId} {
+      allow read, write: if isGlobalAdmin() || (
+        isAuthenticated() && (
+           chatId.matches('.*' + request.auth.uid + '.*') ||
+           (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+        )
+      );
+      match /{document=**} {
+        allow read, write: if isGlobalAdmin() || (
+          isAuthenticated() && (
+             chatId.matches('.*' + request.auth.uid + '.*') ||
+             (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+          )
+        );
+      }
+    }
+
+    match /audit_logs/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        (isDemoWorkspace(resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']))
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.workspaceId) &&
+        request.resource.data.actorId == request.auth.uid 
+      );
+      allow update, delete: if false; 
+    }
+
+    match /pooja_bookings/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId)
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.workspaceId)
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        belongsToWorkspace(request.resource.data.workspaceId)
+      );
+      allow delete: if false;
+    }
+    match /pitru_records/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId)
+      );
+      allow write: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        (isDemoWorkspace(resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'PUROHIT']))
+      );
+    }
+    match /festivals/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId)
+      );
+      allow write: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        (isDemoWorkspace(resource.data.workspaceId) || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']))
+      );
+    }
+    match /check_ins/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId)
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.workspaceId)
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.workspaceId) &&
+        belongsToWorkspace(request.resource.data.workspaceId)
+      );
+      allow delete: if false;
+    }
+
+    match /communities/{communityId}/{collectionName}/{docId} {
+      allow read: if isGlobalAdmin() || belongsToWorkspace(communityId);
+      allow write: if isGlobalAdmin() || (
+        belongsToWorkspace(communityId) && (
+          collectionName in ['vivah_profiles', 'vivah_connections', 'sadhana_logs', 'social_feed', 'yatra_social_feed', 'purohit_gigs', 'purohit_applications']
+          || isDemoWorkspace(communityId)
+          || (getUserData() != null && getUserData().role in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'PUROHIT'])
+        )
+      );
+    }
+
+    match /{document=**} {
+      allow read, write: if isGlobalAdmin();
+    }
+  }
+}
+`;
+fs.writeFileSync('firestore.rules', content);

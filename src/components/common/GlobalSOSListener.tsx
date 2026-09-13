@@ -84,7 +84,7 @@ export const GlobalSOSListener: React.FC = () => {
           }
         }
       });
-    });
+    }, (err) => console.warn("Firebase SOS sync:", err.message));
 
     return () => {
       unsubscribe();

@@ -55,7 +55,7 @@ export default function PersonalSadhanaDesk() {
       setAllLogs(publicLogs);
       
       setLoading(false);
-    });
+    }, (err) => console.warn("Firebase PersonalSadhanaDesk sync:", err.message));
     return () => unsub();
   }, [activeWorkspace?.id, currentUser?.id]);
 

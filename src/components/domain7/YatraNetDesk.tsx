@@ -52,7 +52,7 @@ export default function YatraNetDesk() {
       const posts: any[] = [];
       snap.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
       setSocialFeed(posts);
-    });
+    }, (err) => console.warn("Firebase YatraNetDesk sync:", err.message));
     return () => unsub();
   }, [activeWorkspace?.id]);
 
@@ -142,7 +142,7 @@ export default function YatraNetDesk() {
           }
         }
       });
-    });
+    }, (err) => console.warn("Firebase YatraNetDesk sync:", err.message));
 
     return () => unsub();
   }, [activeWorkspace?.id, currentUser?.id]);

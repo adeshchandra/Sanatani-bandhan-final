@@ -25,7 +25,7 @@ export function useFirestoreCollection<T extends { id: string, workspaceId?: str
         setData(items);
       }
     }, (error) => {
-      console.error(`Error fetching ${collectionName}:`, error);
+      console.warn(`Firebase sync warning for ${collectionName}:`, error.message);
     });
 
     return () => unsubscribe();
