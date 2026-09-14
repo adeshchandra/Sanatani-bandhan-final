@@ -42,7 +42,7 @@ service cloud.firestore {
 
     match /platform_admins/{adminId} {
       allow read: if isGlobalAdmin();
-      allow write: if false; // Only modified via GCP console or custom admin tool
+      allow write: if false; 
     }
 
     match /platform_leads/{leadId} { allow create: if true; allow read, update, delete: if isGlobalAdmin(); }

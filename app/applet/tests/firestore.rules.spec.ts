@@ -132,4 +132,41 @@ describe('Firestore Security Rules', () => {
     const globalAdminDb = testEnv.authenticatedContext('global-admin-uid').firestore();
     await assertSucceeds(globalAdminDb.collection('devotees').doc('dev-2').update({ name: 'Updated' }));
   });
+
+  it('17. Participant cannot arbitrarily change participants', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().collection('chats').doc('chat_test_1').set({ participants: ['user-1', 'user-2'] });
+    });
+    const user1Db = testEnv.authenticatedContext('user-1').firestore();
+    await assertFails(user1Db.collection('chats').doc('chat_test_1').update({ participants: ['user-1', 'hacker'] }));
+  });
+
+  it('18. SenderId cannot be forged in chat messages', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().collection('chats').doc('chat_test_2').set({ participants: ['user-1', 'user-2'] });
+    });
+    const user1Db = testEnv.authenticatedContext('user-1').firestore();
+    await assertFails(user1Db.collection('chats').doc('chat_test_2').collection('messages').add({ senderId: 'user-2', text: 'Forgery' }));
+  });
+
+  it('19. DEMO workspace user cannot access production tenant data', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.collection('users').doc('demo-super-admin').set({ workspaceId: 'DEMO_123', role: 'SUPER_ADMIN' });
+      await db.collection('devotees').doc('prod-devotee').set({ workspaceId: 'ws-1', name: 'Prod Devotee' });
+    });
+    const demoAdminDb = testEnv.authenticatedContext('demo-super-admin').firestore();
+    await assertFails(demoAdminDb.collection('devotees').doc('prod-devotee').get());
+  });
+
+  it('20. DEMO user cannot create or modify platform_admins', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.collection('users').doc('demo-user').set({ workspaceId: 'DEMO_123', role: 'SUPER_ADMIN' });
+      await db.collection('platform_admins').doc('admin-record').set({ active: true });
+    });
+    const demoDb = testEnv.authenticatedContext('demo-user').firestore();
+    await assertFails(demoDb.collection('platform_admins').doc('demo-user').set({ active: true }));
+    await assertFails(demoDb.collection('platform_admins').doc('admin-record').update({ active: false }));
+  });
 });
