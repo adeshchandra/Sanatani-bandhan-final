@@ -4,14 +4,14 @@ service cloud.firestore {
     
     function isAuthenticated() { return request.auth != null; }
     
-    function isGlobalAdmin() { 
-      return isAuthenticated() && 
-      exists(/databases/$(database)/documents/platform_admins/$(request.auth.uid)) &&
+    function isGlobalAdmin() {
+       return isAuthenticated() &&
+       exists(/databases/$(database)/documents/platform_admins/$(request.auth.uid)) &&
       get(/databases/$(database)/documents/platform_admins/$(request.auth.uid)).data.active == true; 
     }
     
-    function getUserData() { 
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data : null; 
+    function getUserData() {
+       return exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data : null; 
     }
     
     function isDemoWorkspace(workspaceId) {
@@ -40,11 +40,15 @@ service cloud.firestore {
       );
     }
 
+    match /platform_admins/{adminId} {
+      allow read: if isGlobalAdmin();
+      allow write: if false; // Only modified via GCP console or custom admin tool
+    }
+
     match /platform_leads/{leadId} { allow create: if true; allow read, update, delete: if isGlobalAdmin(); }
     match /app_config/{configId} { allow read: if isAuthenticated(); allow write: if isGlobalAdmin(); }
     match /global_purohits/{purohitId} { allow read: if isAuthenticated(); allow write: if (isAuthenticated() && request.auth.uid == purohitId) || isGlobalAdmin(); }
     match /upgrade_requests/{reqId} { allow create: if isAuthenticated(); allow read, update, delete: if isGlobalAdmin(); }
-
     match /yatra_broadcasts/{bId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
     match /global_support_threads/{tId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
     match /global_support_replies/{rId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
@@ -52,26 +56,25 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if (isAuthenticated() && request.auth.uid == userId) || isGlobalAdmin();
+      
       allow create: if isAuthenticated() && request.auth.uid == userId 
         && !request.resource.data.keys().hasAny(['admin', 'isGlobalAdmin', 'status'])
-        && (
-           !request.resource.data.keys().hasAny(['workspaceId', 'defaultWorkspaceId', 'role']) 
+        && ( 
+           !request.resource.data.keys().hasAny(['workspaceId', 'defaultWorkspaceId', 'role', 'membership']) 
            || isDemoWorkspace(request.resource.data.get('workspaceId', null))
         );
-      allow update: if (
+        
+      allow update: if isGlobalAdmin() || (
         isAuthenticated() && request.auth.uid == userId && !isBlocked()
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isGlobalAdmin', 'status'])
-        && (
-             isDemoWorkspace(request.resource.data.get('workspaceId', null)) 
-             || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'workspaceId', 'defaultWorkspaceId', 'membership'])
-        )
-      ) || isGlobalAdmin();
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['admin', 'isGlobalAdmin', 'status', 'role', 'workspaceId', 'defaultWorkspaceId', 'membership'])
+      );
+      
       allow delete: if false; 
     }
 
     match /workspaces/{workspaceId} {
       allow read: if belongsToWorkspace(workspaceId) || isGlobalAdmin();
-      allow write: if hasWorkspaceRole(workspaceId, ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']) || isGlobalAdmin() || (isDemoWorkspace(workspaceId) && isAuthenticated());
+      allow write: if isGlobalAdmin() || hasWorkspaceRole(workspaceId, ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']) || (isDemoWorkspace(workspaceId) && isAuthenticated());
     }
 
     match /treasury/{docId} {
@@ -116,7 +119,6 @@ service cloud.firestore {
           )
         )
       );
-
       allow update: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
         isGlobalAdmin() || (
           isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
@@ -127,7 +129,6 @@ service cloud.firestore {
           )
         )
       );
-
       allow delete: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
         isGlobalAdmin() || (
           isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
