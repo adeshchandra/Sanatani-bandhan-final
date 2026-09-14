@@ -196,4 +196,12 @@ describe('Firestore Security Rules', () => {
     const user1Db = testEnv.authenticatedContext('user-1').firestore();
     await assertFails(user1Db.collection('users').doc('user-2').set({ role: 'SUPER_ADMIN' }));
   });
+  it('28. Cross-tenant update attack is denied', async () => {
+    const adminDb = testEnv.authenticatedContext('admin-1').firestore();
+    await assertFails(adminDb.collection('devotees').doc('dev-1').update({ workspaceId: 'ws-2' }));
+  });
+  it('29. Cross-tenant update attack denied in treasury', async () => {
+    const adminDb = testEnv.authenticatedContext('admin-1').firestore(); 
+    await assertFails(adminDb.collection('treasury').doc('tr-1').update({ workspaceId: 'ws-2' }));
+  });
 });

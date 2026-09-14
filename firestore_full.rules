@@ -1,5 +1,4 @@
-const fs = require('fs');
-let rules = `rules_version = '2';
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
@@ -21,7 +20,6 @@ service cloud.firestore {
     
     function belongsToWorkspace(workspaceId) {
       return isAuthenticated() && workspaceId != null && (
-        isDemoWorkspace(workspaceId) ||
         (getUserData() != null && getUserData().get('workspaceId', null) == workspaceId) ||
         (getUserData() != null && getUserData().get('defaultWorkspaceId', null) == workspaceId) ||
         workspaceId == 'PUROHIT_' + request.auth.uid
@@ -30,7 +28,7 @@ service cloud.firestore {
     
     function hasWorkspaceRole(workspaceId, allowedRoles) {
       return belongsToWorkspace(workspaceId) && (
-        isDemoWorkspace(workspaceId) || 
+        isDemoWorkspace(workspaceId) ||
         (getUserData() != null && getUserData().get('role', null) in allowedRoles)
       );
     }
@@ -73,44 +71,68 @@ service cloud.firestore {
 
     match /workspaces/{workspaceId} {
       allow read: if belongsToWorkspace(workspaceId) || isGlobalAdmin();
-      allow write: if hasWorkspaceRole(workspaceId, ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']) || isGlobalAdmin();
+      allow write: if hasWorkspaceRole(workspaceId, ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']) || isGlobalAdmin() || (isDemoWorkspace(workspaceId) && isAuthenticated());
+    }
+
+    match /treasury/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
+        (
+          isDemoWorkspace(resource.data.get('workspaceId', null)) ||
+          (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']) ||
+          resource.data.get('devoteeId', null) == request.auth.uid 
+        )
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+        (isDemoWorkspace(request.resource.data.get('workspaceId', null)) || (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']))
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
+        belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+        (isDemoWorkspace(resource.data.get('workspaceId', null)) || (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']))
+      );
+      allow delete: if false; 
     }
 
     match /{collection}/{docId} {
-      allow read: if collection in [
-        'treasury', 'devotees', 'families', 'guests', 'assets', 'inventory', 
-        'poojaBookings', 'residentPujas', 'pitruRecords', 'cows', 'annadanam', 
-        'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
-        'checkIns', 'audit_logs', 'festivals'
-      ] && (
-        (isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null))) || isGlobalAdmin()
+      allow read: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
+        isGlobalAdmin() || (
+          isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
+          (
+            isDemoWorkspace(resource.data.get('workspaceId', null)) ||
+            (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER']) ||
+            docId == request.auth.uid
+          )
+        )
       );
       
-      allow create: if collection in [
-        'treasury', 'devotees', 'families', 'guests', 'assets', 'inventory', 
-        'poojaBookings', 'residentPujas', 'pitruRecords', 'cows', 'annadanam', 
-        'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
-        'checkIns', 'audit_logs', 'festivals'
-      ] && (
-        (isAuthenticated() && belongsToWorkspace(request.resource.data.get('workspaceId', null))) || isGlobalAdmin()
+      allow create: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
+        isGlobalAdmin() || (
+          isAuthenticated() && belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+          (
+            isDemoWorkspace(request.resource.data.get('workspaceId', null)) ||
+            (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER'])
+          )
+        )
       );
 
-      allow update: if collection in [
-        'treasury', 'devotees', 'families', 'guests', 'assets', 'inventory', 
-        'poojaBookings', 'residentPujas', 'pitruRecords', 'cows', 'annadanam', 
-        'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
-        'checkIns', 'audit_logs', 'festivals'
-      ] && (
-        (isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) && belongsToWorkspace(request.resource.data.get('workspaceId', null))) || isGlobalAdmin()
+      allow update: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
+        isGlobalAdmin() || (
+          isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
+          belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+          (
+            isDemoWorkspace(resource.data.get('workspaceId', null)) ||
+            (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER'])
+          )
+        )
       );
 
-      allow delete: if collection in [
-        'treasury', 'devotees', 'families', 'guests', 'assets', 'inventory', 
-        'poojaBookings', 'residentPujas', 'pitruRecords', 'cows', 'annadanam', 
-        'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 
-        'checkIns', 'audit_logs', 'festivals'
-      ] && (
-        (isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null))) || isGlobalAdmin()
+      allow delete: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
+        isGlobalAdmin() || (
+          isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
+          (isDemoWorkspace(resource.data.get('workspaceId', null)) || (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']))
+        )
       );
     }
 
@@ -132,6 +154,18 @@ service cloud.firestore {
       }
     }
 
+    match /audit_logs/{docId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
+        (isDemoWorkspace(resource.data.get('workspaceId', null)) || (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER']))
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+        request.resource.data.get('actorId', null) == request.auth.uid 
+      );
+      allow update, delete: if false; 
+    }
+
     match /communities/{communityId}/{collectionName}/{docId} {
       allow read: if belongsToWorkspace(communityId) || isGlobalAdmin();
       allow write: if (
@@ -144,5 +178,3 @@ service cloud.firestore {
     }
   }
 }
-`;
-fs.writeFileSync('firestore.rules', rules);

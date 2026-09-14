@@ -89,7 +89,7 @@ service cloud.firestore {
       );
       allow update: if isGlobalAdmin() || (
         isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
-        belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+        request.resource.data.get('workspaceId', null) == resource.data.get('workspaceId', null) &&
         (isDemoWorkspace(resource.data.get('workspaceId', null)) || (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT']))
       );
       allow delete: if false; 
@@ -120,7 +120,7 @@ service cloud.firestore {
       allow update: if collection in ['devotees', 'families', 'guests', 'cows', 'annadanam', 'rooms', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'assets', 'inventory', 'poojaBookings', 'residentPujas', 'pitruRecords'] && (
         isGlobalAdmin() || (
           isAuthenticated() && belongsToWorkspace(resource.data.get('workspaceId', null)) &&
-          belongsToWorkspace(request.resource.data.get('workspaceId', null)) &&
+          request.resource.data.get('workspaceId', null) == resource.data.get('workspaceId', null) &&
           (
             isDemoWorkspace(resource.data.get('workspaceId', null)) ||
             (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER'])
@@ -137,20 +137,40 @@ service cloud.firestore {
     }
 
     match /chats/{chatId} {
-      allow read, write: if (
-        isAuthenticated() && ( 
-          chatId.matches('.*' + request.auth.uid + '.*') || 
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && (
+          (resource == null || (resource.data.participants != null && request.auth.uid in resource.data.participants)) ||
           (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
         )
-      ) || isGlobalAdmin();
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && (
+          (request.resource.data.participants != null && request.auth.uid in request.resource.data.participants) ||
+          (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+        )
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && (
+          (resource.data.participants != null && request.auth.uid in resource.data.participants && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['participants'])) ||
+          (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+        )
+      );
+      allow delete: if false;
 
-      match /{document=**} {
-        allow read, write: if (
-          isAuthenticated() && ( 
-             chatId.matches('.*' + request.auth.uid + '.*') || 
-             (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+      match /messages/{messageId} {
+        allow read: if isGlobalAdmin() || (
+          isAuthenticated() && (
+            (get(/databases/$(database)/documents/chats/$(chatId)).data.participants != null && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants) ||
+            (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
           )
-        ) || isGlobalAdmin();
+        );
+        allow create: if isGlobalAdmin() || (
+          isAuthenticated() && (
+            (get(/databases/$(database)/documents/chats/$(chatId)).data.participants != null && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants && request.resource.data.senderId == request.auth.uid) ||
+            (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'TRUSTEE', 'MANAGER'])
+          )
+        );
+        allow update, delete: if false;
       }
     }
 
