@@ -60,6 +60,16 @@ describe('Firestore Security Rules', () => {
     await assertFails(unauthedDb.collection('users').doc('anon').set({ workspaceId: 'ws-1' }));
   });
 
+  it('1.2. Anonymous user cannot modify production role', async () => {
+    const unauthedDb = testEnv.unauthenticatedContext().firestore();
+    await assertFails(unauthedDb.collection('users').doc('user-1').update({ role: 'SUPER_ADMIN' }));
+  });
+
+  it('1.3. Anonymous user cannot access production workspace data', async () => {
+    const unauthedDb = testEnv.unauthenticatedContext().firestore();
+    await assertFails(unauthedDb.collection('workspaces').doc('ws-1').get());
+  });
+
   it('2. Workspace A user cannot read Workspace B devotees', async () => {
     const user1Db = testEnv.authenticatedContext('user-1').firestore();
     const query = user1Db.collection('devotees').where('workspaceId', '==', 'ws-2');
@@ -69,6 +79,11 @@ describe('Firestore Security Rules', () => {
   it('3. Workspace A user cannot write Workspace B data', async () => {
     const user1Db = testEnv.authenticatedContext('user-1').firestore();
     await assertFails(user1Db.collection('devotees').add({ workspaceId: 'ws-2', name: 'Hack' }));
+  });
+
+  it('3.1. Workspace A user cannot delete Workspace B data', async () => {
+    const user1Db = testEnv.authenticatedContext('user-1').firestore();
+    await assertFails(user1Db.collection('devotees').doc('dev-2').delete());
   });
 
   it('4. User cannot change their own role', async () => {

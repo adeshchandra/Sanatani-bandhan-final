@@ -262,11 +262,27 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       if (user) {
+        // Handle anonymous DEMO users gracefully
+        if (user.isAnonymous) {
+            setIsAuthenticated(true);
+            if (!activeWorkspaceId.startsWith('DEMO_')) {
+                setActiveWorkspaceId('DEMO_ws-mandir');
+            }
+            return;
+        }
+
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
             setCurrentRole(data.role || 'DEVOTEE');
+            
+            // SECURITY BOUNDARY: Align active workspace with authoritative backend profile
+            const authWorkspace = data.workspaceId || data.defaultWorkspaceId;
+            if (authWorkspace && !activeWorkspaceId.startsWith('DEMO_')) {
+                setActiveWorkspaceId(authWorkspace);
+            }
+            
             setIsAuthenticated(true);
             setViewMode('MANAGER');
           } else {
@@ -280,10 +296,12 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsAuthenticated(false);
         setCurrentRole('DEVOTEE');
         setCurrentDevotee(null);
+        // Fallback to demo workspace on logout
+        setActiveWorkspaceId('DEMO_ws-mandir');
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [activeWorkspaceId]);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
@@ -428,12 +446,12 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     setCurrentRole(role);
     setIsAuthenticated(true);
-      // TODO: PHASE 1B - Production authentication migration required. 
-      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
-      signInAnonymously(auth).catch(console.error);
-
     setViewMode('MANAGER');
+
+    // TODO: PHASE 1B - Production authentication migration required. 
+    // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
     signInAnonymously(auth).catch(console.error);
+
     if (role === 'DEVOTEE') {
       setCurrentDevotee({
         id: 'dev-demo-self',
