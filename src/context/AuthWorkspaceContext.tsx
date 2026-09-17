@@ -313,10 +313,40 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   const activeWorkspace =
     workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0] || INITIAL_WORKSPACES[0];
 
-  const switchWorkspace = (workspaceId: string) => {
+  const switchWorkspace = async (workspaceId: string) => {
     const target = workspaces.find((w) => w.id === workspaceId);
-    if (target) {
+    if (!target) return;
+
+    if (workspaceId.startsWith('DEMO_')) {
       setActiveWorkspaceId(workspaceId);
+      return;
+    }
+
+    // SECURITY BOUNDARY: Production workspaces require Firebase Auth & verification
+    if (!firebaseUser) {
+      console.warn("Production workspace switch denied: User is not authenticated.");
+      return;
+    }
+
+    try {
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        const hasAccess = data.workspaceId === workspaceId || 
+                          data.defaultWorkspaceId === workspaceId || 
+                          (data.memberships && data.memberships.includes(workspaceId)) ||
+                          data.isGlobalAdmin;
+        
+        if (hasAccess) {
+          setActiveWorkspaceId(workspaceId);
+        } else {
+          console.warn("Production workspace switch denied: Unauthorized.");
+        }
+      } else {
+        console.warn("Production workspace switch denied: Identity missing.");
+      }
+    } catch (e) {
+      console.error("Error verifying production workspace access:", e);
     }
   };
 
@@ -338,6 +368,11 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const switchRole = (role: UserRole) => {
+    // SECURITY BOUNDARY: Client-side role switching is ONLY for DEMO environments
+    if (!activeWorkspaceId.startsWith('DEMO_')) {
+      console.warn("Role switching is disabled for production workspaces.");
+      return;
+    }
     setCurrentRole(role);
     set('sanatani_user_role', role);
   };

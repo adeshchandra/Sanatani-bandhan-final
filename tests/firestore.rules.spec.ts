@@ -55,6 +55,11 @@ describe('Firestore Security Rules', () => {
     await assertFails(unauthedDb.collection('devotees').get());
   });
 
+  it('1.1. Anonymous user cannot create production membership', async () => {
+    const unauthedDb = testEnv.unauthenticatedContext().firestore();
+    await assertFails(unauthedDb.collection('users').doc('anon').set({ workspaceId: 'ws-1' }));
+  });
+
   it('2. Workspace A user cannot read Workspace B devotees', async () => {
     const user1Db = testEnv.authenticatedContext('user-1').firestore();
     const query = user1Db.collection('devotees').where('workspaceId', '==', 'ws-2');
@@ -229,13 +234,19 @@ describe('Firestore Security Rules', () => {
   });
 
   it('34. Participant cannot arbitrarily change participants', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().collection('chats').doc('chat2').set({ participants: ['user-1', 'user-2'] });
+    });
     const user1Db = testEnv.authenticatedContext('user-1').firestore();
-    await assertFails(user1Db.collection('chats').doc('chat1').update({ participants: ['user-1', 'hacker'] }));
+    await assertFails(user1Db.collection('chats').doc('chat2').update({ participants: ['user-1', 'hacker'] }));
   });
 
   it('35. SenderId cannot be forged in chat messages', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().collection('chats').doc('chat3').set({ participants: ['user-1', 'user-2'] });
+    });
     const user1Db = testEnv.authenticatedContext('user-1').firestore();
-    await assertFails(user1Db.collection('chats').doc('chat1').collection('messages').add({ senderId: 'user-2', text: 'Forgery' }));
+    await assertFails(user1Db.collection('chats').doc('chat3').collection('messages').add({ senderId: 'user-2', text: 'Forgery' }));
   });
 
   it('36. Ordinary user can create only their own legitimate audit event', async () => {
