@@ -324,8 +324,10 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
         email: email,
         phone: phone,
         name: adminName,
-        role: 'SUPER_ADMIN',
-        workspaceId: newWorkspace.id,
+        // TODO: PHASE 1B - Backend provisioning required here.
+        // The client cannot self-assign SUPER_ADMIN or workspaceId.
+        // A trusted backend function must verify payment/tenant creation
+        // and assign these privileges securely.
         createdAt: serverTimestamp()
       });
 

@@ -18,8 +18,10 @@ service cloud.firestore {
       return workspaceId != null && workspaceId.matches('^DEMO_.*');
     }
     
+    function isRealUser() { return isAuthenticated() && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+
     function belongsToWorkspace(workspaceId) {
-      return isAuthenticated() && workspaceId != null && (
+      return isAuthenticated() && workspaceId != null && (!isDemoWorkspace(workspaceId) ? isRealUser() : true) && (
         (getUserData() != null && getUserData().get('workspaceId', null) == workspaceId) ||
         (getUserData() != null && getUserData().get('defaultWorkspaceId', null) == workspaceId) ||
         workspaceId == 'PUROHIT_' + request.auth.uid

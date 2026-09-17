@@ -8,7 +8,7 @@ import { DevoteeMember, UserRole, WorkspaceConfig, WorkspaceType } from '../type
 
 export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
-    id: 'ws-mandir',
+    id: 'DEMO_ws-mandir',
     name: 'Sri Sanatan Dharma Mandir',
     type: 'Mandir',
     tagline: 'Preserving Sanatan Samskriti & Sacred Darshan',
@@ -28,7 +28,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-goshala',
+    id: 'DEMO_ws-goshala',
     name: 'Surabhi Gau Seva Dham',
     type: 'Goshala',
     tagline: 'Sanctuary for 500+ Indigenous Desi Gir & Sahiwal Gomata',
@@ -48,7 +48,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-sangha',
+    id: 'DEMO_ws-sangha',
     name: 'Bharat Dharma Raksha Sangha',
     type: 'Sangha',
     tagline: 'Youth Character Building, Shakha Discipline & Dharma Seva',
@@ -68,7 +68,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-ashram',
+    id: 'DEMO_ws-ashram',
     name: 'Ananda Kutir Spiritual Ashram',
     type: 'Ashram',
     tagline: 'Silent Meditation, Sadhana Retreats & Vedanta Study',
@@ -88,7 +88,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-gurukul',
+    id: 'DEMO_ws-gurukul',
     name: 'Sandipani Veda Vidyapeeth',
     type: 'Gurukul',
     tagline: 'Reviving Vedic Recitation, Grammar, Nyaya & Shastras',
@@ -108,7 +108,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-satsang',
+    id: 'DEMO_ws-satsang',
     name: 'Sri Krishna Chaitanya Satsang Kendra',
     type: 'Satsang',
     tagline: 'Harinam Sankirtan & Shrimad Bhagavatam Kathas',
@@ -128,7 +128,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-yoga',
+    id: 'DEMO_ws-yoga',
     name: 'Patanjali Yogashala & Wellness Kendra',
     type: 'Yoga',
     tagline: 'Authentic Ashtanga Yoga, Pranayama & Holistic Healing',
@@ -148,7 +148,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-trust',
+    id: 'DEMO_ws-trust',
     name: 'Dharma Jagriti Seva Trust',
     type: 'Trust',
     tagline: 'Disaster Relief, Free Medical Camps & Education Grants',
@@ -168,7 +168,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-tirth',
+    id: 'DEMO_ws-tirth',
     name: 'Sri Somnath Yatri & Tirth Seva Kshetra',
     type: 'Tirth',
     tagline: 'Pilgrim Dharamshala, Pavitra Darshan & Pinda Daan Support',
@@ -188,7 +188,7 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     adminPin: '1008',
   },
   {
-    id: 'ws-samaj',
+    id: 'DEMO_ws-samaj',
     name: 'Akhil Bharatiya Gaur Brahman Mahasabha',
     type: 'Samaj',
     tagline: 'Community Welfare, Gotra Vivah Bandhan & Samaj Bhawan',
@@ -244,11 +244,11 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [viewMode, setViewMode] = useState<'MANAGER' | 'MEMBER'>('MEMBER');
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => {
-    return initialData.sanatani_active_workspace_id || 'ws-mandir';
+    return initialData.sanatani_active_workspace_id || 'DEMO_ws-mandir';
   });
 
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
-    return initialData.sanatani_user_role || 'SUPER_ADMIN';
+    return initialData.sanatani_user_role || 'DEVOTEE';
   });
 
   const [firebaseUser, setFirebaseUser] = useState<any>(null);
@@ -285,22 +285,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => unsubscribe();
   }, []);
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    // Determine if authenticated based on whether we loaded a saved role or devotee
-    // If the data was freshly loaded and role exists (which we default to head_admin for demo)
-    // Actually, to enforce the 3-tier structure, we should default to false unless explicitly logged in,
-    // OR we can check if they have a valid web session saved.
-    const sessionStr = localStorage.getItem('sanatani_web_session');
-    if (sessionStr) {
-      try {
-        const session = JSON.parse(sessionStr);
-        if (session.role) return true;
-      } catch (e) {
-        // ignore
-      }
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Sync to localStorage
   useEffect(() => {
@@ -367,6 +352,10 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const loginWithPin = (pin: string, devoteeList: DevoteeMember[]): boolean => {
+    // FORCE DEMO WORKSPACE to ensure safe boundaries
+    if (!activeWorkspaceId.startsWith('DEMO_')) {
+      setActiveWorkspaceId('DEMO_ws-mandir');
+    }
     // Firebase Auth is bypassed due to IAM lock. Local state governs the prototype UI.
 
     // Admin Master Override PIN
@@ -398,6 +387,10 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const loginAsRole = (role: UserRole, customName?: string) => {
+    // FORCE DEMO WORKSPACE to ensure safe boundaries
+    if (!activeWorkspaceId.startsWith('DEMO_')) {
+      setActiveWorkspaceId('DEMO_ws-mandir');
+    }
     setCurrentRole(role);
     setIsAuthenticated(true);
       // TODO: PHASE 1B - Production authentication migration required. 
@@ -462,6 +455,9 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
 
 
   const generateSecureQRToken = (member: DevoteeMember): string => {
+    // TODO: PHASE 1B - Security Boundary
+    // This token embeds the PIN and is NOT a secure cryptographic credential.
+    // It must only be used as a UI hint/demo until a proper expiring, opaque backend token is implemented.
     const vaultToken = member.qrSecretVaultToken || btoa(member.id + "-vault-" + Date.now());
     return JSON.stringify({ id: member.id, pin: member.pin, token: vaultToken });
   };

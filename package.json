@@ -10,7 +10,9 @@
     "start": "node dist/server.cjs",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "jest",
+    "test:rules": "jest tests/firestore.rules.spec.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
