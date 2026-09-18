@@ -197,8 +197,10 @@ export const SanataniSocialFeed: React.FC = () => {
   const [sosDetails, setSosDetails] = useState('');
 
   useEffect(() => {
+    if (!activeWorkspace?.id) return;
     const q = query(
       collection(db, 'yatra_broadcasts'),
+      where('communityId', '==', activeWorkspace.id),
       where('type', '==', 'RICH_SOS')
     );
     

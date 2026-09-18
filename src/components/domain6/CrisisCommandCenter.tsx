@@ -36,8 +36,13 @@ export const CrisisCommandCenter: React.FC = () => {
   const [karmaPool, setKarmaPool] = useState(12450);
 
   useEffect(() => {
+    if (!activeWorkspace?.id) return;
     // Fetch all emergencies globally or for this workspace
-    const q = query(collection(db, 'yatra_broadcasts'), orderBy('timestamp', 'desc'));
+    const q = query(
+      collection(db, 'yatra_broadcasts'),
+      where('communityId', '==', activeWorkspace.id),
+      orderBy('timestamp', 'desc')
+    );
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const logs: any[] = [];

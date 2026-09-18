@@ -23,6 +23,7 @@ export const GlobalSOSListener: React.FC = () => {
 
     const q = query(
       collection(db, 'yatra_broadcasts'),
+      where('communityId', '==', activeWorkspace.id),
       where('type', '==', 'RICH_SOS')
     );
 

@@ -51,7 +51,19 @@ service cloud.firestore {
     match /app_config/{configId} { allow read: if isAuthenticated(); allow write: if isGlobalAdmin(); }
     match /global_purohits/{purohitId} { allow read: if isAuthenticated(); allow write: if (isAuthenticated() && request.auth.uid == purohitId) || isGlobalAdmin(); }
     match /upgrade_requests/{reqId} { allow create: if isAuthenticated(); allow read, update, delete: if isGlobalAdmin(); }
-    match /yatra_broadcasts/{bId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
+    match /yatra_broadcasts/{bId} {
+      allow read: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.get('communityId', null))
+      );
+      allow create: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(request.resource.data.get('communityId', null))
+      );
+      allow update: if isGlobalAdmin() || (
+        isAuthenticated() && belongsToWorkspace(resource.data.get('communityId', null)) &&
+        request.resource.data.get('communityId', null) == resource.data.get('communityId', null)
+      );
+      allow delete: if isGlobalAdmin();
+    }
     match /global_support_threads/{tId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
     match /global_support_replies/{rId} { allow read, create: if isAuthenticated(); allow update, delete: if isGlobalAdmin(); }
     match /polls/{pollId} { allow read: if isAuthenticated(); allow write: if (getUserData() != null && getUserData().get('role', null) in ['SUPER_ADMIN', 'MANAGER']) || isGlobalAdmin(); }
