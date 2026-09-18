@@ -130,8 +130,10 @@ export const OfflineSyncManager = {
           });
         } else if (item.type === 'POST_SOCIAL') {
           const workspaceId = boundCommunityId || 'demo';
-          await setDoc(doc(db, `communities/${workspaceId}/social_feed`, item.payload.id), {
+          const postId = item.payload?.id || `post_${item.timestamp}_${Math.random().toString(36).substring(2, 7)}`;
+          await setDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), {
             ...item.payload,
+            id: postId,
             workspaceId,
             syncedAt: serverTimestamp()
           });
