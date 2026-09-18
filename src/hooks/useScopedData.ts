@@ -119,8 +119,8 @@ export const useScopedData = <T>(
     return baseFilter;
   }, [currentUser, activeWorkspace, collectionName]);
   
-  // Merge with custom filters
-  const finalFilters = { ...rbacFilters, ...customFilters };
+  // Merge with custom filters, but ensure authoritative RBAC filters always win
+  const finalFilters = { ...customFilters, ...rbacFilters };
   
   // Use existing useCollection hook with final filters
   return useCollection<T>(collectionName, finalFilters, options);

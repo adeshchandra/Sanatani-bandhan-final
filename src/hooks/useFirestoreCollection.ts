@@ -13,10 +13,10 @@ export function useFirestoreCollection<T extends { id: string, workspaceId?: str
   useEffect(() => {
     if (!activeWorkspace?.id || !isAuthenticated || !firebaseUser) return;
     
-    // Only fetch records for the active workspace, or global records if needed
+    // Only fetch records for the active workspace
     const q = query(
       collection(db, collectionName), 
-      where("workspaceId", "in", [activeWorkspace.id, "ws-mandir", "ws-akhara", "ws-trust"])
+      where("workspaceId", "==", activeWorkspace.id)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
