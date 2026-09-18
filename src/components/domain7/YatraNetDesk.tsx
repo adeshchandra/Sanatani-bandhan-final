@@ -233,6 +233,7 @@ export default function YatraNetDesk() {
   const handleRespondSOS = (sosId: string) => {
     OfflineSyncManager.addToQueue('RESPOND_SOS', {
       sosId,
+      communityId: activeWorkspace?.id,
       responderId: currentUser?.id,
       responderName: currentUser?.name || 'Devotee',
     });
@@ -242,6 +243,7 @@ export default function YatraNetDesk() {
   const handleResolveSOS = (sosId: string) => {
     OfflineSyncManager.addToQueue('RESOLVE_SOS', {
       sosId,
+      communityId: activeWorkspace?.id,
       resolverId: currentUser?.id,
       resolverName: currentUser?.name || 'Devotee',
     });
@@ -270,6 +272,7 @@ export default function YatraNetDesk() {
   const handleForwardSOS = (sosId: string) => {
     OfflineSyncManager.addToQueue('FORWARD_SOS', {
       sosId,
+      communityId: activeWorkspace?.id,
       forwarderId: currentUser?.id,
       forwarderName: currentUser?.name || 'Devotee',
     });

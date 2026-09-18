@@ -211,9 +211,14 @@ export const SanataniSocialFeed: React.FC = () => {
     }, (err) => console.warn("Firebase social feed sync:", err.message));
     
     return () => unsubscribe();
-  }, []);
+  }, [activeWorkspace?.id]);
 
   const handleOnlineSOS = async () => {
+    if (!activeWorkspace?.id) {
+      showToast('Please select a workspace before broadcasting.', 'error');
+      return;
+    }
+
     // Attempt to get battery level
     let batteryLevel = null;
     try {
@@ -241,7 +246,7 @@ export const SanataniSocialFeed: React.FC = () => {
       senderId: currentUser?.id || 'anonymous_user',
       senderName: currentUser?.name || 'Devotee',
       senderPhoto: (currentUser as any)?.photoUrl || null,
-      communityId: activeWorkspace?.id || 'global',
+      communityId: activeWorkspace.id,
       situation: sosSituation,
       details: sosDetails,
       location,

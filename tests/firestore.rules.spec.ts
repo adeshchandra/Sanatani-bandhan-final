@@ -359,4 +359,57 @@ describe('Firestore Security Rules', () => {
     await assertFails(demoDb.collection('yatra_broadcasts').doc('broadcast-ws-1').get());
     await assertFails(demoDb.collection('yatra_broadcasts').add({ communityId: 'ws-1', type: 'RICH_SOS' }));
   });
+
+  it('52. Offline replay regression: Queued action for Tenant A retains Tenant A communityId and succeeds on replay by Tenant A user', async () => {
+    const queuedAction = {
+      type: 'RICH_SOS',
+      communityId: 'ws-1',
+      authorUid: 'user-1',
+      payload: {
+        communityId: 'ws-1',
+        senderId: 'user-1',
+        senderName: 'Devotee 1',
+        text: 'Offline SOS in ws-1',
+        type: 'RICH_SOS'
+      }
+    };
+    const user1Db = testEnv.authenticatedContext('user-1').firestore();
+    await assertSucceeds(user1Db.collection('yatra_broadcasts').add({
+      ...queuedAction.payload,
+      communityId: queuedAction.communityId
+    }));
+  });
+
+  it('53. Offline replay regression: Swapping tenant context on replay to Tenant B is rejected for Tenant A user', async () => {
+    const user1Db = testEnv.authenticatedContext('user-1').firestore();
+    await assertFails(user1Db.collection('yatra_broadcasts').add({
+      senderId: 'user-1',
+      senderName: 'Devotee 1',
+      text: 'Offline SOS attempted in ws-2',
+      type: 'RICH_SOS',
+      communityId: 'ws-2'
+    }));
+  });
+
+  it('54. Offline replay regression: Logged-out session cannot replay queued production broadcast', async () => {
+    const unauthDb = testEnv.unauthenticatedContext().firestore();
+    await assertFails(unauthDb.collection('yatra_broadcasts').add({
+      senderId: 'user-1',
+      senderName: 'Devotee 1',
+      text: 'Offline SOS replay after logout',
+      type: 'RICH_SOS',
+      communityId: 'ws-1'
+    }));
+  });
+
+  it('55. Offline replay regression: Different user (user-2 in ws-2) cannot replay Tenant A queued action into Tenant A', async () => {
+    const user2Db = testEnv.authenticatedContext('user-2').firestore();
+    await assertFails(user2Db.collection('yatra_broadcasts').add({
+      senderId: 'user-1',
+      senderName: 'Devotee 1',
+      text: 'Offline SOS replay by wrong user',
+      type: 'RICH_SOS',
+      communityId: 'ws-1'
+    }));
+  });
 });

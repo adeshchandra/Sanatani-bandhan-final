@@ -1,5 +1,5 @@
 import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, setDoc, arrayUnion } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 
 export interface QueuedAction {
   id: string;
@@ -8,6 +8,8 @@ export interface QueuedAction {
   timestamp: number;
   status: 'PENDING' | 'SYNCED' | 'FAILED';
   retryCount: number;
+  communityId?: string; // Authoritative tenant context captured at queue creation time
+  authorUid?: string;   // Auth UID of user who created the queued action
 }
 
 const QUEUE_KEY = 'yatra_offline_queue';
@@ -28,15 +30,26 @@ export const OfflineSyncManager = {
     window.dispatchEvent(new CustomEvent('offline_queue_updated'));
   },
 
-  addToQueue: (type: QueuedAction['type'], payload: any) => {
+  addToQueue: (type: QueuedAction['type'], payload: any, explicitCommunityId?: string) => {
     const queue = OfflineSyncManager.getQueue();
+    // Resolve tenant identifier and author at queue creation time
+    const communityId = explicitCommunityId || payload?.communityId || payload?.workspaceId;
+    const authorUid = auth.currentUser?.uid || payload?.senderId || payload?.authorId || payload?.responderId || payload?.resolverId || payload?.forwarderId;
+
+    const safePayload = { ...payload };
+    if (communityId && !safePayload.communityId && !safePayload.workspaceId) {
+      safePayload.communityId = communityId;
+    }
+
     const newAction: QueuedAction = {
       id: `task_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       type,
-      payload,
+      payload: safePayload,
       timestamp: Date.now(),
       status: 'PENDING',
-      retryCount: 0
+      retryCount: 0,
+      communityId,
+      authorUid
     };
     queue.push(newAction);
     OfflineSyncManager.setQueue(queue);
@@ -68,29 +81,47 @@ export const OfflineSyncManager = {
       const item = queue[i];
       if (item.status === 'SYNCED') continue;
 
+      // Handle session / user switching safely (Scenario B)
+      const currentUid = auth.currentUser?.uid;
+      // If action was created by an authenticated session and a different user is now active,
+      // retain it safely without replaying under the wrong session.
+      if (item.authorUid && currentUid && item.authorUid !== currentUid) {
+        console.warn(`[OfflineSyncManager] Action ${item.id} belongs to user ${item.authorUid}, but current session is ${currentUid}. Retaining in queue.`);
+        continue;
+      }
+      // If user logged out, do not silently replay actions requiring authentication
+      if (item.authorUid && !currentUid) {
+        console.warn(`[OfflineSyncManager] User is logged out. Retaining action ${item.id} until authenticated session is restored.`);
+        continue;
+      }
+
       try {
+        // Resolve tenant context strictly from the item's creation context (Scenario A)
+        const boundCommunityId = item.communityId || item.payload?.communityId || item.payload?.workspaceId;
+
         // Here we map the queued actions to actual Firebase calls
         if (item.type === 'SOS' || item.type === 'MESSAGE' || item.type === 'LOCATION' || item.type === 'RICH_SOS' || item.type === 'DIRECT_MESSAGE') {
-          // General broadcast collection
+          // General broadcast collection: MUST preserve the original bound tenant communityId
           await addDoc(collection(db, `yatra_broadcasts`), {
             ...item.payload,
+            communityId: boundCommunityId,
             syncedAt: serverTimestamp(),
             originalTimestamp: item.timestamp,
             type: item.type
           });
-        } else if (item.type === 'RESPOND_SOS' && item.payload.sosId) {
+        } else if (item.type === 'RESPOND_SOS' && item.payload?.sosId) {
           await updateDoc(doc(db, 'yatra_broadcasts', item.payload.sosId), {
             sosStatus: 'RESPONDED',
             responderId: item.payload.responderId,
             responderName: item.payload.responderName,
             respondedAt: serverTimestamp()
           });
-        } else if (item.type === 'FORWARD_SOS' && item.payload.sosId) {
+        } else if (item.type === 'FORWARD_SOS' && item.payload?.sosId) {
           await updateDoc(doc(db, 'yatra_broadcasts', item.payload.sosId), {
             forwardCount: increment(1)
           });
           // Note: In native implementation, this would also push to the BLE queue for rebroadcast
-        } else if (item.type === 'RESOLVE_SOS' && item.payload.sosId) {
+        } else if (item.type === 'RESOLVE_SOS' && item.payload?.sosId) {
           await updateDoc(doc(db, 'yatra_broadcasts', item.payload.sosId), {
             sosStatus: 'RESOLVED',
             resolvedAt: serverTimestamp(),
@@ -98,13 +129,15 @@ export const OfflineSyncManager = {
             resolverName: item.payload.resolverName,
           });
         } else if (item.type === 'POST_SOCIAL') {
-          const workspaceId = item.payload.workspaceId || 'demo';
+          const workspaceId = boundCommunityId || 'demo';
           await setDoc(doc(db, `communities/${workspaceId}/social_feed`, item.payload.id), {
             ...item.payload,
+            workspaceId,
             syncedAt: serverTimestamp()
           });
         } else if (item.type === 'PRANAM_POST') {
-          const { workspaceId, postId, pranams, flowersOffered, diyasLit } = item.payload;
+          const workspaceId = boundCommunityId;
+          const { postId, pranams, flowersOffered, diyasLit } = item.payload;
           if (workspaceId && postId) {
             const updates: any = {};
             if (pranams) updates.pranams = increment(pranams);
@@ -113,14 +146,16 @@ export const OfflineSyncManager = {
             await updateDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), updates);
           }
         } else if (item.type === 'HIDE_SOCIAL_POST') {
-          const { workspaceId, postId } = item.payload;
+          const workspaceId = boundCommunityId;
+          const { postId } = item.payload;
           if (workspaceId && postId) {
             await updateDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), {
               isHidden: true
             });
           }
         } else if (item.type === 'COMMENT_SOCIAL') {
-          const { workspaceId, postId, comment } = item.payload;
+          const workspaceId = boundCommunityId;
+          const { postId, comment } = item.payload;
           if (workspaceId && postId && comment) {
             await updateDoc(doc(db, `communities/${workspaceId}/social_feed`, postId), {
               comments: arrayUnion(comment)

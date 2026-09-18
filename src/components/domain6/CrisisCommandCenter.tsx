@@ -4,7 +4,7 @@ import {
   AlertTriangle, CheckCircle2, TrendingUp, Filter,
   Search, Crosshair, Award, Zap, Radio
 } from 'lucide-react';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
@@ -67,7 +67,7 @@ export const CrisisCommandCenter: React.FC = () => {
     }, (err) => console.warn("Firebase CrisisCommandCenter sync:", err.message));
 
     return () => unsubscribe();
-  }, []);
+  }, [activeWorkspace?.id]);
 
 
   const handleAcknowledge = async (id: string) => {
