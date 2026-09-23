@@ -4,29 +4,182 @@ export type WorkspaceType =
   | 'Tirth' | 'Samaj' | 'AkshayaPatra' | 'KashiKshetra'
   | 'DharmadaTrust' | 'MahotsavSamiti' | 'PurohitSabha';
 
-export type UserRole = 
-  | 'SUPER_ADMIN' | 'TRUSTEE' | 'ACCOUNTANT' | 'PUROHIT' 
-  | 'VOLUNTEER' | 'DEVOTEE' | 'MANAGER' | 'ANONYMOUS';
+export type UserRole = 'SuperAdmin' | 'Trustee' | 'Priest' | 'Accountant' | 'Sevadar' | 'Devotee';
+
+export type LegacyUserRole =
+  | 'SUPER_ADMIN'
+  | 'TRUSTEE'
+  | 'ACCOUNTANT'
+  | 'PUROHIT'
+  | 'VOLUNTEER'
+  | 'DEVOTEE'
+  | 'MANAGER'
+  | 'ANONYMOUS';
+
+export type SubscriptionTier = 'LITE' | 'STANDARD' | 'ENTERPRISE';
 
 export const ROLE_MIGRATION_MAP: Record<string, UserRole> = {
-  'admin': 'SUPER_ADMIN', 'ADMIN': 'SUPER_ADMIN', 'superadmin': 'SUPER_ADMIN',
-  'SUPER_ADMIN': 'SUPER_ADMIN', 'head_admin': 'SUPER_ADMIN', 'master_admin': 'SUPER_ADMIN',
-  'trustee': 'TRUSTEE', 'TRUSTEE': 'TRUSTEE',
-  'accountant': 'ACCOUNTANT', 'ACCOUNTANT': 'ACCOUNTANT',
-  'purohit': 'PUROHIT', 'PUROHIT': 'PUROHIT',
-  'volunteer': 'VOLUNTEER', 'VOLUNTEER': 'VOLUNTEER',
-  'devotee': 'DEVOTEE', 'DEVOTEE': 'DEVOTEE',
-  'manager': 'MANAGER', 'MANAGER': 'MANAGER',
-  'anonymous': 'ANONYMOUS', 'ANONYMOUS': 'ANONYMOUS',
+  admin: 'SuperAdmin',
+  ADMIN: 'SuperAdmin',
+  superadmin: 'SuperAdmin',
+  SUPER_ADMIN: 'SuperAdmin',
+  SuperAdmin: 'SuperAdmin',
+  head_admin: 'SuperAdmin',
+  master_admin: 'SuperAdmin',
+  trustee: 'Trustee',
+  TRUSTEE: 'Trustee',
+  Trustee: 'Trustee',
+  accountant: 'Accountant',
+  ACCOUNTANT: 'Accountant',
+  Accountant: 'Accountant',
+  purohit: 'Priest',
+  PUROHIT: 'Priest',
+  Priest: 'Priest',
+  priest: 'Priest',
+  volunteer: 'Sevadar',
+  VOLUNTEER: 'Sevadar',
+  sevadar: 'Sevadar',
+  Sevadar: 'Sevadar',
+  manager: 'Sevadar',
+  MANAGER: 'Sevadar',
+  devotee: 'Devotee',
+  DEVOTEE: 'Devotee',
+  Devotee: 'Devotee',
+  anonymous: 'Devotee',
+  ANONYMOUS: 'Devotee',
 };
 
 export type AppLanguage = 'en' | 'bn' | 'hi' | 'sa';
 
 export type SevaTier = 'Ratna' | 'Vishesh' | 'Kormi' | 'Sadharan';
 
+export interface TenantScoped {
+  workspaceId: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface Workspace extends TenantScoped {
+  id: string;
+  name: string;
+  type: WorkspaceType;
+  tagline: string;
+  address: string;
+  tier: SubscriptionTier;
+  enabledDesks: string[];
+  city: string;
+  state: string;
+  country: string;
+  currency: string;
+  currencySymbol: string;
+  phone?: string;
+  sponsorPhone?: string;
+  email?: string;
+  sampradaya: string;
+  kuladevata: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  taxExemptionNumber?: string;
+  enabledModules?: string[];
+  trustRegNumber?: string;
+  pinRequired: boolean;
+  adminPin: string;
+  superAdmins?: string[];
+  bloodGroup?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  medicalNotes?: string;
+  idCardValidThru?: string;
+  idCardIssuedOn?: string;
+  gotra?: string;
+}
+
+export interface WorkspaceConfig extends Partial<TenantScoped> {
+  id: string;
+  name: string;
+  type: WorkspaceType;
+  tagline: string;
+  address: string;
+  tier?: SubscriptionTier;
+  enabledDesks?: string[];
+  city: string;
+  state: string;
+  country: string;
+  currency: string;
+  currencySymbol: string;
+  phone?: string;
+  sponsorPhone?: string;
+  email?: string;
+  sampradaya: string;
+  kuladevata: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  taxExemptionNumber?: string;
+  enabledModules?: string[];
+  trustRegNumber?: string;
+  pinRequired: boolean;
+  adminPin: string;
+  superAdmins?: string[];
+  bloodGroup?: string;
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  medicalNotes?: string;
+  idCardValidThru?: string;
+  idCardIssuedOn?: string;
+  gotra?: string;
+}
+
+export interface AuditLog extends TenantScoped {
+  id: string;
+  actorId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | string;
+  collectionName: string;
+  documentId: string;
+  changes: Record<string, any>;
+  ipAddress: string;
+  actorEmail?: string;
+  actorRole?: UserRole | string;
+  timestamp?: number | string;
+}
+
+export interface PanchayatPoll extends TenantScoped {
+  id: string;
+  title: string;
+  description: string;
+  options: string[];
+  status: 'OPEN' | 'CLOSED';
+  createdBy: string;
+  resolutionNumber?: string;
+  votesCount?: Record<string, number>;
+  deadline?: number;
+  quorumRequired?: number;
+}
+
+export interface PollVote extends TenantScoped {
+  id: string;
+  pollId: string;
+  userId: string;
+  selectedOption: string;
+  votedAt: number;
+}
+
+export interface CrisisEvent extends TenantScoped {
+  id: string;
+  type: 'MEDICAL' | 'CROWD_SURGE' | 'LOST_CHILD' | 'FIRE';
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | string;
+  location: string;
+  status: 'ACTIVE' | 'RESOLVED';
+  reportedBy: string;
+  notes?: string;
+  resolvedAt?: number;
+  resolvedBy?: string;
+}
+
 export interface IngestedDevoteeRow {
-  fullName?: string; name?: string;
-  phone?: string; sponsorPhone?: string;
+  fullName?: string;
+  name?: string;
+  phone?: string;
+  sponsorPhone?: string;
   gotra: string;
   sevaTier?: SevaTier;
   address?: string;
@@ -49,50 +202,18 @@ export interface PanchangDetails {
   ritu?: string;
 }
 
-export type CowRecord = GoshalaCowRecord;
-
-export type PoojaBookingRecord = PoojaBooking;
-
-export interface WorkspaceConfig {
+export interface DevoteeMember extends TenantScoped {
   id: string;
-  name: string;
-  type: WorkspaceType;
-  tagline: string;
-  address: string;
-  bloodGroup?: string;
-  emergencyContact?: string;
-  emergencyPhone?: string;
-  medicalNotes?: string;
-  idCardValidThru?: string;
-  
-          idCardIssuedOn?: string;
-  city: string; gotra?: string;
-  state: string;
-  country: string;
-  currency: string;
-  currencySymbol: string;
-  phone?: string; sponsorPhone?: string;
-  email?: string;
-  sampradaya: string;
-  kuladevata: string;
-  logoUrl?: string; bannerUrl?: string;
-  taxExemptionNumber?: string; enabledModules?: string[];
-  trustRegNumber?: string;
-  pinRequired: boolean;
-  adminPin: string;
-  superAdmins?: string[];
-}
-
-export interface DevoteeMember {
-  id: string;
-  workspaceId?: string;
-  fullName?: string; name?: string;
+  userId?: string;
+  fullName?: string;
+  name?: string;
   spiritualName?: string;
-  phone?: string; sponsorPhone?: string;
+  phone?: string;
+  sponsorPhone?: string;
   email?: string;
-  pin: string; // 4-digit PIN for self login
-  role: UserRole;
-  sevaIndex: number; // 0 - 1000
+  pin: string;
+  role: UserRole | LegacyUserRole | string;
+  sevaIndex: number;
   sevaTier: SevaTier;
   gotra: string;
   pravara?: string;
@@ -119,25 +240,33 @@ export interface DevoteeMember {
   totalDonated: number;
   volunteerHours: number;
   qrCodeRef: string;
-  qrSecretVaultToken?: string; // Encrypted user secret vault token
-  isQrPublic?: boolean; // Visibility toggle for standard members
+  qrSecretVaultToken?: string;
+  isQrPublic?: boolean;
   joinedDate: string;
 }
 
-export interface FamilyHousehold {
+export type Devotee = DevoteeMember;
+
+export interface FamilyHousehold extends TenantScoped {
   id: string;
-  workspaceId?: string;
   familyName: string;
   kartaDevoteeId: string;
+  kartaId?: string;
   gotra: string;
   kuladevata: string;
   residenceAddress: string;
-  contactPhone?: string; devoteePhone?: string; shradhLocation?: string; nextScheduledReminder?: string;
+  contactPhone?: string;
+  devoteePhone?: string;
+  shradhLocation?: string;
+  nextScheduledReminder?: string;
   memberIds: string[];
   totalFamilyDonations: number;
   lastChandaDate?: string;
-  notes?: string; photoUrl?: string;
+  notes?: string;
+  photoUrl?: string;
 }
+
+export type Household = FamilyHousehold;
 
 export interface VanshavaliNode {
   id: string;
@@ -149,39 +278,42 @@ export interface VanshavaliNode {
   relation: string;
   spouse?: string;
   location?: string;
-  notes?: string; photoUrl?: string;
+  notes?: string;
+  photoUrl?: string;
   children?: VanshavaliNode[];
 }
 
-export interface GuestRecord {
+export interface GuestRecord extends TenantScoped {
   id: string;
-  workspaceId?: string;
   name: string;
-  phone?: string; sponsorPhone?: string;
-  city: string; gotra?: string;
+  phone?: string;
+  sponsorPhone?: string;
+  city: string;
+  gotra?: string;
   purpose: 'Darshan' | 'Pooja Inquiry' | 'Volunteer' | 'Guest' | 'Sponsorship' | string;
   visitDate: string;
   referredBy?: string;
   status: 'Lead' | 'Follow-Up' | 'Promoted' | 'Visited' | string;
   assignedSevadar?: string;
-  notes?: string; photoUrl?: string;
+  notes?: string;
+  photoUrl?: string;
 }
 
-export interface TreasuryTransaction {
+export interface TreasuryTransaction extends TenantScoped {
   id: string;
-  workspaceId?: string;
   date: string;
   type: 'Income' | 'Expense';
   category: string;
   subcategory?: string;
   eventName?: string;
   amount: number;
-  handledBy: string; vendorName?: string; // Custody tracking
+  handledBy: string;
+  vendorName?: string;
   devoteeId?: string;
   devoteeName?: string;
   paymentMode: 'UPI / QR' | 'Cash' | 'Bank Transfer' | 'Cheque' | 'Card' | string;
   referenceNo?: string;
-  memoImageUrl?: string; // Zero-cost compressed image
+  memoImageUrl?: string;
   purpose: string;
   is80GEligible?: boolean;
   taxReceiptIssued?: boolean;
@@ -191,25 +323,97 @@ export interface TreasuryTransaction {
   recurringInterval?: 'Monthly' | 'Annually';
 }
 
-export interface AssetRecord {
+export type TreasuryLedger = TreasuryTransaction;
+export type TreasuryLedgerRecord = TreasuryTransaction;
+
+export interface DonationRecord extends TenantScoped {
   id: string;
-  workspaceId?: string;
+  donorId?: string;
+  devoteeId?: string;
+  devoteeName?: string;
+  donorName?: string;
+  amount: number;
+  purpose: string;
+  category: string;
+  paymentMode: 'UPI / QR' | 'Cash' | 'Bank Transfer' | 'Cheque' | 'Card' | string;
+  status: 'pledged' | 'completed' | 'failed' | 'pending';
+  receiptNumber?: string;
+  is80GEligible?: boolean;
+  date: string;
+}
+
+export type Donation = DonationRecord;
+
+export interface TaxReceipt extends TenantScoped {
+  id: string;
+  receiptNumber: string;
+  donorId?: string;
+  devoteeId?: string;
+  donorName: string;
+  panNumber?: string;
+  donorAddress?: string;
+  donorPhone?: string;
+  donorEmail?: string;
+  amount: number;
+  amountInWords?: string;
+  paymentMode: string;
+  transactionRef?: string;
+  financialYear: string;
+  exemptionSection: '80G' | '10(23C)' | '12A' | string;
+  trustRegNumber?: string;
+  issuedAt: number;
+  issuedBy: string;
+  pdfUrl?: string;
+  status: 'ISSUED' | 'CANCELLED';
+}
+
+export interface AssetRecord extends TenantScoped {
+  id: string;
   name: string;
-  category: 'Land & Building' | 'Deity Ornaments & Gold' | 'Vahan / Vehicle' | 'Electronics' | 'Utensils & Furniture' | 'Sacred Relics' | 'Utensils & Bhandara' | 'Other' | string;
+  category:
+    | 'Land & Building'
+    | 'Deity Ornaments & Gold'
+    | 'Vahan / Vehicle'
+    | 'Electronics'
+    | 'Utensils & Furniture'
+    | 'Sacred Relics'
+    | 'Utensils & Bhandara'
+    | 'Other'
+    | string;
   valuation: number;
   acquisitionDate: string;
-  condition: 'Pristine' | 'Good' | 'Needs Restoration' | 'Under Maintenance' | 'Retired' | 'Needs Repair' | string;
+  condition:
+    | 'Pristine'
+    | 'Good'
+    | 'Needs Restoration'
+    | 'Under Maintenance'
+    | 'Retired'
+    | 'Needs Repair'
+    | string;
   custodian: string;
   location: string;
-  donorName?: string; notes?: string; photoUrl?: string;
+  donorName?: string;
+  notes?: string;
+  photoUrl?: string;
   imageCompressed?: string;
 }
 
-export interface InventoryItem {
+export type Asset = AssetRecord;
+export type FixedAsset = AssetRecord;
+
+export interface InventoryItem extends TenantScoped {
   id: string;
-  workspaceId?: string;
   itemName: string;
-  category: 'Ghee & Oils' | 'Camphor & Dhoop' | 'Rice & Grains' | 'Prasad Supplies' | 'Books & Stationery' | 'Medical / Fodder' | 'Spices & Dry Fruits' | 'General Stores' | string;
+  category:
+    | 'Ghee & Oils'
+    | 'Camphor & Dhoop'
+    | 'Rice & Grains'
+    | 'Prasad Supplies'
+    | 'Books & Stationery'
+    | 'Medical / Fodder'
+    | 'Spices & Dry Fruits'
+    | 'General Stores'
+    | string;
   currentStock: number;
   unit: 'kg' | 'liters' | 'packets' | 'boxes' | 'pieces' | 'quintals' | string;
   minReorderLevel: number;
@@ -218,10 +422,10 @@ export interface InventoryItem {
   supplierName: string;
 }
 
-export interface PoojaBooking {
+export interface PoojaBooking extends TenantScoped {
   id: string;
-  workspaceId?: string;
   devoteeId?: string;
+  userId?: string;
   devoteeName: string;
   phone?: string;
   poojaName: string;
@@ -232,72 +436,123 @@ export interface PoojaBooking {
   nakshatra?: string;
   rashi?: string;
   sankalpDescription?: string;
-  sankalpText?: string; sankalpaIntention?: string;
-  purohitAssigned?: string; assignedPurohit?: string;
+  sankalpText?: string;
+  sankalpaIntention?: string;
+  purohitAssigned?: string;
+  assignedPurohit?: string;
   priestAssigned?: string;
-  liveStreamUrl?: string; liveStreamRequested?: boolean;
+  liveStreamUrl?: string;
+  liveStreamRequested?: boolean;
   dakshinaAmount: number;
   status: 'Confirmed' | 'Completed' | 'Standby' | 'Cancelled' | string;
   paymentStatus: 'Paid' | 'Pending' | string;
-  receiptRef: string; bookingType?: "Individual" | "Organization"; organizationName?: string; cancellationReason?: string;
+  receiptRef: string;
+  bookingType?: 'Individual' | 'Organization';
+  organizationName?: string;
+  cancellationReason?: string;
 }
 
-export interface ResidentPujaSchedule {
+export type PujaBooking = PoojaBooking;
+export type PoojaBookingRecord = PoojaBooking;
+
+export interface ResidentPujaSchedule extends TenantScoped {
   id: string;
-  workspaceId?: string;
-  ritualName?: string; pujaName?: string;
-  time?: string; timings?: string;
-  priestName?: string; leadPurohit?: string;
+  ritualName?: string;
+  pujaName?: string;
+  time?: string;
+  timings?: string;
+  priestName?: string;
+  leadPurohit?: string;
   deity?: string;
   samagriList?: string[];
-  isOpenForPublic?: boolean; darshanStatus?: string; dressCode?: string; dailyAttendanceAvg?: number;
+  isOpenForPublic?: boolean;
+  darshanStatus?: string;
+  dressCode?: string;
+  dailyAttendanceAvg?: number;
 }
 
-export interface PurohitProfile {
-  workspaceId?: string;
+export interface PurohitProfile extends TenantScoped {
   id: string;
-  fullName?: string; name?: string;
-  vidwatTitle?: string; vedicQualification?: string; // e.g. Veda Murthy, Jyotishacharya, Shastri
+  fullName?: string;
+  name?: string;
+  vidwatTitle?: string;
+  vedicQualification?: string;
   specializations: string[];
-  sampradaya?: string; vedicBranch?: 'Rigveda' | 'Yajurveda' | 'Samaveda' | 'Atharvaveda' | 'Smartha' | 'Tantrik';
-  city: string; gotra?: string;
-  phone?: string; sponsorPhone?: string;
+  sampradaya?: string;
+  vedicBranch?: 'Rigveda' | 'Yajurveda' | 'Samaveda' | 'Atharvaveda' | 'Smartha' | 'Tantrik';
+  city: string;
+  gotra?: string;
+  phone?: string;
+  sponsorPhone?: string;
   email?: string;
   languages: string[];
   experienceYears: number;
-  rating: number; reviewCount?: number;
-  isKycVerified?: boolean; verifiedByMandirTrust?: boolean;
+  rating: number;
+  reviewCount?: number;
+  isKycVerified?: boolean;
+  verifiedByMandirTrust?: boolean;
   availability?: 'Available' | 'On Call' | 'Traveling';
-  dakshinaRange?: string; suggestedDakshina?: number;
+  dakshinaRange?: string;
+  suggestedDakshina?: number;
 }
 
-export interface PitruRecord {
+export interface PitruRecord extends TenantScoped {
   id: string;
-  workspaceId?: string;
   devoteeId?: string;
   devoteeName: string;
   ancestorName: string;
-  relationship?: string; relation?: string;
-  tithiLunar?: string; tithiOfDemise?: string; // e.g. Bhadrapada Krishna Ashtami
-  nakshatra?: string; paksha?: 'Shukla' | 'Krishna';
+  relationship?: string;
+  relation?: string;
+  tithiLunar?: string;
+  tithiOfDemise?: string;
+  nakshatra?: string;
+  paksha?: 'Shukla' | 'Krishna';
   deathGregorianDate?: string;
   gotra: string;
   annualShradhAlert?: boolean;
-  pindaDaanBooked?: boolean; lastShradhPerformed?: string;
-  contactPhone?: string; devoteePhone?: string; shradhLocation?: string; nextScheduledReminder?: string;
+  pindaDaanBooked?: boolean;
+  lastShradhPerformed?: string;
+  contactPhone?: string;
+  devoteePhone?: string;
+  shradhLocation?: string;
+  nextScheduledReminder?: string;
 }
 
-export interface GoshalaCowRecord {
+export interface GoshalaCowRecord extends TenantScoped {
   id: string;
-  workspaceId?: string;
   cowTagId?: string;
   tagNumber?: string;
   name: string;
-  breed: 'Gir' | 'Sahiwal' | 'Tharparkar' | 'Rathi' | 'Kankrej' | 'Red Sindhi' | 'Desi Indigenous' | string;
-  gender: 'Gomata' | 'Nandi' | 'Calf (Female)' | 'Calf (Male)' | 'Gau Mata (Cow)' | 'Nandi (Bull)' | 'Vatsa (Calf)' | string;
+  breed:
+    | 'Gir'
+    | 'Sahiwal'
+    | 'Tharparkar'
+    | 'Rathi'
+    | 'Kankrej'
+    | 'Red Sindhi'
+    | 'Desi Indigenous'
+    | string;
+  gender:
+    | 'Gomata'
+    | 'Nandi'
+    | 'Calf (Female)'
+    | 'Calf (Male)'
+    | 'Gau Mata (Cow)'
+    | 'Nandi (Bull)'
+    | 'Vatsa (Calf)'
+    | string;
   dateOfBirth?: string;
   ageYears?: number;
-  healthStatus: 'Excellent' | 'Under Treatment' | 'Pregnant' | 'Lactating' | 'Retired' | 'Healthy' | 'Under Veterinary Care' | 'Critical' | string;
+  healthStatus:
+    | 'Excellent'
+    | 'Under Treatment'
+    | 'Pregnant'
+    | 'Lactating'
+    | 'Retired'
+    | 'Healthy'
+    | 'Under Veterinary Care'
+    | 'Critical'
+    | string;
   lactationStage?: 'Lactating' | 'Dry' | 'Pregnant' | 'Calf' | string;
   dailyMilkYieldLiters?: number;
   dailyMilkLiters?: number;
@@ -308,26 +563,37 @@ export interface GoshalaCowRecord {
   monthlyAdoptionFee?: number;
   monthlyCareCost?: number;
   adoptionStartDate?: string;
-  lastVetCheckup?: string; monthlyFodderCost?: number;
-  notes?: string; photoUrl?: string;
+  lastVetCheckup?: string;
+  monthlyFodderCost?: number;
+  notes?: string;
+  photoUrl?: string;
 }
 
-export interface AnnadanamSponsorship {
+export type CowRecord = GoshalaCowRecord;
+export type GaushalaCattle = GoshalaCowRecord;
+
+export interface AnnadanamSponsorship extends TenantScoped {
   id: string;
-  workspaceId?: string;
-  sponsorName: string; gotra?: string;
-  phone?: string; sponsorPhone?: string;
+  sponsorName: string;
+  gotra?: string;
+  phone?: string;
+  sponsorPhone?: string;
   occasion: string;
   date: string;
-  mealType: 'Mahaprasad Lunch' | 'Bhandara Dinner' | 'Morning Bal Bhog' | 'Mahaprasad Lunch Bhandara' | 'Morning Kheer & Puri Prasad';
+  mealType:
+    | 'Mahaprasad Lunch'
+    | 'Bhandara Dinner'
+    | 'Morning Bal Bhog'
+    | 'Mahaprasad Lunch Bhandara'
+    | 'Morning Kheer & Puri Prasad';
   devoteeCountProjected: number;
   contributionAmount: number;
-  specialSankalp?: string; status?: string;
+  specialSankalp?: string;
+  status?: string;
 }
 
-export interface AshramKutirRoom {
+export interface AshramKutirRoom extends TenantScoped {
   id: string;
-  workspaceId?: string;
   roomNumber: string;
   roomType: 'Sadhana Kutir' | 'Dharamshala Deluxe' | 'Family Suite' | 'Dormitory Bed';
   capacity: number;
@@ -339,13 +605,18 @@ export interface AshramKutirRoom {
   cleaningStatus: 'Ready' | 'Needs Cleaning' | 'Maintenance';
 }
 
-export interface GurukulStudent {
+export type DharamshalaRoom = AshramKutirRoom;
+
+export interface GurukulStudent extends TenantScoped {
   id: string;
-  workspaceId?: string;
   studentName: string;
   rollNo: string;
-  courseLevel: 'Prathama (Grammar)' | 'Madhyama (Shastras)' | 'Shastri (Philosophy)' | 'Acharya (Vedanta)';
-  sandhyaVandanaRegularity: number; // percentage
+  courseLevel:
+    | 'Prathama (Grammar)'
+    | 'Madhyama (Shastras)'
+    | 'Shastri (Philosophy)'
+    | 'Acharya (Vedanta)';
+  sandhyaVandanaRegularity: number;
   shlokaRecitationScore: number;
   guardianName: string;
   guardianPhone: string;
@@ -353,11 +624,19 @@ export interface GurukulStudent {
   attendancePct: number;
 }
 
-export interface CampaignCrowdfund {
+export interface CampaignCrowdfund extends TenantScoped {
   id: string;
-  workspaceId?: string;
-  title: string; bannerUrl?: string; description?: string;
-  category: 'Mandir Nirman' | 'Murti Pran Pratishtha' | 'Goshala Expansion' | 'Annakshetra Fund' | 'Festival Mahotsav' | 'Eco Mandir / Solar' | 'Gau Seva / Healthcare';
+  title: string;
+  bannerUrl?: string;
+  description?: string;
+  category:
+    | 'Mandir Nirman'
+    | 'Murti Pran Pratishtha'
+    | 'Goshala Expansion'
+    | 'Annakshetra Fund'
+    | 'Festival Mahotsav'
+    | 'Eco Mandir / Solar'
+    | 'Gau Seva / Healthcare';
   targetAmount: number;
   collectedAmount: number;
   startDate?: string;
@@ -367,10 +646,10 @@ export interface CampaignCrowdfund {
   topDonors: { name: string; amount: number; city: string }[];
 }
 
-export interface MatrimonyProfile {
-  workspaceId?: string;
+export interface MatrimonyProfile extends TenantScoped {
   id: string;
-  fullName?: string; name?: string;
+  fullName?: string;
+  name?: string;
   gender: 'Male' | 'Female';
   birthDate: string;
   birthTime?: string;
@@ -384,7 +663,10 @@ export interface MatrimonyProfile {
   location: string;
   familyBackground: string;
   contactFamilyPerson: string;
-  contactPhone?: string; devoteePhone?: string; shradhLocation?: string; nextScheduledReminder?: string;
+  contactPhone?: string;
+  devoteePhone?: string;
+  shradhLocation?: string;
+  nextScheduledReminder?: string;
   verified: boolean;
   photoMasked: boolean;
 }
@@ -403,8 +685,7 @@ export interface PanjikaFestival {
   auspiciousMuhurat: string;
 }
 
-export interface ShlokaCardItem {
-  workspaceId?: string;
+export interface ShlokaCardItem extends Partial<TenantScoped> {
   id: string;
   sanskrit: string;
   transliteration: string;
@@ -416,12 +697,13 @@ export interface ShlokaCardItem {
   category: 'Karma Yoga' | 'Bhakti' | 'Jnana' | 'Dharma' | 'Peace & Harmony';
 }
 
-export interface TrusteeResolution {
+export interface TrusteeResolution extends TenantScoped {
   id: string;
-  workspaceId?: string;
   resolutionNumber: string;
   date: string;
-  title: string; bannerUrl?: string; description?: string;
+  title: string;
+  bannerUrl?: string;
+  description?: string;
   proposedBy: string;
   secondedBy: string;
   votesInFavor: number;
@@ -432,14 +714,24 @@ export interface TrusteeResolution {
   expiresAt?: number;
 }
 
-export interface SevadarDutyShift {
+export interface SevadarDutyShift extends TenantScoped {
   id: string;
-  workspaceId?: string;
   sevadarName: string;
-  phone?: string; sponsorPhone?: string;
-  role: 'Crowd Control' | 'Prasad Distribution' | 'Shoe Counter' | 'VIP Escort' | 'Sanitation' | 'Kitchen Seva';
+  phone?: string;
+  sponsorPhone?: string;
+  role:
+    | 'Crowd Control'
+    | 'Prasad Distribution'
+    | 'Shoe Counter'
+    | 'VIP Escort'
+    | 'Sanitation'
+    | 'Kitchen Seva';
   date: string;
-  shiftTiming: 'Morning (05:00 - 11:00)' | 'Afternoon (11:00 - 17:00)' | 'Evening (17:00 - 22:00)' | 'Night Vigil';
+  shiftTiming:
+    | 'Morning (05:00 - 11:00)'
+    | 'Afternoon (11:00 - 17:00)'
+    | 'Evening (17:00 - 22:00)'
+    | 'Night Vigil';
   attended: boolean;
 }
 
@@ -450,11 +742,9 @@ export interface TelemetryEventLog {
   payload: Record<string, any>;
 }
 
-
-export interface ConsentRecord {
+export interface ConsentRecord extends TenantScoped {
   id: string;
   devoteeId: string;
-  workspaceId: string;
   purpose: string[];
   grantedAt: string;
   expiresAt?: string;

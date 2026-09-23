@@ -15,8 +15,8 @@
     "test:rules": "firebase emulators:exec --project demo-sanatanibandhan \"jest tests/firestore.rules.spec.ts\""
   },
   "dependencies": {
-    "@capacitor/android": "^8.5.1",
-    "@capacitor/core": "^8.5.1",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/canvas-confetti": "^1.9.0",
@@ -46,7 +46,7 @@
     "recharts": "^3.10.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.1",
+    "@capacitor/cli": "^7.0.0",
     "@firebase/rules-unit-testing": "^5.0.2",
     "@resvg/resvg-js": "^2.6.2",
     "@types/crypto-js": "^4.2.2",

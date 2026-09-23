@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { User, onAuthStateChanged, signOut, signInAnonymously } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+import { DevoteeMember, UserRole, WorkspaceConfig, WorkspaceType, ROLE_MIGRATION_MAP } from '../types';
 import { useInitialData } from './AppInitializer';
 import { set } from 'idb-keyval';
-import { auth, db } from "../lib/firebase";
-import { onAuthStateChanged, signOut, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { DevoteeMember, UserRole, WorkspaceConfig, WorkspaceType } from '../types';
 
 export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
   {
@@ -98,101 +98,41 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     country: 'Bharat (India)',
     currency: 'INR',
     currencySymbol: '₹',
-    phone: '+91 94066 33221',
-    email: 'acharyas@sandipanigurukul.edu.in',
-    sampradaya: 'Shukla Yajurveda Madhyandina',
-    kuladevata: 'Bhagwan Mahakaleshwar & Saraswati Devi',
-    taxExemptionNumber: 'CIT(E)/80G/UJN-6611',
-    trustRegNumber: 'TR/MP/8834/2010',
-    pinRequired: true,
-    adminPin: '1008',
-  },
-  {
-    id: 'DEMO_ws-satsang',
-    name: 'Sri Krishna Chaitanya Satsang Kendra',
-    type: 'Satsang',
-    tagline: 'Harinam Sankirtan & Shrimad Bhagavatam Kathas',
-    address: 'Mayapur Road',
-    city: 'Nabadwip',
-    state: 'West Bengal',
-    country: 'Bharat (India)',
-    currency: 'INR',
-    currencySymbol: '₹',
-    phone: '+91 93322 11445',
-    email: 'satsang@mayapurkendra.org',
-    sampradaya: 'Gaudiya Sampradaya',
-    kuladevata: 'Sri Chaitanya Mahaprabhu',
-    taxExemptionNumber: 'CIT(E)/80G/WB-4509',
-    trustRegNumber: 'TR/WB/3321/2016',
-    pinRequired: true,
-    adminPin: '1008',
-  },
-  {
-    id: 'DEMO_ws-yoga',
-    name: 'Patanjali Yogashala & Wellness Kendra',
-    type: 'Yoga',
-    tagline: 'Authentic Ashtanga Yoga, Pranayama & Holistic Healing',
-    address: 'Chamundi Hill Road',
-    city: 'Mysuru',
-    state: 'Karnataka',
-    country: 'Bharat (India)',
-    currency: 'INR',
-    currencySymbol: '₹',
-    phone: '+91 98450 77112',
-    email: 'info@patanjaliyogashala.org',
-    sampradaya: 'Patanjali Yoga Darshana',
-    kuladevata: 'Bhagwan Adiyogi Shiva & Patanjali Muni',
-    taxExemptionNumber: 'CIT(E)/80G/MYS-1002',
-    trustRegNumber: 'TR/KA/7711/2014',
+    phone: '+91 94066 11223',
+    email: 'acharya@sandipanigurukul.edu.in',
+    sampradaya: 'Rigveda & Yajurveda Shakha',
+    kuladevata: 'Bhagwan Sri Krishna & Sandipani Muni',
+    taxExemptionNumber: 'CIT(E)/80G/UJN-5519',
+    trustRegNumber: 'TR/MP/3381/1998',
     pinRequired: true,
     adminPin: '1008',
   },
   {
     id: 'DEMO_ws-trust',
-    name: 'Dharma Jagriti Seva Trust',
+    name: 'Shree Somnath Dharmada Trust',
     type: 'Trust',
-    tagline: 'Disaster Relief, Free Medical Camps & Education Grants',
-    address: 'Ring Road, Lajpat Nagar',
-    city: 'New Delhi',
-    state: 'Delhi',
-    country: 'Bharat (India)',
-    currency: 'INR',
-    currencySymbol: '₹',
-    phone: '+91 98100 44556',
-    email: 'trust@dharmajagriti.org',
-    sampradaya: 'Universal Sanatan Seva',
-    kuladevata: 'Bhagwan Sri Hanuman',
-    taxExemptionNumber: 'CIT(E)/80G/DEL-9901',
-    trustRegNumber: 'TR/DEL/1221/1998',
-    pinRequired: true,
-    adminPin: '1008',
-  },
-  {
-    id: 'DEMO_ws-tirth',
-    name: 'Sri Somnath Yatri & Tirth Seva Kshetra',
-    type: 'Tirth',
-    tagline: 'Pilgrim Dharamshala, Pavitra Darshan & Pinda Daan Support',
+    tagline: 'Preserving Sacred Tirthas & Vedic Heritage',
     address: 'Prabhas Patan',
     city: 'Veraval',
     state: 'Gujarat',
     country: 'Bharat (India)',
     currency: 'INR',
     currencySymbol: '₹',
-    phone: '+91 99090 12345',
-    email: 'yatri@somnathtirth.org',
-    sampradaya: 'Shaiva / Jyotirlinga',
-    kuladevata: 'Sri Somnath Mahadev',
-    taxExemptionNumber: 'CIT(E)/80G/GUJ-5512',
-    trustRegNumber: 'TR/GJ/6612/1951',
+    phone: '+91 98250 44556',
+    email: 'trustee@somnathtrust.org',
+    sampradaya: 'Pashupata Shaivism',
+    kuladevata: 'Shree Somnath Jyotirlinga',
+    taxExemptionNumber: 'CIT(E)/80G/GUJ-1102',
+    trustRegNumber: 'TR/GJ/1004/1951',
     pinRequired: true,
     adminPin: '1008',
   },
   {
     id: 'DEMO_ws-samaj',
-    name: 'Akhil Bharatiya Gaur Brahman Mahasabha',
+    name: 'Sarvajanik Gaur Brahman Samaj',
     type: 'Samaj',
-    tagline: 'Community Welfare, Gotra Vivah Bandhan & Samaj Bhawan',
-    address: 'Civil Lines, Station Road',
+    tagline: 'Sanskrit Vidyapeeth, Matrimonial & Community Welfare',
+    address: 'Brahman Mahasabha Bhawan',
     city: 'Jaipur',
     state: 'Rajasthan',
     country: 'Bharat (India)',
@@ -206,28 +146,36 @@ export const INITIAL_WORKSPACES: WorkspaceConfig[] = [
     trustRegNumber: 'TR/RJ/4412/1985',
     pinRequired: true,
     adminPin: '1008',
-  },
+  }
 ];
 
-interface AuthWorkspaceContextType {
-  viewMode: 'MANAGER' | 'MEMBER';
-  setViewMode: (mode: 'MANAGER' | 'MEMBER') => void;
-  workspaces: WorkspaceConfig[];
+export interface AuthWorkspaceContextType {
+  // Required core state properties
+  user: User | null;
+  workspaceId: string | null;
+  role: UserRole | null;
+  isLoading: boolean;
+  switchWorkspace: (newWorkspaceId: string) => Promise<boolean>;
+
+  // Backward-compatible and platform RBAC properties
+  firebaseUser: User | null;
+  activeWorkspaceId: string;
   activeWorkspace: WorkspaceConfig;
+  workspaces: WorkspaceConfig[];
   currentRole: UserRole;
   currentDevotee: DevoteeMember | null;
   setCurrentDevotee: (devotee: DevoteeMember | null) => void;
   currentUser?: { id: string; name: string; role: UserRole };
   isAuthenticated: boolean;
-  firebaseUser: any;
-  switchWorkspace: (workspaceId: string) => void;
+  viewMode: 'MANAGER' | 'MEMBER';
+  setViewMode: (mode: 'MANAGER' | 'MEMBER') => void;
   updateWorkspaceType: (newType: WorkspaceType) => void;
   switchRole: (role: UserRole) => void;
   updateCurrentUserRole?: (role: UserRole) => void;
-  checkPermission: (allowedRoles: UserRole[]) => boolean;
+  checkPermission: (allowedRoles: (UserRole | string)[]) => boolean;
   loginWithPin: (pin: string, devoteeList: DevoteeMember[]) => boolean;
   loginAsRole: (role: UserRole, customName?: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   saveCustomLogo: (base64: string) => void;
   updateWorkspaceDetails: (updates: Partial<WorkspaceConfig>) => void;
   addWorkspace: (workspace: WorkspaceConfig) => void;
@@ -238,200 +186,287 @@ const AuthWorkspaceContext = createContext<AuthWorkspaceContextType | undefined>
 
 export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const initialData = useInitialData();
+
+  // Core Authentication & Tenant State
+  const [user, setUser] = useState<User | null>(null);
+  const [workspaceId, setWorkspaceId] = useState<string | null>(() => {
+    return initialData.sanatani_active_workspace_id || 'DEMO_ws-mandir';
+  });
+  const [role, setRole] = useState<UserRole | null>(() => {
+    return (initialData.sanatani_user_role as UserRole) || null;
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Cached User Profile Document from Firestore
+  const [userDocData, setUserDocData] = useState<any>(null);
+
+  // Application Workspaces & View States
   const [workspaces, setWorkspaces] = useState<WorkspaceConfig[]>(() => {
     return initialData.sanatani_workspaces || INITIAL_WORKSPACES;
   });
-
   const [viewMode, setViewMode] = useState<'MANAGER' | 'MEMBER'>('MEMBER');
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => {
     return initialData.sanatani_active_workspace_id || 'DEMO_ws-mandir';
   });
-
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
-    return initialData.sanatani_user_role || 'DEVOTEE';
+    return (initialData.sanatani_user_role as UserRole) || 'Devotee';
   });
-
-  const [firebaseUser, setFirebaseUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentDevotee, setCurrentDevotee] = useState<DevoteeMember | null>(() => {
     return initialData.sanatani_current_devotee || null;
   });
 
-  
-  // FIREBASE AUTH SYNC
+  // Keep workspaceId and activeWorkspaceId synchronized
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user);
-      if (user) {
-        // Handle anonymous DEMO users gracefully
-        if (user.isAnonymous) {
-            setIsAuthenticated(true);
-            if (!activeWorkspaceId.startsWith('DEMO_')) {
-                setActiveWorkspaceId('DEMO_ws-mandir');
-            }
-            return;
-        }
+    if (workspaceId && workspaceId !== activeWorkspaceId) {
+      setActiveWorkspaceId(workspaceId);
+    }
+  }, [workspaceId, activeWorkspaceId]);
 
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setCurrentRole(data.role || 'DEVOTEE');
-            
-            // SECURITY BOUNDARY: Align active workspace with authoritative backend profile
-            const authWorkspace = data.workspaceId || data.defaultWorkspaceId;
-            if (authWorkspace && !activeWorkspaceId.startsWith('DEMO_')) {
-                setActiveWorkspaceId(authWorkspace);
-            }
-            
-            setIsAuthenticated(true);
-            setViewMode('MANAGER');
-          } else {
-            setIsAuthenticated(true);
-          }
-        } catch(e) {
-          console.error("Error fetching user role", e);
-        }
-      } else {
-        setFirebaseUser(null);
-        setIsAuthenticated(false);
-        setCurrentRole('DEVOTEE');
-        setCurrentDevotee(null);
-        // Fallback to demo workspace on logout
-        setActiveWorkspaceId('DEMO_ws-mandir');
-      }
-    });
-    return () => unsubscribe();
-  }, [activeWorkspaceId]);
-
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-
-  // Sync to localStorage
+  // Sync state to IndexedDB / Local Storage for persistence
   useEffect(() => {
     set('sanatani_workspaces', workspaces);
   }, [workspaces]);
 
   useEffect(() => {
     set('sanatani_active_workspace_id', activeWorkspaceId);
-    
     if (isAuthenticated) {
-      // Keep session object in sync
       localStorage.setItem(
         'sanatani_web_session',
         JSON.stringify({
           communityId: activeWorkspaceId,
-          role: currentRole,
+          role: role || currentRole,
           devoteeId: currentDevotee?.id || null,
         })
       );
     } else {
       localStorage.removeItem('sanatani_web_session');
     }
-  }, [activeWorkspaceId, currentRole, currentDevotee, isAuthenticated]);
+  }, [activeWorkspaceId, role, currentRole, currentDevotee, isAuthenticated]);
 
-  const activeWorkspace =
-    workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0] || INITIAL_WORKSPACES[0];
+  /**
+   * 1. State Management & 2. Firestore Binding
+   * Detect logins via onAuthStateChanged and fetch doc(db, 'users', user.uid)
+   */
+  useEffect(() => {
+    setIsLoading(true);
 
-  const switchWorkspace = async (workspaceId: string) => {
-    const target = workspaces.find((w) => w.id === workspaceId);
-    if (!target) return;
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseAuthUser) => {
+      setUser(firebaseAuthUser);
 
-    if (workspaceId.startsWith('DEMO_')) {
-      setActiveWorkspaceId(workspaceId);
-      return;
-    }
+      if (firebaseAuthUser) {
+        // Handle anonymous sandboxed demo sessions
+        if (firebaseAuthUser.isAnonymous) {
+          setIsAuthenticated(true);
+          const fallbackRole: UserRole = currentRole || 'Devotee';
+          setRole(fallbackRole);
+          setCurrentRole(fallbackRole);
+          setIsLoading(false);
+          return;
+        }
 
-    // SECURITY BOUNDARY: Production workspaces require Firebase Auth & verification
-    if (!firebaseUser) {
-      console.warn("Production workspace switch denied: User is not authenticated.");
-      return;
-    }
+        try {
+          // Fetch authoritative user profile from Firestore 'users' collection
+          const userDocRef = doc(db, 'users', firebaseAuthUser.uid);
+          const userSnap = await getDoc(userDocRef);
 
-    try {
-      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        const hasAccess = data.workspaceId === workspaceId || 
-                          data.defaultWorkspaceId === workspaceId || 
-                          (data.memberships && data.memberships.includes(workspaceId)) ||
-                          data.isGlobalAdmin;
-        
-        if (hasAccess) {
-          setActiveWorkspaceId(workspaceId);
-        } else {
-          console.warn("Production workspace switch denied: Unauthorized.");
+          if (userSnap.exists()) {
+            const data = userSnap.data();
+            setUserDocData(data);
+
+            // Extract role and cast to UserRole with legacy normalizer
+            const rawRole = data.role || 'Devotee';
+            const normalizedRole: UserRole = (ROLE_MIGRATION_MAP[rawRole] || rawRole) as UserRole;
+            setRole(normalizedRole);
+            setCurrentRole(normalizedRole);
+
+            // Extract default workspace ID
+            const targetWorkspaceId: string =
+              data.defaultWorkspaceId || data.workspaceId || activeWorkspaceId || 'DEMO_ws-mandir';
+
+            setWorkspaceId(targetWorkspaceId);
+            setActiveWorkspaceId(targetWorkspaceId);
+            setIsAuthenticated(true);
+            setViewMode('MANAGER');
+          } else {
+            // New user registration or document pending creation
+            const defaultRole: UserRole = 'Devotee';
+            setRole(defaultRole);
+            setCurrentRole(defaultRole);
+            setIsAuthenticated(true);
+          }
+        } catch (err) {
+          console.error('Error fetching user document from Firestore:', err);
+          setIsAuthenticated(true);
+        } finally {
+          setIsLoading(false);
         }
       } else {
-        console.warn("Production workspace switch denied: Identity missing.");
+        // Signed out state
+        setUser(null);
+        setRole(null);
+        setCurrentRole('Devotee');
+        setUserDocData(null);
+        setCurrentDevotee(null);
+        setIsAuthenticated(false);
+        setWorkspaceId('DEMO_ws-mandir');
+        setActiveWorkspaceId('DEMO_ws-mandir');
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.error("Error verifying production workspace access:", e);
-    }
-  };
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  /**
+   * 3. Tenant Switching Logic
+   * - SuperAdmin can switch to ANY workspace without restriction.
+   * - Other admins (Trustees) verify multi-branch / workspace membership access before switching.
+   */
+  const switchWorkspace = useCallback(
+    async (newWorkspaceId: string): Promise<boolean> => {
+      if (!newWorkspaceId) return false;
+
+      // Sandbox Demo workspaces are always switchable for preview & QA
+      if (newWorkspaceId.startsWith('DEMO_')) {
+        setWorkspaceId(newWorkspaceId);
+        setActiveWorkspaceId(newWorkspaceId);
+        set('sanatani_active_workspace_id', newWorkspaceId);
+        return true;
+      }
+
+      // Check SuperAdmin unrestricted privileges
+      const effectiveRole = role || currentRole;
+      const isSuperAdmin =
+        effectiveRole === 'SuperAdmin' ||
+        userDocData?.role === 'SuperAdmin' ||
+        userDocData?.role === 'SUPER_ADMIN' ||
+        userDocData?.isGlobalAdmin === true;
+
+      if (isSuperAdmin) {
+        setWorkspaceId(newWorkspaceId);
+        setActiveWorkspaceId(newWorkspaceId);
+        set('sanatani_active_workspace_id', newWorkspaceId);
+        return true;
+      }
+
+      // Non-SuperAdmin tenant access verification via Firestore
+      if (user) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const freshSnap = await getDoc(userDocRef);
+          const uData = freshSnap.exists() ? freshSnap.data() : userDocData || {};
+
+          // Verify access via assigned memberships, branches, or default workspace
+          const accessibleList: string[] = [
+            uData.workspaceId,
+            uData.defaultWorkspaceId,
+            ...(Array.isArray(uData.accessibleWorkspaces) ? uData.accessibleWorkspaces : []),
+            ...(Array.isArray(uData.memberships) ? uData.memberships : []),
+            ...(Array.isArray(uData.branches) ? uData.branches : []),
+          ].filter(Boolean);
+
+          const hasAccess =
+            uData.role === 'SuperAdmin' ||
+            uData.role === 'SUPER_ADMIN' ||
+            uData.isGlobalAdmin === true ||
+            accessibleList.includes(newWorkspaceId);
+
+          if (hasAccess) {
+            setWorkspaceId(newWorkspaceId);
+            setActiveWorkspaceId(newWorkspaceId);
+            set('sanatani_active_workspace_id', newWorkspaceId);
+            return true;
+          } else {
+            console.warn(`Production workspace switch denied for ${newWorkspaceId}: Insufficient tenant clearance.`);
+            return false;
+          }
+        } catch (error) {
+          console.error('Error verifying tenant switch authorization:', error);
+          return false;
+        }
+      }
+
+      // If user is not authenticated for production workspace
+      console.warn('Production workspace switch denied: User is not authenticated.');
+      return false;
+    },
+    [user, role, currentRole, userDocData]
+  );
+
+  const activeWorkspace = useMemo(() => {
+    return (
+      workspaces.find((w) => w.id === activeWorkspaceId) ||
+      workspaces[0] ||
+      INITIAL_WORKSPACES[0]
+    );
+  }, [workspaces, activeWorkspaceId]);
 
   const updateWorkspaceType = (newType: WorkspaceType) => {
     setWorkspaces((prev) =>
-      prev.map((w, idx) => {
-        if (w.id === activeWorkspaceId) {
-          return { ...w, type: newType };
-        }
-        return w;
-      })
+      prev.map((w) => (w.id === activeWorkspaceId ? { ...w, type: newType } : w))
     );
   };
 
   const updateWorkspaceDetails = (updates: Partial<WorkspaceConfig>) => {
     setWorkspaces((prev) =>
-      prev.map((w, idx) => (w.id === activeWorkspaceId ? { ...w, ...updates } : w))
+      prev.map((w) => (w.id === activeWorkspaceId ? { ...w, ...updates } : w))
     );
   };
 
-  const switchRole = (role: UserRole) => {
-    // SECURITY BOUNDARY: Client-side role switching is ONLY for DEMO environments
+  const switchRole = (newRole: UserRole) => {
+    // Client-side role switching is allowed for DEMO / development environments
     if (!activeWorkspaceId.startsWith('DEMO_')) {
-      console.warn("Role switching is disabled for production workspaces.");
+      console.warn('Role switching is disabled for production tenant workspaces.');
       return;
     }
-    setCurrentRole(role);
-    set('sanatani_user_role', role);
+    const normalized: UserRole = (ROLE_MIGRATION_MAP[newRole] || newRole) as UserRole;
+    setRole(normalized);
+    setCurrentRole(normalized);
+    set('sanatani_user_role', normalized);
   };
 
-  const checkPermission = (allowedRoles: UserRole[]): boolean => {
-    const adminRoles = ['SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN', 'MANAGER', 'MANAGER'];
-    if (adminRoles.includes(currentRole)) return true;
-    
-    // Auto-map legacy manager/trustee roles for standard check
-    const mappedRole = currentRole === 'MANAGER' ? 'MANAGER' : currentRole;
-    return allowedRoles.includes(mappedRole as UserRole) || allowedRoles.includes(currentRole);
-  };
+  const checkPermission = useCallback(
+    (allowedRoles: (UserRole | string)[]): boolean => {
+      const effectiveRole: UserRole = (role ? ROLE_MIGRATION_MAP[role] || role : currentRole) as UserRole;
+      if (effectiveRole === 'SuperAdmin') return true;
+
+      return allowedRoles.some((allowed) => {
+        const normalizedAllowed = ROLE_MIGRATION_MAP[allowed] || allowed;
+        if (normalizedAllowed === effectiveRole || allowed === effectiveRole) return true;
+        // Trustee hierarchy grants operational leadership clearance
+        if (effectiveRole === 'Trustee' && ['Priest', 'Accountant', 'Sevadar', 'Devotee'].includes(normalizedAllowed)) {
+          return true;
+        }
+        return false;
+      });
+    },
+    [role, currentRole]
+  );
 
   const loginWithPin = (pin: string, devoteeList: DevoteeMember[]): boolean => {
-    // FORCE DEMO WORKSPACE to ensure safe boundaries
     if (!activeWorkspaceId.startsWith('DEMO_')) {
       setActiveWorkspaceId('DEMO_ws-mandir');
+      setWorkspaceId('DEMO_ws-mandir');
     }
-    // Firebase Auth is bypassed due to IAM lock. Local state governs the prototype UI.
 
     // Admin Master Override PIN
     if (pin === '1008' || pin === activeWorkspace.adminPin) {
-      setCurrentRole('SUPER_ADMIN');
+      setRole('SuperAdmin');
+      setCurrentRole('SuperAdmin');
       setIsAuthenticated(true);
-      // TODO: PHASE 1B - Production authentication migration required. 
-      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
       signInAnonymously(auth).catch(console.error);
-
       return true;
     }
 
-    // Match devotee by PIN
     const match = devoteeList.find((d) => d.pin === pin || d.phone.endsWith(pin));
     if (match) {
       setCurrentDevotee(match);
-      setCurrentRole(match.role || 'DEVOTEE');
+      const matchedRole = (ROLE_MIGRATION_MAP[match.role] || match.role || 'Devotee') as UserRole;
+      setRole(matchedRole);
+      setCurrentRole(matchedRole);
       setIsAuthenticated(true);
-      // TODO: PHASE 1B - Production authentication migration required. 
-      // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
       signInAnonymously(auth).catch(console.error);
-
       set('sanatani_current_devotee', match);
       return true;
     }
@@ -439,20 +474,19 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     return false;
   };
 
-  const loginAsRole = (role: UserRole, customName?: string) => {
-    // FORCE DEMO WORKSPACE to ensure safe boundaries
+  const loginAsRole = (asRole: UserRole, customName?: string) => {
     if (!activeWorkspaceId.startsWith('DEMO_')) {
       setActiveWorkspaceId('DEMO_ws-mandir');
+      setWorkspaceId('DEMO_ws-mandir');
     }
-    setCurrentRole(role);
+    const normalized: UserRole = (ROLE_MIGRATION_MAP[asRole] || asRole) as UserRole;
+    setRole(normalized);
+    setCurrentRole(normalized);
     setIsAuthenticated(true);
     setViewMode('MANAGER');
-
-    // TODO: PHASE 1B - Production authentication migration required. 
-    // Anonymous auth is ONLY acceptable for isolated demo/sandbox functionality.
     signInAnonymously(auth).catch(console.error);
 
-    if (role === 'DEVOTEE') {
+    if (normalized === 'Devotee') {
       setCurrentDevotee({
         id: 'dev-demo-self',
         workspaceId: activeWorkspaceId,
@@ -461,7 +495,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         phone: '+91 98765 00108',
         email: 'anand@sanatan.org',
         pin: '1008',
-        role: 'DEVOTEE',
+        role: 'Devotee',
         sevaIndex: 780,
         sevaTier: 'Vishesh',
         gotra: 'Kashyapa',
@@ -480,12 +514,21 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const logout = async () => {
-    try { await signOut(auth); } catch(e) {}
-    setCurrentRole('DEVOTEE');
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error('Error signing out:', e);
+    }
+    setUser(null);
+    setRole(null);
+    setCurrentRole('Devotee');
     setCurrentDevotee(null);
+    setUserDocData(null);
     setIsAuthenticated(false);
     set('sanatani_current_devotee', null);
     localStorage.removeItem('sanatani_web_session');
+    setWorkspaceId('DEMO_ws-mandir');
+    setActiveWorkspaceId('DEMO_ws-mandir');
   };
 
   const saveCustomLogo = (base64: string) => {
@@ -497,42 +540,48 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     setWorkspaces((prev) => {
       const existing = prev.find((w) => w.id === newWorkspace.id);
       if (existing) {
-        return prev.map((w, idx) => (w.id === newWorkspace.id ? newWorkspace : w));
+        return prev.map((w) => (w.id === newWorkspace.id ? newWorkspace : w));
       }
       const updated = [...prev, newWorkspace];
       set('sanatani_workspaces', updated);
       return updated;
     });
+    setWorkspaceId(newWorkspace.id);
     setActiveWorkspaceId(newWorkspace.id);
   };
 
-
   const generateSecureQRToken = (member: DevoteeMember): string => {
-    // TODO: PHASE 1B - Security Boundary
-    // This token embeds the PIN and is NOT a secure cryptographic credential.
-    // It must only be used as a UI hint/demo until a proper expiring, opaque backend token is implemented.
-    const vaultToken = member.qrSecretVaultToken || btoa(member.id + "-vault-" + Date.now());
+    const vaultToken = member.qrSecretVaultToken || btoa(`${member.id}-vault-${Date.now()}`);
     return JSON.stringify({ id: member.id, pin: member.pin, token: vaultToken });
   };
 
-  const currentUser = {
-    id: currentDevotee?.id || 'admin-root',
-    name: currentDevotee?.fullName || 'Acharya / Trustee Administrator',
-    role: currentRole,
-  };
+  const currentUser = useMemo(() => {
+    return {
+      id: currentDevotee?.id || user?.uid || 'admin-root',
+      name: currentDevotee?.fullName || user?.displayName || 'Acharya / Trustee Administrator',
+      role: role || currentRole,
+    };
+  }, [currentDevotee, user, role, currentRole]);
 
   return (
     <AuthWorkspaceContext.Provider
       value={{
-        workspaces,
+        user,
+        workspaceId,
+        role,
+        isLoading,
+        switchWorkspace,
+        firebaseUser: user,
+        activeWorkspaceId,
         activeWorkspace,
-        currentRole,
+        workspaces,
+        currentRole: role || currentRole,
         currentDevotee,
         setCurrentDevotee,
         currentUser,
         isAuthenticated,
-        firebaseUser,
-        switchWorkspace,
+        viewMode,
+        setViewMode,
         updateWorkspaceType,
         switchRole,
         updateCurrentUserRole: switchRole,
@@ -544,11 +593,24 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         updateWorkspaceDetails,
         addWorkspace,
         generateSecureQRToken,
-        viewMode,
-        setViewMode,
       }}
     >
-      {children}
+      {isLoading ? (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-stone-900 text-amber-100 selection:bg-amber-500">
+          <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-amber-500 text-xl font-bold">🕉️</span>
+            <span className="text-lg font-serif font-semibold tracking-wider text-amber-200">
+              सनातन बन्धन (SANATANI BANDHAN)
+            </span>
+          </div>
+          <p className="text-xs text-stone-400 font-sans tracking-wide">
+            Initializing Sacred Workspace & Verifying RBAC Session...
+          </p>
+        </div>
+      ) : (
+        children
+      )}
     </AuthWorkspaceContext.Provider>
   );
 };
