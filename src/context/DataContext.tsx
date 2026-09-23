@@ -28,7 +28,20 @@ import { trackTreasuryPurchase, trackSignUp, trackGenerateLead } from '../utils/
 import { useAuthWorkspace } from './AuthWorkspaceContext';
 import { useToast } from './ToastContext';
 import { db } from '../lib/firebase';
-import { doc, setDoc, deleteDoc, collection, onSnapshot, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  onSnapshot,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { offlineSyncManager } from '../services/OfflineSyncManager';
 
 
 // Master Initial Datasets
@@ -916,16 +929,26 @@ const DEMO_QUOTA_KEY_PREFIX = 'sb_demo_count_';
 const AUTO_PURGE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours auto-delete retention window
 
 interface DataContextType {
-  // Filtered Isolated Datasets for Active Workspace (Superadmin sees all)
+  // Global loading state for initial data payload
+  isDataLoading: boolean;
+
+  // Core tenant-scoped datasets
   devotees: DevoteeMember[];
+  puja_bookings: PoojaBooking[];
+  donations: TreasuryTransaction[];
+  inventory_items: InventoryItem[];
+
+  // Aliases for platform backward compatibility
+  poojaBookings: PoojaBooking[];
+  poojas: PoojaBooking[];
+  treasury: TreasuryTransaction[];
+  inventory: InventoryItem[];
+
+  // Ancillary tenant-scoped datasets
   families: FamilyHousehold[];
   vanshavali: VanshavaliNode;
   guests: GuestRecord[];
-  treasury: TreasuryTransaction[];
   assets: AssetRecord[];
-  inventory: InventoryItem[];
-  poojaBookings: PoojaBooking[];
-  poojas: PoojaBooking[];
   residentPujas: ResidentPujaSchedule[];
   purohits: PurohitProfile[];
   pitruRecords: PitruRecord[];
@@ -970,7 +993,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { activeWorkspace, currentRole, isAuthenticated, firebaseUser } = useAuthWorkspace();
+  const { activeWorkspaceId, activeWorkspace, currentRole, isAuthenticated, firebaseUser } = useAuthWorkspace();
   const { showToast } = useToast();
   const initialData = useInitialData();
 
@@ -1027,70 +1050,139 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [allResolutions, setAllResolutions] = useState<TrusteeResolution[]>(INITIAL_RESOLUTIONS);
   const [allShifts, setAllShifts] = useState<SevadarDutyShift[]>(INITIAL_SHIFTS);
 
-  // FIREBASE SYNC EFFECT
+  // Global loading state for initial data payload across core collections
+  const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
+
+  // ----------------------------------------------------
+  // TENANT-SCOPED REAL-TIME DATA SUBSCRIPTIONS
+  // Sets up onSnapshot listeners for core collections:
+  // devotees, puja_bookings, donations, and inventory_items.
+  // Every query MUST include .where('workspaceId', '==', activeWorkspaceId)
+  // to prevent cross-tenant data leaks and minimize read costs.
+  // ----------------------------------------------------
   useEffect(() => {
-    if (!activeWorkspace?.id || !isAuthenticated || !firebaseUser) return;
-    
-    const collections = [
-      { name: 'devotees', setter: setAllDevotees },
-      { name: 'families', setter: setAllFamilies },
-      { name: 'treasury', setter: setAllTreasury },
-      { name: 'assets', setter: setAllAssets },
-      { name: 'inventory', setter: setAllInventory },
-      { name: 'poojaBookings', setter: setAllPoojaBookings },
-      { name: 'residentPujas', setter: setAllResidentPujas },
-      { name: 'pitruRecords', setter: setAllPitruRecords },
-      { name: 'cows', setter: setAllCows },
-      { name: 'annadanam', setter: setAllAnnadanamList },
-      { name: 'gurukulStudents', setter: setAllGurukulStudents },
-      { name: 'campaigns', setter: setAllCampaigns },
-      { name: 'resolutions', setter: setAllResolutions },
-      { name: 'shifts', setter: setAllShifts }
-    ];
+    // If the user is unauthenticated or activeWorkspaceId does not exist
+    if (!isAuthenticated || !activeWorkspaceId) {
+      setIsDataLoading(false);
+      return;
+    }
 
-    const unsubscribes = collections.map(c => {
-      let q;
-      
-      // Strict RBAC filtering for the global data sync
-      if (['SUPER_ADMIN', 'TRUSTEE', 'ACCOUNTANT', 'MANAGER'].includes(currentRole)) {
-        // Staff see all workspace data
-        q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id));
-      } else if (currentRole === 'PUROHIT') {
-        // Purohit sees pooja bookings assigned to them, but also basic workspace data
-        if (c.name === 'poojaBookings') {
-           q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id), where('assignedPurohit', '==', firebaseUser.uid));
-        } else {
-           q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id));
-        }
-      } else {
-        // DEVOTEE / VOLUNTEER see strictly their own data
-        if (c.name === 'devotees') {
-          q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id), where('id', '==', firebaseUser.uid));
-        } else if (c.name === 'poojaBookings' || c.name === 'treasury') {
-          q = query(collection(db, c.name), where('workspaceId', '==', activeWorkspace.id), where('devoteeId', '==', firebaseUser.uid));
-        } else {
-           // Skip fetching full collections for Devotees
-           c.setter([]);
-           return () => {};
-        }
+    setIsDataLoading(true);
+
+    const pendingCollections = new Set<string>([
+      'devotees',
+      'puja_bookings',
+      'donations',
+      'inventory_items',
+    ]);
+
+    const markResolved = (colName: string) => {
+      pendingCollections.delete(colName);
+      if (pendingCollections.size === 0) {
+        setIsDataLoading(false);
       }
+    };
 
-      return onSnapshot(q, (snapshot) => {
-        if (!snapshot.empty) {
-          const items = snapshot.docs.map(doc => doc.data() as any);
-          c.setter(items);
+    // 1. Core query: devotees
+    const devoteesQuery = query(
+      collection(db, 'devotees'),
+      where('workspaceId', '==', activeWorkspaceId)
+    );
+    const unsubDevotees = onSnapshot(
+      devoteesQuery,
+      (snapshot) => {
+        const items = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+        } as DevoteeMember));
+        if (items.length > 0 || !activeWorkspaceId.startsWith('DEMO_')) {
+          setAllDevotees(items);
         }
-      }, (err) => {
-        if (err.code === 'permission-denied') {
-          console.warn(`[Firebase] Expected permission issue for ${c.name} - role restricted.`);
-        } else {
-          console.warn(`[Firebase] Sync info for ${c.name}:`, err.message);
-        }
-      });
-    });
+        markResolved('devotees');
+      },
+      (err) => {
+        console.warn('[Firestore] devotees listener error:', err);
+        markResolved('devotees');
+      }
+    );
 
-    return () => unsubscribes.forEach(unsub => unsub());
-  }, [activeWorkspace?.id, isAuthenticated, firebaseUser]);
+    // 2. Core query: puja_bookings
+    const pujaBookingsQuery = query(
+      collection(db, 'puja_bookings'),
+      where('workspaceId', '==', activeWorkspaceId)
+    );
+    const unsubPujaBookings = onSnapshot(
+      pujaBookingsQuery,
+      (snapshot) => {
+        const items = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+        } as PoojaBooking));
+        if (items.length > 0 || !activeWorkspaceId.startsWith('DEMO_')) {
+          setAllPoojaBookings(items);
+        }
+        markResolved('puja_bookings');
+      },
+      (err) => {
+        console.warn('[Firestore] puja_bookings listener error:', err);
+        markResolved('puja_bookings');
+      }
+    );
+
+    // 3. Core query: donations
+    const donationsQuery = query(
+      collection(db, 'donations'),
+      where('workspaceId', '==', activeWorkspaceId)
+    );
+    const unsubDonations = onSnapshot(
+      donationsQuery,
+      (snapshot) => {
+        const items = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+        } as TreasuryTransaction));
+        if (items.length > 0 || !activeWorkspaceId.startsWith('DEMO_')) {
+          setAllTreasury(items);
+        }
+        markResolved('donations');
+      },
+      (err) => {
+        console.warn('[Firestore] donations listener error:', err);
+        markResolved('donations');
+      }
+    );
+
+    // 4. Core query: inventory_items
+    const inventoryItemsQuery = query(
+      collection(db, 'inventory_items'),
+      where('workspaceId', '==', activeWorkspaceId)
+    );
+    const unsubInventory = onSnapshot(
+      inventoryItemsQuery,
+      (snapshot) => {
+        const items = snapshot.docs.map((docSnap) => ({
+          ...docSnap.data(),
+          id: docSnap.id,
+        } as InventoryItem));
+        if (items.length > 0 || !activeWorkspaceId.startsWith('DEMO_')) {
+          setAllInventory(items);
+        }
+        markResolved('inventory_items');
+      },
+      (err) => {
+        console.warn('[Firestore] inventory_items listener error:', err);
+        markResolved('inventory_items');
+      }
+    );
+
+    // Cleanup function that calls all unsubscribe methods to prevent memory leaks
+    return () => {
+      unsubDevotees();
+      unsubPujaBookings();
+      unsubDonations();
+      unsubInventory();
+    };
+  }, [activeWorkspaceId, isAuthenticated]);
 
   // Helper to push to firestore
   const pushToFirestore = (colName: string, id: string, data: any) => {
@@ -1197,54 +1289,60 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Superadmin / God Mode is exempted to allow sovereign control.
   // ----------------------------------------------------
   const isGodMode = false; // Strictly disabled to enforce organization data isolation
+  const currentWsId = activeWorkspaceId || activeWorkspace.id;
 
   const devotees = useMemo(() => {
     return isGodMode
       ? allDevotees
-      : allDevotees.filter((d) => !d.workspaceId || d.workspaceId === activeWorkspace.id);
-  }, [allDevotees, activeWorkspace.id, isGodMode]);
+      : allDevotees.filter((d) => !d.workspaceId || d.workspaceId === currentWsId);
+  }, [allDevotees, currentWsId, isGodMode]);
+
+  const puja_bookings = useMemo(() => {
+    return isGodMode
+      ? allPoojaBookings
+      : allPoojaBookings.filter((p) => !p.workspaceId || p.workspaceId === currentWsId);
+  }, [allPoojaBookings, currentWsId, isGodMode]);
+
+  const donations = useMemo(() => {
+    return isGodMode
+      ? allTreasury
+      : allTreasury.filter((t) => !t.workspaceId || t.workspaceId === currentWsId);
+  }, [allTreasury, currentWsId, isGodMode]);
+
+  const inventory_items = useMemo(() => {
+    return isGodMode
+      ? allInventory
+      : allInventory.filter((i) => !i.workspaceId || i.workspaceId === currentWsId);
+  }, [allInventory, currentWsId, isGodMode]);
+
+  const poojaBookings = puja_bookings;
+  const poojas = puja_bookings;
+  const treasury = donations;
+  const inventory = inventory_items;
 
   const families = useMemo(() => {
     return isGodMode
       ? allFamilies
-      : allFamilies.filter((f) => !f.workspaceId || f.workspaceId === activeWorkspace.id);
-  }, [allFamilies, activeWorkspace.id, isGodMode]);
+      : allFamilies.filter((f) => !f.workspaceId || f.workspaceId === currentWsId);
+  }, [allFamilies, currentWsId, isGodMode]);
 
   const guests = useMemo(() => {
     return isGodMode
       ? allGuests
-      : allGuests.filter((g) => !g.workspaceId || g.workspaceId === activeWorkspace.id);
-  }, [allGuests, activeWorkspace.id, isGodMode]);
-
-  const treasury = useMemo(() => {
-    return isGodMode
-      ? allTreasury
-      : allTreasury.filter((t) => !t.workspaceId || t.workspaceId === activeWorkspace.id);
-  }, [allTreasury, activeWorkspace.id, isGodMode]);
+      : allGuests.filter((g) => !g.workspaceId || g.workspaceId === currentWsId);
+  }, [allGuests, currentWsId, isGodMode]);
 
   const assets = useMemo(() => {
     return isGodMode
       ? allAssets
-      : allAssets.filter((a) => !a.workspaceId || a.workspaceId === activeWorkspace.id);
-  }, [allAssets, activeWorkspace.id, isGodMode]);
-
-  const inventory = useMemo(() => {
-    return isGodMode
-      ? allInventory
-      : allInventory.filter((i) => !i.workspaceId || i.workspaceId === activeWorkspace.id);
-  }, [allInventory, activeWorkspace.id, isGodMode]);
-
-  const poojaBookings = useMemo(() => {
-    return isGodMode
-      ? allPoojaBookings
-      : allPoojaBookings.filter((p) => !p.workspaceId || p.workspaceId === activeWorkspace.id);
-  }, [allPoojaBookings, activeWorkspace.id, isGodMode]);
+      : allAssets.filter((a) => !a.workspaceId || a.workspaceId === currentWsId);
+  }, [allAssets, currentWsId, isGodMode]);
 
   const pitruRecords = useMemo(() => {
     return isGodMode
       ? allPitruRecords
-      : allPitruRecords.filter((p) => !p.workspaceId || p.workspaceId === activeWorkspace.id);
-  }, [allPitruRecords, activeWorkspace.id, isGodMode]);
+      : allPitruRecords.filter((p) => !p.workspaceId || p.workspaceId === currentWsId);
+  }, [allPitruRecords, currentWsId, isGodMode]);
 
   const cows = useMemo(() => {
     return isGodMode
@@ -1859,15 +1957,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider
       value={{
+        isDataLoading,
         devotees,
+        puja_bookings,
+        donations,
+        inventory_items,
+        poojaBookings,
+        poojas: poojaBookings,
+        treasury,
+        inventory,
         families,
         vanshavali,
         guests,
-        treasury,
         assets,
-        inventory,
-        poojaBookings,
-        poojas: poojaBookings,
         residentPujas,
         purohits,
         pitruRecords,
@@ -1912,7 +2014,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useData = () => {
+export const useData = (): DataContextType => {
   const context = useContext(DataContext);
   if (!context) {
     throw new Error('useData must be used within a DataProvider');
