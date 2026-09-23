@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 import {
   Landmark,
@@ -14,591 +14,1243 @@ import {
   Image as ImageIcon,
   X,
   CheckCircle2,
+  Calendar,
+  Layers,
+  FileText,
+  Printer,
+  ChevronDown,
+  Building,
+  CreditCard,
+  AlertCircle,
+  Sparkles,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
-import { useScopedData } from '../../hooks/useScopedData';
 import { TreasuryTransaction } from '../../types';
 import { generateTaxReceiptPDF, generateTreasuryLedgerPDF } from '../../utils/pdfGenerator';
 import { printThermalReceipt } from '../../utils/printUtils';
-import { exportToCSV } from '../../utils/csvEngine';
 import { useToast } from '../../context/ToastContext';
+import { compressExpenseMemo } from '../../utils/imageCompression';
 import { MemberSearchSelect } from '../common/MemberSearchSelect';
 
 interface TreasuryLedgerDeskProps {
-  onOpenQuickPay: () => void;
+  onOpenQuickPay?: () => void;
 }
+
+type FundType = 'Unrestricted' | 'Restricted';
+
+interface FundDefinition {
+  id: string;
+  name: string;
+  type: FundType;
+  description: string;
+  keywords: string[];
+}
+
+const TRUST_FUNDS: FundDefinition[] = [
+  {
+    id: 'general',
+    name: 'General Trust Fund',
+    type: 'Unrestricted',
+    description: 'Unrestricted general donations, temple hundi, operational expenses & administrative overhead',
+    keywords: ['general', 'chanda', 'pranami', 'hundi', 'maintenance', 'utility', 'utilities', 'office', 'admin'],
+  },
+  {
+    id: 'annadanam',
+    name: 'Annadanam & Prasad Fund',
+    type: 'Restricted',
+    description: 'Earmarked solely for prasad preparation, community meals, grains, and bhandara seva',
+    keywords: ['annadanam', 'prasad', 'bhandara', 'catering', 'food', 'groceries', 'ration', 'bhog'],
+  },
+  {
+    id: 'nirman',
+    name: 'Mandir Nirman & Capital Fund',
+    type: 'Restricted',
+    description: 'Earmarked for sanctum construction, stone carving, architecture, land, and temple renovation',
+    keywords: ['nirman', 'mandir nirman', 'construction', 'renovation', 'building', 'stone', 'capital', 'expansion'],
+  },
+  {
+    id: 'gauseva',
+    name: 'Gau Seva & Gaushala Fund',
+    type: 'Restricted',
+    description: 'Earmarked for sacred cow protection, fodder, veterinary care, and gaushala shelter',
+    keywords: ['gau', 'cow', 'gaushala', 'grass', 'fodder', 'veterinary'],
+  },
+  {
+    id: 'puja_utsav',
+    name: 'Pooja & Utsav Seva Fund',
+    type: 'Restricted',
+    description: 'Earmarked for special festival celebrations, floral decorations, yajnas, and priest honorariums',
+    keywords: ['utsav', 'festival', 'pooja', 'puja', 'yajna', 'dakshina', 'purohit', 'flower', 'decor', 'setup', 'durga'],
+  },
+];
 
 export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQuickPay }) => {
   const { activeWorkspace } = useAuthWorkspace();
-  const { addTreasuryTransaction } = useData();
-  const treasury = useScopedData<TreasuryTransaction>('treasury', {}, { orderBy: { field: 'date', direction: 'desc' } });
+  const { treasury, donations, addTreasuryTransaction } = useData();
   const { showToast } = useToast();
 
+  // Combine treasury and donations ensuring no missing records
+  const allLedgerRecords = useMemo(() => {
+    const combined = [...(treasury || [])];
+    if (donations && donations.length > 0) {
+      const existingIds = new Set(combined.map((t) => t.id));
+      for (const d of donations) {
+        if (!existingIds.has(d.id)) {
+          combined.push(d);
+        }
+      }
+    }
+    return combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [treasury, donations]);
+
+  // Filters State
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'Income' | 'Expense'>('all');
-  const [expenseFilter, setExpenseFilter] = useState<'all' | 'org' | 'personal'>('all');
-  const [utsavFilter, setUtsavFilter] = useState<string>('all');
-  const [showExpenseModal, setShowExpenseModal] = useState(false);
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [selectedFundId, setSelectedFundId] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Modals State
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [selectedMemoUrl, setSelectedMemoUrl] = useState<string | null>(null);
 
-  const availableUtsavs = Array.from(new Set(treasury.filter(t => t.eventName).map(t => t.eventName!)));
+  // New Voucher Form State
+  const [voucherType, setVoucherType] = useState<'Income' | 'Expense'>('Expense');
+  const [voucherDate, setVoucherDate] = useState(new Date().toISOString().slice(0, 10));
+  const [voucherAmount, setVoucherAmount] = useState<number | ''>('');
+  const [voucherCategory, setVoucherCategory] = useState('Utilities & Maintenance');
+  const [voucherFundId, setVoucherFundId] = useState('general');
+  const [voucherEntityName, setVoucherEntityName] = useState('');
+  const [voucherPaymentMode, setVoucherPaymentMode] = useState('Bank Transfer (NEFT/RTGS)');
+  const [voucherRefNo, setVoucherRefNo] = useState('');
+  const [voucherPurpose, setVoucherPurpose] = useState('');
+  const [voucherHandledBy, setVoucherHandledBy] = useState((activeWorkspace as any)?.custodianName || 'Treasury Sevadar');
+  const [voucherIs80G, setVoucherIs80G] = useState(false);
+  const [voucherMemoUrl, setVoucherMemoUrl] = useState('');
+  const [isUploadingMemo, setIsUploadingMemo] = useState(false);
 
-  // Financial Metrics
-  const totalIncome = treasury
-    .filter((t) => t.type === 'Income')
-    .reduce((a, b) => a + b.amount, 0);
+  // Categorize a transaction into a Fund
+  const getTransactionFund = (tx: TreasuryTransaction): FundDefinition => {
+    const text = `${tx.category || ''} ${tx.purpose || ''} ${tx.eventName || ''}`.toLowerCase();
 
-  const totalExpense = treasury
-    .filter((t) => t.type === 'Expense')
-    .reduce((a, b) => a + b.amount, 0);
-
-  const netBalance = totalIncome - totalExpense;
-
-  const filteredTreasury = treasury.filter((tx) => {
-    const matchSearch =
-      tx.category?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-      (tx.devoteeName && tx.devoteeName?.toLowerCase().includes(searchTerm?.toLowerCase())) ||
-      tx.handledBy?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
-      tx.purpose?.toLowerCase().includes(searchTerm?.toLowerCase());
-
-    const matchType = filterType === 'all' || tx.type === filterType;
-    
-    let matchExpense = true;
-    if (filterType === 'Expense' && expenseFilter !== 'all') {
-      const isPersonal = (tx.category || '').toLowerCase().includes('sevadar') || (tx.category || '').toLowerCase().includes('reimbursement') || (tx.category || '').toLowerCase().includes('personal') || !!tx.devoteeId;
-      if (expenseFilter === 'org' && isPersonal) matchExpense = false;
-      if (expenseFilter === 'personal' && !isPersonal) matchExpense = false;
+    for (const fund of TRUST_FUNDS) {
+      if (fund.id === 'general') continue;
+      if (fund.keywords.some((kw) => text.includes(kw))) {
+        return fund;
+      }
     }
-    
-    return matchSearch && matchType && matchExpense;
-  });
-
-  const handlePrintReceipt = async (tx: TreasuryTransaction) => {
-    try {
-      await generateTaxReceiptPDF(tx, activeWorkspace);
-      showToast(`Section 80G Tax Receipt generated for ${tx.devoteeName || 'Devotee'}`, 'success');
-    } catch (err: any) {
-      showToast('Error generating Tax Receipt PDF', 'error');
-    }
+    return TRUST_FUNDS[0]; // Default to General Fund
   };
 
+  // Top-Level Financial KPIs
+  const financialKPIs = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+
+    for (const tx of allLedgerRecords) {
+      if (tx.type === 'Income') {
+        income += Number(tx.amount || 0);
+      } else if (tx.type === 'Expense') {
+        expense += Number(tx.amount || 0);
+      }
+    }
+
+    return {
+      totalIncome: income,
+      totalExpense: expense,
+      netBalance: income - expense,
+    };
+  }, [allLedgerRecords]);
+
+  // Fund Segregation Breakdown (Restricted vs. Unrestricted)
+  const fundBreakdown = useMemo(() => {
+    const map = new Map<string, { fund: FundDefinition; income: number; expense: number; net: number }>();
+
+    for (const f of TRUST_FUNDS) {
+      map.set(f.id, { fund: f, income: 0, expense: 0, net: 0 });
+    }
+
+    for (const tx of allLedgerRecords) {
+      const fund = getTransactionFund(tx);
+      const entry = map.get(fund.id);
+      if (entry) {
+        if (tx.type === 'Income') {
+          entry.income += Number(tx.amount || 0);
+        } else {
+          entry.expense += Number(tx.amount || 0);
+        }
+        entry.net = entry.income - entry.expense;
+      }
+    }
+
+    let unrestrictedNet = 0;
+    let restrictedNet = 0;
+
+    map.forEach((val) => {
+      if (val.fund.type === 'Unrestricted') {
+        unrestrictedNet += val.net;
+      } else {
+        restrictedNet += val.net;
+      }
+    });
+
+    return {
+      funds: Array.from(map.values()),
+      unrestrictedNet,
+      restrictedNet,
+    };
+  }, [allLedgerRecords]);
+
+  // Filtered transactions list
+  const filteredTransactions = useMemo(() => {
+    return allLedgerRecords.filter((tx) => {
+      // Type filter
+      if (filterType !== 'all' && tx.type !== filterType) return false;
+
+      // Date range filter
+      if (startDate && tx.date < startDate) return false;
+      if (endDate && tx.date > endDate) return false;
+
+      // Fund filter
+      if (selectedFundId !== 'all') {
+        const txFund = getTransactionFund(tx);
+        if (txFund.id !== selectedFundId) return false;
+      }
+
+      // Category filter
+      if (selectedCategory !== 'all' && tx.category !== selectedCategory) return false;
+
+      // Search query filter
+      if (searchTerm.trim()) {
+        const q = searchTerm.toLowerCase();
+        const categoryMatch = tx.category?.toLowerCase().includes(q);
+        const entityMatch =
+          tx.devoteeName?.toLowerCase().includes(q) ||
+          tx.vendorName?.toLowerCase().includes(q);
+        const purposeMatch = tx.purpose?.toLowerCase().includes(q);
+        const refMatch = (tx.referenceNo || tx.id || tx.taxReceiptNumber)?.toLowerCase().includes(q);
+        const custodyMatch = tx.handledBy?.toLowerCase().includes(q);
+
+        if (!categoryMatch && !entityMatch && !purposeMatch && !refMatch && !custodyMatch) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [allLedgerRecords, filterType, startDate, endDate, selectedFundId, selectedCategory, searchTerm]);
+
+  // Unique categories for filtering
+  const availableCategories = useMemo(() => {
+    return Array.from(new Set(allLedgerRecords.map((t) => t.category).filter(Boolean)));
+  }, [allLedgerRecords]);
+
+  // 1. Export to Tally Prime CSV
+  const handleExportTallyCSV = () => {
+    const headers = [
+      'Date',
+      'Voucher Type',
+      'Ledger Name',
+      'Debit',
+      'Credit',
+      'Narration',
+      'Voucher No',
+      'Payment Mode',
+    ];
+
+    const rows = filteredTransactions.map((tx) => {
+      const dateFormatted = tx.date ? tx.date.split('T')[0] : '';
+      const voucherType = tx.type === 'Income' ? 'Receipt' : 'Payment';
+      const ledgerName = tx.category || (tx.type === 'Income' ? 'Donation Account' : 'General Expenses');
+      const debit = tx.type === 'Expense' ? tx.amount.toFixed(2) : '';
+      const credit = tx.type === 'Income' ? tx.amount.toFixed(2) : '';
+      const entity = tx.devoteeName || tx.vendorName || 'Counter Cashier';
+      const narration = `"${(tx.purpose || tx.category || '').replace(/"/g, '""')} - ${entity.replace(/"/g, '""')} [Mode: ${tx.paymentMode || 'Cash'}]"`;
+      const voucherNo = `"${(tx.taxReceiptNumber || tx.referenceNo || tx.id).replace(/"/g, '""')}"`;
+
+      return [
+        dateFormatted,
+        voucherType,
+        `"${ledgerName.replace(/"/g, '""')}"`,
+        debit,
+        credit,
+        narration,
+        voucherNo,
+        `"${tx.paymentMode || ''}"`,
+      ].join(',');
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute(
+      'download',
+      `Tally_Prime_Ledger_${activeWorkspace.name?.replace(/\s+/g, '_') || 'Trust'}_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Tally Prime columnar CSV exported for Chartered Accountant!', 'success', 'CA & Tally Export');
+  };
+
+  // 2. Export Statement via jsPDF
   const handleExportPDF = async () => {
     try {
-      await generateTreasuryLedgerPDF(filteredTreasury, activeWorkspace, `Treasury & Expense Ledger (${filterType} View)`);
-      showToast('Ledger PDF generated successfully!', 'success');
-    } catch (err: any) {
+      showToast('Generating official Treasury Ledger Statement...', 'info');
+      await generateTreasuryLedgerPDF(
+        filteredTransactions,
+        activeWorkspace,
+        `Treasury & Fund Statement (${filterType === 'all' ? 'Consolidated' : filterType})`
+      );
+      showToast('Treasury Statement PDF downloaded successfully!', 'success');
+    } catch (err) {
+      console.error(err);
       showToast('Error generating Ledger PDF', 'error');
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = ['TX ID', 'Date', 'Type', 'Category', 'Amount', 'Donor / Payee', 'Payment Mode', 'Custody Handled By', 'Purpose', '80G Eligible'];
-    const rows = filteredTreasury.map((t, idx) => [
-      t.id,
-      t.date,
-      t.type,
-      t.category,
-      t.amount.toString(),
-      t.devoteeName || t.vendorName || '',
-      t.paymentMode,
-      t.handledBy,
-      t.purpose || '',
-      t.is80GEligible ? 'YES' : 'NO',
-    ]);
-    exportToCSV(`Treasury_Ledger_${activeWorkspace.type}_${new Date().toISOString().slice(0, 10)}.csv`, headers, rows);
-    showToast('Double-Entry Ledger CSV exported!', 'success');
+  // 3. Export Standard Audited CSV
+  const handleExportStandardCSV = () => {
+    const headers = [
+      'Transaction ID',
+      'Date',
+      'Type',
+      'Fund Segregation',
+      'Ledger Head',
+      'Amount (INR)',
+      'Entity (Donor / Vendor)',
+      'Payment Mode',
+      'Handled By',
+      'Purpose / Sankalp',
+      '80G Tax Exemption',
+    ];
+
+    const rows = filteredTransactions.map((tx) => {
+      const fund = getTransactionFund(tx);
+      return [
+        `"${tx.id}"`,
+        `"${tx.date}"`,
+        `"${tx.type}"`,
+        `"${fund.name} (${fund.type})"`,
+        `"${tx.category}"`,
+        tx.amount.toString(),
+        `"${tx.devoteeName || tx.vendorName || ''}"`,
+        `"${tx.paymentMode}"`,
+        `"${tx.handledBy}"`,
+        `"${(tx.purpose || '').replace(/"/g, '""')}"`,
+        tx.is80GEligible ? 'YES' : 'NO',
+      ].join(',');
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Treasury_Ledger_Audited_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Audited Double-Entry CSV downloaded', 'success');
   };
 
-  const handleExportTally = () => {
-    let xml = `<ENVELOPE>
-  <HEADER>
-    <TALLYREQUEST>Import Data</TALLYREQUEST>
-  </HEADER>
-  <BODY>
-    <IMPORTDATA>
-      <REQUESTDESC>
-        <REPORTNAME>Vouchers</REPORTNAME>
-      </REQUESTDESC>
-      <REQUESTDATA>
-`;
-    
-    filteredTreasury.forEach(tx => {
-      xml += `        <TALLYMESSAGE xmlns:UDF="TallyUDF">
-          <VOUCHER>
-            <DATE>${tx.date.split('T')[0].replace(/-/g, '')}</DATE>
-            <VOUCHERTYPENAME>${tx.type === 'Income' ? 'Receipt' : 'Payment'}</VOUCHERTYPENAME>
-            <NARRATION>${tx.purpose.replace(/&/g, '&amp;')} - ${tx.devoteeName ? tx.devoteeName.replace(/&/g, '&amp;') : 'Walk-in'}</NARRATION>
-            <ALLLEDGERENTRIES.LIST>
-              <LEDGERNAME>${tx.type === 'Income' ? 'Cash/Bank' : tx.category.replace(/&/g, '&amp;')}</LEDGERNAME>
-              <ISDEEMEDPOSITIVE>${tx.type === 'Income' ? 'Yes' : 'No'}</ISDEEMEDPOSITIVE>
-              <AMOUNT>${tx.type === 'Income' ? `-${tx.amount}` : tx.amount}</AMOUNT>
-            </ALLLEDGERENTRIES.LIST>
-            <ALLLEDGERENTRIES.LIST>
-              <LEDGERNAME>${tx.type === 'Income' ? tx.category.replace(/&/g, '&amp;') : 'Cash/Bank'}</LEDGERNAME>
-              <ISDEEMEDPOSITIVE>${tx.type === 'Income' ? 'No' : 'Yes'}</ISDEEMEDPOSITIVE>
-              <AMOUNT>${tx.type === 'Income' ? tx.amount : `-${tx.amount}`}</AMOUNT>
-            </ALLLEDGERENTRIES.LIST>
-          </VOUCHER>
-        </TALLYMESSAGE>\n`;
-    });
-    
-    xml += `      </REQUESTDATA>
-    </IMPORTDATA>
-  </BODY>
-</ENVELOPE>`;
+  // Memo upload compression
+  const handleMemoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsUploadingMemo(true);
+      const compressed = await compressExpenseMemo(file);
+      setVoucherMemoUrl(compressed);
+      showToast('Voucher receipt memo compressed and attached', 'info');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to compress receipt image', 'error');
+    } finally {
+      setIsUploadingMemo(false);
+    }
+  };
 
-    const blob = new Blob([xml], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Tally_Export_${activeWorkspace.type}_${new Date().toISOString().slice(0, 10)}.xml`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    showToast('Tally ERP 9 XML Exported Successfully', 'success');
+  // Save Voucher Entry
+  const handleSaveVoucher = (e: React.FormEvent) => {
+    e.preventDefault();
+    const numAmount = Number(voucherAmount);
+    if (!numAmount || numAmount <= 0) {
+      showToast('Please specify a valid transaction amount', 'warning');
+      return;
+    }
+
+    const txId = `tx_${Date.now()}`;
+    const newTx: any = {
+      id: txId,
+      workspaceId: activeWorkspace.id,
+      date: voucherDate,
+      type: voucherType,
+      category: voucherCategory,
+      amount: numAmount,
+      handledBy: voucherHandledBy.trim() || 'Treasury Sevadar',
+      devoteeName: voucherType === 'Income' ? voucherEntityName.trim() : undefined,
+      vendorName: voucherType === 'Expense' ? voucherEntityName.trim() : undefined,
+      paymentMode: voucherPaymentMode,
+      referenceNo: voucherRefNo.trim() || undefined,
+      purpose: voucherPurpose.trim() || `${voucherCategory} Transaction`,
+      is80GEligible: voucherType === 'Income' ? voucherIs80G : false,
+      taxReceiptIssued: voucherType === 'Income' && voucherIs80G,
+      taxReceiptNumber: voucherType === 'Income' ? `SB-80G-${Date.now().toString().slice(-6)}` : undefined,
+      memoImageUrl: voucherMemoUrl || undefined,
+      auditVerified: true,
+    };
+
+    try {
+      addTreasuryTransaction(newTx);
+      showToast(
+        `${voucherType === 'Income' ? 'Receipt' : 'Payment'} Voucher recorded on the General Ledger!`,
+        'success',
+        'Voucher Posted'
+      );
+      setShowVoucherModal(false);
+      // Reset form
+      setVoucherAmount('');
+      setVoucherEntityName('');
+      setVoucherPurpose('');
+      setVoucherRefNo('');
+      setVoucherMemoUrl('');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to save voucher to ledger', 'error');
+    }
   };
 
   return (
     <ErrorBoundary moduleName="Treasury Ledger">
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-temple-900/90 border border-temple-800 p-6 rounded-3xl shadow-xl">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-              Double-Entry Dharma Accounting
-            </span>
-            <span className="text-xs text-temple-400 font-mono">
-              Audit Verified & Section 80G Compliant
-            </span>
+      <div className="space-y-6">
+        {/* Top Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gradient-to-r from-temple-950 via-temple-900 to-amber-950/70 border border-amber-500/30 p-6 rounded-3xl shadow-2xl">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              <span className="px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                <Landmark className="w-3.5 h-3.5 text-emerald-400" />
+                Double-Entry Treasury Ledger
+              </span>
+              <span className="text-xs text-temple-300 font-mono bg-temple-950/60 px-2.5 py-0.5 rounded-lg border border-temple-800">
+                Charitable Trust Accounting Standard
+              </span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-amber-300 tracking-tight">
+              Treasury & Fund Balance Sheet
+            </h2>
+            <p className="text-xs sm:text-sm text-temple-400 mt-1 max-w-2xl">
+              Audited double-entry ledger with Restricted vs. Unrestricted fund segregation, instant Section 80G receipts, and direct Tally Prime CSV ingestion for CAs.
+            </p>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
-            Treasury & Expense Ledger
-          </h2>
-          <p className="text-xs text-temple-400 mt-0.5">
-            Real-time balance sheet, cash/UPI custody tracking, and instant tax exemption receipts
-          </p>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            onClick={handleExportTally}
-            className="px-3.5 py-2 rounded-xl bg-indigo-900 hover:bg-indigo-800 border border-indigo-700/50 text-indigo-100 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Tally XML</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleExportPDF}
-            className="px-3.5 py-2 rounded-xl bg-rose-900/50 hover:bg-rose-800/50 border border-rose-700/50 text-rose-100 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>PDF</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-temple-800 hover:bg-temple-750 border border-temple-700 text-temple-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>CSV</span>
-          </button>
+          {/* Action Toolbar */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {/* Tally CSV Export */}
+            <button
+              type="button"
+              onClick={handleExportTallyCSV}
+              className="px-3.5 py-2.5 rounded-xl bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/50 text-indigo-200 hover:text-white text-xs font-bold flex items-center gap-1.5 shadow transition-all cursor-pointer"
+              title="Download formatted columnar CSV for Tally Prime import"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-indigo-400" />
+              <span>Export to Tally (CSV)</span>
+            </button>
 
-          <button
-            type="button"
-            id="log-treasury-tx-btn"
-            onClick={onOpenQuickPay}
-            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Log Income (Chanda)</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => { setIsRecurring(false); setShowExpenseModal(true); }}
-            className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-rose-600/20 transition-all cursor-pointer"
-          >
-            <ArrowUpRight className="w-4 h-4" />
-            <span>Log Expense</span>
-          </button>
-        </div>
-      </div>
+            {/* Statement PDF */}
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className="px-3.5 py-2.5 rounded-xl bg-temple-800 hover:bg-temple-750 border border-temple-700 text-amber-300 hover:text-amber-200 text-xs font-bold flex items-center gap-1.5 shadow transition-all cursor-pointer"
+              title="Print Audited Statement PDF"
+            >
+              <Printer className="w-4 h-4 text-amber-400" />
+              <span>Print Statement (PDF)</span>
+            </button>
 
-      {/* 3 Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-temple-400">
-            <span className="font-bold uppercase tracking-wider">Total Inflow (Chanda)</span>
-            <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
+            {/* Standard CSV */}
+            <button
+              type="button"
+              onClick={handleExportStandardCSV}
+              className="px-3.5 py-2.5 rounded-xl bg-temple-800 hover:bg-temple-750 border border-temple-700 text-temple-300 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Export all rows to CSV"
+            >
+              <Download className="w-4 h-4" />
+              <span>Full CSV</span>
+            </button>
+
+            {/* New Voucher Entry */}
+            <button
+              type="button"
+              id="new-voucher-entry-btn"
+              onClick={() => {
+                setVoucherType('Expense');
+                setShowVoucherModal(true);
+              }}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-temple-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-600/30 transition-all transform active:scale-95 cursor-pointer flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4 text-temple-950" />
+              <span>New Voucher Entry</span>
+            </button>
+
+            {/* Quick Chanda Button (If parent passed callback) */}
+            {onOpenQuickPay && (
+              <button
+                type="button"
+                onClick={onOpenQuickPay}
+                className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>POS Chanda</span>
+              </button>
+            )}
           </div>
-          <p className="text-2xl font-black text-emerald-400 mt-2">
-            + ₹{totalIncome.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-temple-400 mt-1">Pranami, Pujas & Donations</p>
         </div>
 
-        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-temple-400">
-            <span className="font-bold uppercase tracking-wider">Total Outflow (Seva)</span>
-            <ArrowUpRight className="w-4 h-4 text-rose-400" />
+        {/* Top-Level Financial KPIs (3 Core Metrics) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Total Inflow */}
+          <div className="bg-temple-900/90 border border-emerald-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-emerald-950/15">
+            <div className="flex items-center justify-between text-xs text-emerald-400">
+              <span className="font-bold uppercase tracking-wider">Total Income (Inflow)</span>
+              <ArrowDownLeft className="w-5 h-5 text-emerald-400" />
+            </div>
+            <p className="text-2xl sm:text-3xl font-black text-emerald-400 mt-2">
+              + ₹{financialKPIs.totalIncome.toLocaleString('en-IN')}
+            </p>
+            <p className="text-[11px] text-temple-400 mt-1">Pranami, Seva, Annadanam & Hundi Collections</p>
           </div>
-          <p className="text-2xl font-black text-rose-400 mt-2">
-            - ₹{totalExpense.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-temple-400 mt-1">Ghee, Utilities, Maintenance</p>
-        </div>
 
-        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg">
-          <div className="flex items-center justify-between text-xs text-temple-400">
-            <span className="font-bold uppercase tracking-wider">Net Available Treasury</span>
-            <ShieldCheck className="w-4 h-4 text-saffron-400" />
+          {/* Total Outflow */}
+          <div className="bg-temple-900/90 border border-rose-500/30 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-rose-950/15">
+            <div className="flex items-center justify-between text-xs text-rose-400">
+              <span className="font-bold uppercase tracking-wider">Total Expenses (Outflow)</span>
+              <ArrowUpRight className="w-5 h-5 text-rose-400" />
+            </div>
+            <p className="text-2xl sm:text-3xl font-black text-rose-400 mt-2">
+              - ₹{financialKPIs.totalExpense.toLocaleString('en-IN')}
+            </p>
+            <p className="text-[11px] text-temple-400 mt-1">Sevadar Honorarium, Ghee, Utilities, Maintenance</p>
           </div>
-          <p className="text-2xl font-black text-temple-100 mt-2">
-            ₹{netBalance.toLocaleString()}
-          </p>
-          <p className="text-[11px] text-saffron-400/90 mt-1 font-semibold">100% Reconciled</p>
-        </div>
-      </div>
 
-      {/* Filter & Search */}
-      <div className="bg-temple-900/90 border border-temple-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-3.5 h-3.5 text-temple-400 absolute left-3 top-3" />
-          <input
-            type="text"
-            placeholder="Search by category, donor, custody..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-temple-800 border border-temple-700 rounded-xl pl-9 pr-3 py-2 text-xs text-temple-200 placeholder-temple-400 focus:outline-none focus:border-saffron-500"
-          />
+          {/* Net Treasury Balance */}
+          <div className="bg-temple-900/90 border border-amber-500/40 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-amber-950/15">
+            <div className="flex items-center justify-between text-xs text-amber-400">
+              <span className="font-bold uppercase tracking-wider">Net Available Treasury</span>
+              <ShieldCheck className="w-5 h-5 text-amber-400" />
+            </div>
+            <p className="text-2xl sm:text-3xl font-black text-amber-300 mt-2">
+              ₹{financialKPIs.netBalance.toLocaleString('en-IN')}
+            </p>
+            <p className="text-[11px] text-amber-400/90 mt-1 font-mono font-semibold">
+              Reconciled across Bank, Cash & UPI Ledgers
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 ml-auto overflow-x-auto w-full sm:w-auto no-scrollbar pb-1 sm:pb-0">
-          {filterType === 'Expense' && (
-            <div className="flex items-center gap-1 bg-temple-950 p-1 rounded-xl border border-temple-800 shadow-inner">
-              {(['all', 'org', 'personal'] as const).map(ef => (
+        {/* FUND SEGREGATION: Restricted vs. Unrestricted Funds */}
+        <div className="bg-temple-900/90 border border-temple-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-temple-800">
+            <div className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-amber-400" />
+              <div>
+                <h3 className="text-sm font-bold text-temple-100">
+                  Trust Fund Segregation (Restricted vs. Unrestricted)
+                </h3>
+                <p className="text-[11px] text-temple-400">
+                  Statutory adherence to donor mandates under the Indian Trust Act & Income Tax Section 11/12
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs font-mono">
+              <div className="px-3 py-1 rounded-lg bg-temple-950 border border-temple-800">
+                <span className="text-temple-400 mr-1.5">Unrestricted Corpus:</span>
+                <span className="font-bold text-amber-400">
+                  ₹{fundBreakdown.unrestrictedNet.toLocaleString('en-IN')}
+                </span>
+              </div>
+              <div className="px-3 py-1 rounded-lg bg-temple-950 border border-temple-800">
+                <span className="text-temple-400 mr-1.5">Restricted Earmarked:</span>
+                <span className="font-bold text-emerald-400">
+                  ₹{fundBreakdown.restrictedNet.toLocaleString('en-IN')}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Fund Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            {fundBreakdown.funds.map(({ fund, income, expense, net }) => {
+              const isSelected = selectedFundId === fund.id;
+              return (
                 <button
-                  key={ef}
-                  onClick={() => setExpenseFilter(ef)}
-                  className={`px-3 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase transition-all whitespace-nowrap ${
-                    expenseFilter === ef ? 'bg-rose-500 text-white shadow-xs' : 'text-temple-400 hover:text-temple-200 hover:bg-temple-800'
+                  key={fund.id}
+                  type="button"
+                  onClick={() => setSelectedFundId(isSelected ? 'all' : fund.id)}
+                  className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? 'bg-amber-500/15 border-amber-500/60 shadow-md ring-1 ring-amber-500/40'
+                      : 'bg-temple-950/60 border-temple-800 hover:border-temple-700'
                   }`}
                 >
-                  {ef === 'all' ? 'All Expenses' : ef === 'org' ? 'Org Ops' : 'Personal (Sevadar)'}
-                </button>
-              ))}
-              <div className="w-px h-4 bg-temple-700 mx-1"></div>
-            </div>
-          )}
-          <div className="flex items-center gap-1 bg-temple-800 p-1 rounded-xl border border-temple-700">
-            {(['all', 'Income', 'Expense'] as const).map((t, idx) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setFilterType(t)}
-                className={`px-3 py-1.5 rounded-lg font-bold text-[11px] transition-all cursor-pointer whitespace-nowrap ${
-                  filterType === t
-                    ? (t === 'Income' ? 'bg-emerald-500 text-temple-950' : t === 'Expense' ? 'bg-rose-500 text-white' : 'bg-saffron-500 text-temple-950')
-                    : 'text-temple-400 hover:text-temple-200 hover:bg-temple-750'
-                }`}
-              >
-                {t === 'all' ? 'All Entries' : t === 'Income' ? 'Inflows (Income)' : 'Outflows (Expense)'}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Ledger Table */}
-      <div className="bg-temple-900/90 border border-temple-800 rounded-3xl p-6 shadow-xl overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead className="text-[10px] text-temple-400 uppercase bg-temple-950/60 font-semibold border-b border-temple-800">
-              <tr>
-                <th className="p-3">Date & ID</th>
-                <th className="p-3">Type & Category</th>
-                <th className="p-3">Devotee / Purpose</th>
-                <th className="p-3">Amount</th>
-                <th className="p-3">Custody (Handled By)</th>
-                <th className="p-3">Payment Mode</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-temple-800">
-              {filteredTreasury.map((tx, idx) => (
-                <tr key={`${tx.id}-${idx}`} className="hover:bg-temple-800/40 transition-colors">
-                  <td className="p-3">
-                    <p className="font-mono text-temple-200 font-semibold">{tx.date}</p>
-                    <p className="text-[10px] text-temple-400 font-mono">{tx.id}</p>
-                  </td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1.5 mb-1">
+                  <div>
+                    <div className="flex items-center justify-between gap-1 mb-1">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                          tx.type === 'Income'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                        className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                          fund.type === 'Unrestricted'
+                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                         }`}
                       >
-                        {tx.type}
+                        {fund.type}
                       </span>
-                      {tx.type === 'Expense' && (
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
-                            (tx.category || '').toLowerCase().includes('sevadar') || (tx.category || '').toLowerCase().includes('personal') || !!tx.devoteeId
-                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                              : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                          }`}
-                        >
-                          {(tx.category || '').toLowerCase().includes('sevadar') || (tx.category || '').toLowerCase().includes('personal') || !!tx.devoteeId ? 'Personal (Sevadar)' : 'Org Ops'}
-                        </span>
+                      {isSelected && (
+                        <span className="text-[10px] font-bold text-amber-400">Active</span>
                       )}
                     </div>
-                    <p className="font-semibold text-temple-200">{tx.category}</p>
-                    {tx.eventName && (
-                      <span className="mt-1 inline-block px-1.5 py-0.5 rounded bg-temple-800 text-temple-400 text-[9px] font-bold uppercase border border-temple-700">
-                        {tx.eventName}
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <p className="font-bold text-temple-100">{tx.devoteeName || '-'}</p>
-                    <p className="text-[11px] text-temple-400 truncate max-w-[200px]">{tx.purpose}</p>
-                  </td>
-                  <td className="p-3">
-                    <p
-                      className={`font-black text-sm ${
-                        tx.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'
-                      }`}
-                    >
-                      {tx.type === 'Income' ? '+' : '-'} ₹{(tx.amount || 0).toLocaleString()}
-                    </p>
-                    {tx.is80GEligible && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-saffron-500/20 text-saffron-300 font-mono">
-                        80G Eligible
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3">
-                    <p className="text-temple-300 font-medium">{tx.handledBy}</p>
-                  </td>
-                  <td className="p-3">
-                    <span className="px-2 py-0.5 rounded bg-temple-800 text-temple-300 text-[10px] font-mono border border-temple-700">
-                      {tx.paymentMode}
-                    </span>
-                    {tx.referenceNo && (
-                      <p className="text-[10px] text-temple-400 font-mono mt-0.5 truncate max-w-[120px]">
-                        {tx.referenceNo}
-                      </p>
-                    )}
-                  </td>
-                  <td className="p-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {tx.memoImageUrl && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMemoUrl(tx.memoImageUrl!)}
-                          className="p-1.5 rounded-lg bg-temple-800 hover:bg-temple-700 text-temple-300"
-                          title="View Payment Memo"
-                        >
-                          <ImageIcon className="w-3.5 h-3.5 text-saffron-400" />
-                        </button>
-                      )}
-                      {tx.type === 'Income' && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              try {
-                                printThermalReceipt(tx, activeWorkspace);
-                                showToast('Printing thermal slip...', 'info');
-                              } catch(e) {
-                                showToast('Error printing slip', 'error');
-                              }
-                            }}
-                            className="px-2.5 py-1.5 rounded-lg bg-temple-800 hover:bg-temple-750 text-indigo-400 border border-temple-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                            title="Thermal Print Slip"
-                          >
-                            <span>Print Slip</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handlePrintReceipt(tx)}
-                            className="px-2.5 py-1.5 rounded-lg bg-temple-800 hover:bg-temple-750 text-saffron-400 border border-temple-700 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                            title="Download 80G Tax Receipt PDF"
-                          >
-                            <Receipt className="w-3.5 h-3.5" />
-                            <span>80G Receipt</span>
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    <p className="font-bold text-xs text-temple-100 line-clamp-1">{fund.name}</p>
+                    <p className="text-[10px] text-temple-400 mt-0.5 line-clamp-1">{fund.description}</p>
+                  </div>
 
-      {/* Memo Modal */}
-      {selectedMemoUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/85 backdrop-blur-md">
-          <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-md w-full p-4 text-temple-100 shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-temple-800 mb-3">
-              <h4 className="font-bold text-xs">Attached Payment Memo / Voucher</h4>
-              <button
-                type="button"
-                onClick={() => setSelectedMemoUrl(null)}
-                className="text-temple-400 hover:text-temple-100"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <img
-              src={selectedMemoUrl || undefined}
-              alt="Payment Memo"
-              className="rounded-xl w-full max-h-96 object-contain border border-temple-800"
-              referrerPolicy="no-referrer"
-            />
+                  <div className="mt-3 pt-2 border-t border-temple-800/80">
+                    <div className="flex justify-between text-[11px] font-mono">
+                      <span className="text-temple-400">Net Corpus:</span>
+                      <span className={`font-bold ${net >= 0 ? 'text-amber-400' : 'text-rose-400'}`}>
+                        ₹{net.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-temple-400 mt-0.5">
+                      <span className="text-emerald-400">+₹{income.toLocaleString('en-IN')}</span>
+                      <span className="text-rose-400">-₹{expense.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
-      )}
-      {/* Add Utsav Expense Modal */}
-      {showExpenseModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-temple-950/85 backdrop-blur-md animate-in fade-in">
-          <div className="bg-temple-900 border border-temple-700 rounded-3xl w-full max-w-lg p-6 shadow-2xl text-temple-200">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <ArrowUpRight className="w-5 h-5 text-rose-500" />
-                  Log Organization Expense
-                </h3>
-                <p className="text-xs text-temple-400 mt-1">Record a general operational cost or an event-specific expense.</p>
-              </div>
-              <button onClick={() => setShowExpenseModal(false)} className="w-8 h-8 rounded-full bg-temple-800 flex items-center justify-center hover:bg-temple-700 text-temple-400 hover:text-white transition-colors">
-                <X className="w-4 h-4" />
-              </button>
+
+        {/* Filters & Search Toolbar */}
+        <div className="bg-temple-900/90 border border-temple-800 p-4 rounded-2xl shadow-md space-y-3">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-temple-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search by Voucher ID, Category, Donor, Vendor, Custody, or Narration..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-temple-950/80 border border-temple-700/80 rounded-xl pl-10 pr-4 py-2 text-xs sm:text-sm text-temple-100 placeholder-temple-500 focus:outline-none focus:border-amber-500 font-medium"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-temple-400 hover:text-temple-200"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-            
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              
-              addTreasuryTransaction({
-                date: new Date().toISOString(),
-                type: 'Expense',
-                category: fd.get('category') as string,
-                amount: Number(fd.get('amount')),
-                handledBy: 'Current Admin',
-                vendorName: fd.get('vendor') as string,
-                purpose: fd.get('purpose') as string,
-                paymentMode: fd.get('paymentMode') as string,
-                eventName: fd.get('eventName') as string,
-                workspaceId: activeWorkspace.id,
-                is80GEligible: false,
-                isRecurring: isRecurring,
-                recurringInterval: isRecurring ? (fd.get('recurringInterval') as 'Monthly' | 'Annually') : undefined
-              });
-              showToast('Event Expense Logged!', 'success');
-              setShowExpenseModal(false);
-            }} className="space-y-4">
-              <div>
-                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Event / Utsav Name (Optional)</label>
-                <input name="eventName" type="text" placeholder="Optional: e.g., Durga Puja 2026" list="utsav-list" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-rose-500 focus:outline-none" />
-                <datalist id="utsav-list">
-                  {availableUtsavs.map(ev => <option key={ev} value={ev} />)}
-                </datalist>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Amount (₹)</label>
-                  <input required name="amount" type="number" placeholder="0.00" min="1" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-rose-500 focus:outline-none" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Category</label>
-                  <select required name="category" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-rose-500 focus:outline-none">
-                    <optgroup label="Operational">
-                      <option value="Utilities & Maintenance">Utilities & Maintenance</option>
-                      <option value="Staff / Sevadar Reimbursement">Staff / Sevadar Reimbursement</option>
-                      <option value="Groceries & Mandir Supplies">Groceries & Mandir Supplies</option>
-                      <option value="Logistics / Travel">Logistics / Travel</option>
-                    </optgroup>
-                    <optgroup label="Event Specific">
-                      <option value="Event Setup / Decor">Event Setup / Decor</option>
-                      <option value="Catering / Prasad">Catering / Prasad</option>
-                      <option value="Artist / Purohit Dakshina">Artist / Purohit Dakshina</option>
-                      <option value="Marketing / Print">Marketing / Print</option>
-                      <option value="Misc Event Expense">Misc Event Expense</option>
-                    </optgroup>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Vendor / Payee Name (Search Devotee or enter new)</label>
-                <MemberSearchSelect 
-                  name="vendor"
-                  value=""
-                  onChange={() => {}}
-                  placeholder="Name of person or company paid"
+
+            {/* Date Range Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 bg-temple-950/80 border border-temple-700/80 rounded-xl px-2.5 py-1.5 text-xs text-temple-300">
+                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-temple-400 text-[11px]">From:</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="bg-transparent text-temple-100 text-xs focus:outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Purpose / Notes</label>
-                <input required name="purpose" type="text" placeholder="What was this for?" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-saffron-500 focus:outline-none" />
+
+              <div className="flex items-center gap-1.5 bg-temple-950/80 border border-temple-700/80 rounded-xl px-2.5 py-1.5 text-xs text-temple-300">
+                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-temple-400 text-[11px]">To:</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="bg-transparent text-temple-100 text-xs focus:outline-none"
+                />
               </div>
-              <div>
-                <label className="block text-[11px] font-bold text-temple-400 uppercase mb-1.5">Payment Mode</label>
-                <select required name="paymentMode" className="w-full bg-temple-950 border border-temple-800 rounded-xl px-4 py-2.5 text-sm text-temple-200 focus:border-saffron-500 focus:outline-none">
-                  <option value="Bank Transfer (NEFT/RTGS)">Bank Transfer (NEFT/RTGS)</option>
-                  <option value="UPI">UPI</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Cheque">Cheque</option>
+
+              {(startDate || endDate) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStartDate('');
+                    setEndDate('');
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-temple-800 hover:bg-temple-750 text-temple-300 text-xs font-semibold"
+                >
+                  Clear Dates
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Filter Tabs: Transaction Type & Category */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-temple-800/80">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Type Switcher */}
+              <div className="flex items-center gap-1 bg-temple-950 p-1 rounded-xl border border-temple-800">
+                {(['all', 'Income', 'Expense'] as const).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setFilterType(type)}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      filterType === type
+                        ? type === 'Income'
+                          ? 'bg-emerald-500 text-temple-950'
+                          : type === 'Expense'
+                          ? 'bg-rose-500 text-white'
+                          : 'bg-amber-500 text-temple-950'
+                        : 'text-temple-400 hover:text-temple-200'
+                    }`}
+                  >
+                    {type === 'all' ? 'All Vouchers' : type === 'Income' ? 'Receipts (Income)' : 'Payments (Expense)'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Category Dropdown */}
+              <div className="relative">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="bg-temple-950 border border-temple-700/80 text-temple-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
+                >
+                  <option value="all">-- All Ledger Heads --</option>
+                  {availableCategories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
                 </select>
               </div>
-              
-              <div className="bg-temple-950/50 border border-temple-800 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="w-4 h-4 rounded border-temple-700 bg-temple-900 text-rose-500 focus:ring-rose-500 focus:ring-offset-temple-900"
-                      checked={isRecurring}
-                      onChange={(e) => setIsRecurring(e.target.checked)}
-                    />
-                    <span className="text-[12px] font-bold text-temple-200">Recurring Transaction</span>
-                  </label>
-                  <p className="text-[10px] text-temple-400 mt-1 pl-6">Schedule automatic utility or operational cost entries.</p>
-                </div>
-                
-                {isRecurring && (
-                  <div className="w-full sm:w-auto">
-                    <select name="recurringInterval" className="w-full sm:w-40 bg-temple-900 border border-temple-700 rounded-lg px-3 py-1.5 text-xs text-temple-200 focus:border-rose-500 focus:outline-none">
-                      <option value="Monthly">Monthly</option>
-                      <option value="Annually">Annually</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-              <div className="pt-4 flex justify-end">
-                <button type="submit" className="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-600/20">
-                  Log Expense
+
+              {/* Reset All Filters button */}
+              {(selectedFundId !== 'all' || selectedCategory !== 'all' || filterType !== 'all' || startDate || endDate || searchTerm) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFundId('all');
+                    setSelectedCategory('all');
+                    setFilterType('all');
+                    setStartDate('');
+                    setEndDate('');
+                    setSearchTerm('');
+                  }}
+                  className="text-xs text-amber-400 hover:underline font-bold px-2"
+                >
+                  Reset All Filters
                 </button>
-              </div>
-            </form>
+              )}
+            </div>
+
+            <div className="text-xs text-temple-400">
+              Showing <span className="font-bold text-amber-400">{filteredTransactions.length}</span> of{' '}
+              {allLedgerRecords.length} entries
+            </div>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* HIGH-DENSITY PROFESSIONAL DATA TABLE */}
+        <div className="bg-temple-900/90 border border-temple-800 rounded-3xl shadow-xl overflow-hidden">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left text-xs text-temple-200">
+              <thead className="bg-temple-950/90 text-temple-400 border-b border-temple-800 text-[11px] uppercase tracking-wider font-extrabold">
+                <tr>
+                  <th className="py-3.5 px-4">Date</th>
+                  <th className="py-3.5 px-3">Voucher / Ref ID</th>
+                  <th className="py-3.5 px-3">Type</th>
+                  <th className="py-3.5 px-3">Ledger Head & Fund</th>
+                  <th className="py-3.5 px-3">Payment Mode</th>
+                  <th className="py-3.5 px-3">Entity (Donor / Payee)</th>
+                  <th className="py-3.5 px-4 text-right">Amount (₹)</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-temple-800/60 font-medium">
+                {filteredTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-temple-400">
+                      <Receipt className="w-10 h-10 mx-auto text-temple-600 mb-2" />
+                      <p className="font-semibold text-sm">No Ledger Transactions Found</p>
+                      <p className="text-xs text-temple-500 mt-0.5">Try widening your date or search filters.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTransactions.map((tx, idx) => {
+                    const isIncome = tx.type === 'Income';
+                    const fund = getTransactionFund(tx);
+                    const entityName = tx.devoteeName || tx.vendorName || '-';
+
+                    return (
+                      <tr
+                        key={`${tx.id}-${idx}`}
+                        className="hover:bg-temple-800/40 transition-colors"
+                      >
+                        {/* Date */}
+                        <td className="py-3 px-4 font-mono text-temple-300 whitespace-nowrap">
+                          {tx.date ? tx.date.split('T')[0] : '-'}
+                        </td>
+
+                        {/* Voucher / Ref ID */}
+                        <td className="py-3 px-3 whitespace-nowrap font-mono">
+                          <p className="font-bold text-amber-300">
+                            {tx.taxReceiptNumber || tx.referenceNo || tx.id}
+                          </p>
+                          <p className="text-[10px] text-temple-500">{tx.id}</p>
+                        </td>
+
+                        {/* Transaction Type Badge */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide border ${
+                              isIncome
+                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                            }`}
+                          >
+                            {isIncome ? 'Receipt' : 'Payment'}
+                          </span>
+                        </td>
+
+                        {/* Ledger Head (Category) & Fund Tag */}
+                        <td className="py-3 px-3">
+                          <p className="font-bold text-temple-100">{tx.category || 'General Ledger'}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
+                                fund.type === 'Unrestricted'
+                                  ? 'bg-blue-500/15 text-blue-300 border-blue-500/30'
+                                  : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                              }`}
+                            >
+                              {fund.name}
+                            </span>
+                            <span className="text-[10px] text-temple-400 truncate max-w-[160px]">
+                              {tx.purpose}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Payment Mode */}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span className="px-2 py-0.5 rounded bg-temple-800 text-temple-300 text-[11px] font-mono border border-temple-700">
+                            {tx.paymentMode || 'Cash'}
+                          </span>
+                        </td>
+
+                        {/* Entity (Donor / Vendor / Payee) */}
+                        <td className="py-3 px-3">
+                          <p className="font-bold text-temple-100 truncate max-w-[180px]">
+                            {entityName}
+                          </p>
+                          <p className="text-[10px] text-temple-400">
+                            Handled by: <span className="text-temple-300">{tx.handledBy || 'Admin'}</span>
+                          </p>
+                        </td>
+
+                        {/* Amount: Green for Income, Red for Expense */}
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <span
+                            className={`font-black font-mono text-sm sm:text-base ${
+                              isIncome ? 'text-emerald-400' : 'text-rose-400'
+                            }`}
+                          >
+                            {isIncome ? '+' : '-'} ₹{(tx.amount || 0).toLocaleString('en-IN', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </span>
+                          {tx.is80GEligible && (
+                            <div className="text-[9px] font-mono text-amber-400 mt-0.5">
+                              80G Tax Deductible
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {/* Memo Image thumbnail if attached */}
+                            {tx.memoImageUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedMemoUrl(tx.memoImageUrl!)}
+                                className="p-1.5 rounded-lg bg-temple-800 hover:bg-temple-750 text-temple-300 hover:text-amber-300 transition-colors"
+                                title="View Attached Payment Memo"
+                              >
+                                <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+                              </button>
+                            )}
+
+                            {/* Thermal print slip */}
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  await printThermalReceipt(tx, activeWorkspace);
+                                  showToast('Thermal voucher slip dispatched', 'info');
+                                } catch (e) {
+                                  showToast('Print error', 'error');
+                                }
+                              }}
+                              className="px-2 py-1 rounded-lg bg-temple-800 hover:bg-temple-750 text-indigo-300 hover:text-white border border-temple-700 text-xs font-semibold flex items-center gap-1 transition-colors"
+                              title="Print 80mm Counter Voucher"
+                            >
+                              <span>Slip</span>
+                            </button>
+
+                            {/* 80G Tax PDF for Incomes */}
+                            {isIncome && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    showToast('Compiling 80G Certificate...', 'info');
+                                    await generateTaxReceiptPDF(tx, activeWorkspace);
+                                    showToast('80G Certificate downloaded', 'success');
+                                  } catch (e) {
+                                    showToast('Failed to generate PDF', 'error');
+                                  }
+                                }}
+                                className="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 hover:text-temple-950 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1 transition-all"
+                                title="Download Section 80G Receipt"
+                              >
+                                <Receipt className="w-3.5 h-3.5" />
+                                <span>80G</span>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ATTACHED MEMO MODAL */}
+        {selectedMemoUrl && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/85 backdrop-blur-md">
+            <div className="bg-temple-900 border border-temple-700 rounded-2xl max-w-md w-full p-4 text-temple-100 shadow-2xl">
+              <div className="flex items-center justify-between pb-2 border-b border-temple-800 mb-3">
+                <h4 className="font-bold text-xs">Attached Payment Memo / Voucher Photo</h4>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMemoUrl(null)}
+                  className="text-temple-400 hover:text-temple-100"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <img
+                src={selectedMemoUrl || undefined}
+                alt="Payment Memo"
+                className="rounded-xl w-full max-h-96 object-contain border border-temple-800"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* NEW VOUCHER ENTRY MODAL */}
+        {showVoucherModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-temple-950/85 backdrop-blur-md animate-in fade-in">
+            <div className="bg-temple-900 border border-amber-500/40 rounded-3xl w-full max-w-xl shadow-2xl p-6 text-temple-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-temple-800 mb-4">
+                <div>
+                  <h3 className="text-xl font-extrabold text-amber-300 flex items-center gap-2">
+                    <Landmark className="w-5 h-5 text-amber-400" />
+                    New General Ledger Voucher Entry
+                  </h3>
+                  <p className="text-xs text-temple-400 mt-0.5">
+                    Log double-entry disbursements, priest honorariums, vendor bills, or manual receipts.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowVoucherModal(false)}
+                  className="p-1.5 rounded-xl bg-temple-800 hover:bg-temple-700 text-temple-400 hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveVoucher} className="space-y-4">
+                {/* Voucher Type Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-temple-300 uppercase mb-1.5">
+                    Voucher Type *
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVoucherType('Expense');
+                        setVoucherCategory('Utilities & Maintenance');
+                      }}
+                      className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all border ${
+                        voucherType === 'Expense'
+                          ? 'bg-rose-500 text-white border-rose-400 shadow-md shadow-rose-500/25'
+                          : 'bg-temple-950 text-temple-400 border-temple-800 hover:border-temple-700'
+                      }`}
+                    >
+                      Payment Voucher (Expense Outflow)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVoucherType('Income');
+                        setVoucherCategory('Chanda / General Donation');
+                      }}
+                      className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all border ${
+                        voucherType === 'Income'
+                          ? 'bg-emerald-500 text-temple-950 border-emerald-400 shadow-md shadow-emerald-500/25'
+                          : 'bg-temple-950 text-temple-400 border-temple-800 hover:border-temple-700'
+                      }`}
+                    >
+                      Receipt Voucher (Income Inflow)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Amount & Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                      Amount (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={voucherAmount}
+                      onChange={(e) => setVoucherAmount(e.target.value ? Number(e.target.value) : '')}
+                      className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3.5 py-2 text-base font-mono font-bold text-amber-300 focus:outline-none focus:border-amber-500"
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                      Voucher Date *
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={voucherDate}
+                      onChange={(e) => setVoucherDate(e.target.value)}
+                      className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3.5 py-2 text-sm text-temple-200 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Ledger Head & Fund Segregation */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                      Ledger Head / Category *
+                    </label>
+                    <select
+                      value={voucherCategory}
+                      onChange={(e) => setVoucherCategory(e.target.value)}
+                      className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-amber-500"
+                    >
+                      {voucherType === 'Expense' ? (
+                        <>
+                          <option value="Staff / Priest Honorarium">Staff / Priest (Purohit) Honorarium</option>
+                          <option value="Utilities & Maintenance">Utilities, Electricity & Temple Water</option>
+                          <option value="Groceries & Mandir Supplies">Groceries, Ghee & Samagri</option>
+                          <option value="Flower & Decoration Seva">Flower Garland & Sanctum Decor</option>
+                          <option value="Prasadam & Annadanam Kitchen">Prasadam & Annadanam Kitchen Expenses</option>
+                          <option value="Gaushala Maintenance">Gaushala & Fodder Purchases</option>
+                          <option value="Mandir Construction & Civil Work">Mandir Construction & Civil Work</option>
+                          <option value="Legal & Audit Professional Fees">Legal, Trust & Audit Professional Fees</option>
+                          <option value="Miscellaneous Temple Expense">Miscellaneous Temple Expense</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="Chanda / General Donation">Chanda / General Donation</option>
+                          <option value="Annadanam Sponsorship">Annadanam Sponsorship</option>
+                          <option value="Mandir Nirman Fund">Mandir Nirman Fund</option>
+                          <option value="Gau Seva Nidhi">Gau Seva Nidhi</option>
+                          <option value="Pooja Dakshina">Pooja Dakshina</option>
+                          <option value="Hundi Collection">Hundi (Golak) Collection</option>
+                        </>
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                      Fund Allocation Tag
+                    </label>
+                    <select
+                      value={voucherFundId}
+                      onChange={(e) => setVoucherFundId(e.target.value)}
+                      className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-amber-500"
+                    >
+                      {TRUST_FUNDS.map((f) => (
+                        <option key={f.id} value={f.id}>
+                          {f.name} ({f.type})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Entity (Donor / Vendor Name) */}
+                <div>
+                  <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                    {voucherType === 'Expense' ? 'Payee / Vendor Name *' : 'Devotee / Donor Name *'}
+                  </label>
+                  <MemberSearchSelect
+                    value={voucherEntityName}
+                    onChange={(name) => setVoucherEntityName(name)}
+                    placeholder={
+                      voucherType === 'Expense'
+                        ? 'Vendor or Payee (e.g. Ramesh Purohit, Shiv Florist)'
+                        : 'Donor Name'
+                    }
+                  />
+                </div>
+
+                {/* Payment Mode & Ref / UTR */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                      Payment Mode *
+                    </label>
+                    <select
+                      value={voucherPaymentMode}
+                      onChange={(e) => setVoucherPaymentMode(e.target.value)}
+                      className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-amber-500"
+                    >
+                      <option value="Bank Transfer (NEFT/RTGS)">Bank Transfer (NEFT/RTGS)</option>
+                      <option value="UPI">UPI</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Cheque">Cheque</option>
+                      <option value="Demand Draft">Demand Draft</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                      Cheque / UTR / Voucher Ref No
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. UTR123456 / CHQ-00123"
+                      value={voucherRefNo}
+                      onChange={(e) => setVoucherRefNo(e.target.value)}
+                      className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Purpose / Narration */}
+                <div>
+                  <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                    Narration / Purpose *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Specific purpose for CA audit trail and Tally narration..."
+                    value={voucherPurpose}
+                    onChange={(e) => setVoucherPurpose(e.target.value)}
+                    className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                {/* Custody Handled By */}
+                <div>
+                  <label className="block text-xs font-bold text-temple-300 uppercase mb-1">
+                    Custody (Handled By)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={voucherHandledBy}
+                    onChange={(e) => setVoucherHandledBy(e.target.value)}
+                    className="w-full bg-temple-950 border border-temple-700/80 rounded-xl px-3 py-2 text-xs text-temple-200 focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                {/* 80G Tax Exemption Toggle (For Incomes) */}
+                {voucherType === 'Income' && (
+                  <div className="pt-2 border-t border-temple-800">
+                    <label className="flex items-center gap-2 text-xs text-temple-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={voucherIs80G}
+                        onChange={(e) => setVoucherIs80G(e.target.checked)}
+                        className="rounded bg-temple-950 border-temple-700 text-amber-500 focus:ring-0"
+                      />
+                      <span className="font-semibold text-amber-300">
+                        Mark as Section 80G(5)(vi) Tax Exemption Eligible
+                      </span>
+                    </label>
+                  </div>
+                )}
+
+                {/* Voucher Memo Photo Attachment */}
+                <div className="pt-2 border-t border-temple-800">
+                  <label className="block text-xs font-bold text-temple-400 mb-1">
+                    Attach Bill / Invoice / Voucher Photo (Compressed locally)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleMemoUpload}
+                    className="w-full text-xs text-temple-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-temple-800 file:text-temple-300 hover:file:bg-temple-750 cursor-pointer"
+                  />
+                  {voucherMemoUrl && (
+                    <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Voucher photo compressed and attached
+                    </p>
+                  )}
+                </div>
+
+                {/* Modal Actions */}
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-temple-800">
+                  <button
+                    type="button"
+                    onClick={() => setShowVoucherModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-temple-800 hover:bg-temple-750 text-temple-300 text-xs font-semibold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-400 text-temple-950 font-black text-xs shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
+                  >
+                    Post Voucher to General Ledger
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </ErrorBoundary>
   );
 };

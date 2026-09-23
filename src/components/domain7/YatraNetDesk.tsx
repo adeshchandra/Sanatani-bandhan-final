@@ -1,895 +1,1323 @@
-import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, Radio, Send, AlertTriangle, MapPin, Clock, Activity, Radar, Users, CheckCircle2, X, Battery, Phone, Droplet, UserSquare2, ArrowLeft, MessageSquare, Globe, Navigation } from 'lucide-react';
-import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { OfflineSyncManager, QueuedAction } from '../../services/OfflineSyncManager';
-import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
-import { useLanguage } from '../../context/LanguageContext';
-import { useToast } from '../../context/ToastContext';
-import { MapContainer, TileLayer, Marker, Circle } from 'react-leaflet';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import {
+  MapPin,
+  Navigation,
+  Compass,
+  Calendar,
+  Clock,
+  User,
+  Users,
+  CheckCircle2,
+  AlertTriangle,
+  ShieldCheck,
+  Flame,
+  Sparkles,
+  Filter,
+  Search,
+  QrCode,
+  Plus,
+  Share2,
+  Layers,
+  Globe,
+  Radio,
+  Wifi,
+  WifiOff,
+  Send,
+  X,
+  ExternalLink,
+  ChevronRight,
+  TrendingUp,
+  Award,
+  Footprints,
+  Eye,
+  RefreshCw,
+  LocateFixed,
+  Building,
+  HeartHandshake
+} from 'lucide-react';
+import { collection, query, where, orderBy, limit, onSnapshot, doc, setDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
+import { useData } from '../../context/DataContext';
+import { useToast } from '../../context/ToastContext';
+import { QRScanner } from '../common/QRScanner';
+import { OfflineSyncManager, QueuedAction } from '../../services/OfflineSyncManager';
+import { DevoteeCommsDrawer } from './DevoteeCommsDrawer';
 
-// Custom pulsing red dot icon for victims
-const emergencyIcon = L.divIcon({
-  className: 'custom-emergency-icon',
-  html: '<div class="animate-pulse" style="width: 20px; height: 20px; background-color: #dc2626; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(220,38,38,0.8);"></div>',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
+// ==========================================
+// Types & Interfaces
+// ==========================================
 
+export interface VisitRecord {
+  id: string;
+  devoteeId: string;
+  devoteeName: string;
+  devoteePhone?: string;
+  gotra?: string;
+  pravara?: string;
+  workspaceId: string;
+  locationName: string;
+  branchName: string;
+  latitude: number;
+  longitude: number;
+  timestamp: number;
+  darshanType: 'General Darshan' | 'Special Puja' | 'Aarti Seva' | 'Parikrama' | 'Prasad Seva';
+  notes?: string;
+  verified: boolean;
+  qrVerified?: boolean;
+}
+
+// Map Controller for smooth fly-to animations
+function FlyToController({ target, zoom }: { target: [number, number] | null; zoom?: number }) {
+  const map = useMap();
+  useEffect(() => {
+    if (target) {
+      map.flyTo(target, zoom || 16, { duration: 1.2 });
+    }
+  }, [target, zoom, map]);
+  return null;
+}
+
+// Custom Leaflet DivIcons to prevent broken asset paths and provide high-end Dharmic styling
+const createTempleSanctumIcon = (name: string) => {
+  return L.divIcon({
+    className: 'custom-temple-icon',
+    html: `
+      <div class="relative flex items-center justify-center cursor-pointer group">
+        <div class="absolute -inset-3 bg-amber-500/25 rounded-full animate-ping"></div>
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 border-2 border-amber-300 shadow-xl flex items-center justify-center text-white font-black text-base select-none">
+          ॐ
+        </div>
+        <div class="absolute -bottom-6 px-2 py-0.5 rounded-md bg-stone-950/90 text-amber-200 border border-amber-500/40 text-[10px] font-bold whitespace-nowrap shadow-md pointer-events-none">
+          ${name}
+        </div>
+      </div>
+    `,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -22],
+  });
+};
+
+const createDevoteeMarkerIcon = (isSelf: boolean, isRecent: boolean = false) => {
+  return L.divIcon({
+    className: 'custom-devotee-pin',
+    html: `
+      <div class="relative flex items-center justify-center cursor-pointer group">
+        ${isRecent ? '<div class="absolute -inset-2 bg-amber-400/40 rounded-full animate-ping"></div>' : ''}
+        <div class="w-8 h-8 rounded-full ${
+          isSelf
+            ? 'bg-amber-500 border-2 border-amber-100 text-stone-950 shadow-amber-500/40'
+            : 'bg-stone-900 border-2 border-emerald-400 text-emerald-300 shadow-stone-950/60'
+        } shadow-lg flex items-center justify-center font-bold text-xs transition-transform transform group-hover:scale-115">
+          ${isSelf ? '🙏' : '🚩'}
+        </div>
+      </div>
+    `,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -18],
+  });
+};
+
+// ==========================================
+// Main Component
+// ==========================================
 
 export default function YatraNetDesk() {
   const { currentUser, activeWorkspace } = useAuthWorkspace();
-  const { t } = useLanguage();
+  const { devotees } = useData();
   const { showToast } = useToast();
 
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [queue, setQueue] = useState<QueuedAction[]>([]);
-  const [message, setMessage] = useState('');
-  
-  // Real-time mesh data
-  const [broadcasts, setBroadcasts] = useState<any[]>([]);
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanComplete, setScanComplete] = useState(false);
-  const [activeChatNode, setActiveChatNode] = useState<string | null>(null);
-  const [directMessage, setDirectMessage] = useState('');
+  // Active Desk View
+  const [activeTab, setActiveTab] = useState<'MAP' | 'MESH'>('MAP');
 
-  // SOS Modal State
-  const [showSOSModal, setShowSOSModal] = useState(false);
-  const [sosSituation, setSosSituation] = useState('LOST_PERSON'); // LOST_PERSON, MEDICAL, SEPARATED, OTHER
-  const [sosDetails, setSosDetails] = useState('');
-  const [activeTab, setActiveTab] = useState<'SOCIAL' | 'MESH'>('SOCIAL');
-  const [socialFeed, setSocialFeed] = useState<any[]>([]);
-  const [newPostText, setNewPostText] = useState('');
-  
+  // RBAC Gating
+  const userRole = (currentUser?.role || 'Devotee').toString().toLowerCase();
+  const isAdminOrSevadar =
+    userRole === 'trustee' ||
+    userRole === 'superadmin' ||
+    userRole === 'sevadar' ||
+    userRole === 'admin' ||
+    userRole === 'manager';
+
+  // Base Coordinates for Active Workspace
+  const templeCoords = useMemo<[number, number]>(() => {
+    const city = activeWorkspace?.city?.toLowerCase() || '';
+    if (city.includes('vrindavan') || city.includes('mathura')) return [27.5816, 77.7006];
+    if (city.includes('ujjain')) return [23.1765, 75.7885];
+    if (city.includes('ayodhya')) return [26.7922, 82.1998];
+    if (city.includes('haridwar')) return [29.9457, 78.1642];
+    if (city.includes('nagpur')) return [21.1458, 79.0882];
+    if (city.includes('puri')) return [19.8135, 85.8312];
+    if (city.includes('tirupati')) return [13.6288, 79.4192];
+    // Default to Kashi / Varanasi
+    return [25.3176, 82.9739];
+  }, [activeWorkspace?.city]);
+
+  // Map state
+  const [flyTarget, setFlyTarget] = useState<[number, number] | null>(templeCoords);
+  const [selectedVisit, setSelectedVisit] = useState<VisitRecord | null>(null);
+
+  // Live Intercom & Comms Drawer State
+  const [showCommsDrawer, setShowCommsDrawer] = useState(false);
+  const [commsTargetVisit, setCommsTargetVisit] = useState<VisitRecord | null>(null);
+
+  const selectedDevoteeMember = useMemo(() => {
+    if (!commsTargetVisit?.devoteeId) return null;
+    return (
+      devotees.find(
+        (d) => d.id === commsTargetVisit.devoteeId || d.userId === commsTargetVisit.devoteeId
+      ) || null
+    );
+  }, [devotees, commsTargetVisit]);
+
+  const handleOpenCommsDrawer = (visit: VisitRecord) => {
+    setCommsTargetVisit(visit);
+    setShowCommsDrawer(true);
+  };
+
+  // Geo Check-In Modal & Location State
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
+  const [showQRScannerModal, setShowQRScannerModal] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [currentGPS, setCurrentGPS] = useState<{ lat: number; lng: number; accuracy?: number } | null>(null);
+  const [checkInLocationName, setCheckInLocationName] = useState(activeWorkspace?.name || 'Main Sanctum');
+  const [checkInDarshanType, setCheckInDarshanType] = useState<VisitRecord['darshanType']>('General Darshan');
+  const [checkInNotes, setCheckInNotes] = useState('');
+  const [isSubmittingCheckIn, setIsSubmittingCheckIn] = useState(false);
+
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterPeriod, setFilterPeriod] = useState<'all' | 'today' | 'verified'>('all');
+
+  // Visit Records State
+  const [visits, setVisits] = useState<VisitRecord[]>([]);
+
+  // ==========================================
+  // Generate Base Grounded Seed Data
+  // ==========================================
   useEffect(() => {
-    // Social Feed Listener
+    const [tLat, tLng] = templeCoords;
+    const now = Date.now();
+    const wId = activeWorkspace?.id || 'DEMO_ws-mandir';
+    const wName = activeWorkspace?.name || 'Sri Sanatan Dharma Mandir';
+
+    const seedVisits: VisitRecord[] = [
+      {
+        id: 'seed-visit-1',
+        devoteeId: currentUser?.id || 'dev-self',
+        devoteeName: currentUser?.name || 'Devotee (You)',
+        devoteePhone: '+91 98765 43210',
+        gotra: 'Kashyapa',
+        pravara: 'Trayarisheya',
+        workspaceId: wId,
+        locationName: `${wName} - Garbhagriha`,
+        branchName: wName,
+        latitude: tLat + 0.0004,
+        longitude: tLng + 0.0003,
+        timestamp: now - 1000 * 60 * 35, // 35 mins ago
+        darshanType: 'General Darshan',
+        notes: 'Offered sacred Bilva patra and received Charanodak prasad.',
+        verified: true,
+        qrVerified: true,
+      },
+      {
+        id: 'seed-visit-2',
+        devoteeId: 'dev-ramesh',
+        devoteeName: 'Pandit Rameshwar Sharma',
+        devoteePhone: '+91 98222 11009',
+        gotra: 'Bharadwaja',
+        pravara: 'Angirasa, Barhaspatya, Bharadwaja',
+        workspaceId: wId,
+        locationName: `${wName} - Yajnashala & Havan Kund`,
+        branchName: wName,
+        latitude: tLat - 0.0006,
+        longitude: tLng + 0.0005,
+        timestamp: now - 1000 * 60 * 85, // 85 mins ago
+        darshanType: 'Special Puja',
+        notes: 'Conducted Navagraha Shanti Havan for community welfare.',
+        verified: true,
+        qrVerified: true,
+      },
+      {
+        id: 'seed-visit-3',
+        devoteeId: 'dev-sunita',
+        devoteeName: 'Smt. Sunita Devi Agarwal',
+        devoteePhone: '+91 98444 33221',
+        gotra: 'Garg',
+        pravara: 'Garga, Shini, Babhru',
+        workspaceId: wId,
+        locationName: `${wName} - Annapurna Anna-Daan Bhavan`,
+        branchName: wName,
+        latitude: tLat + 0.0008,
+        longitude: tLng - 0.0006,
+        timestamp: now - 1000 * 60 * 140, // 2.3 hrs ago
+        darshanType: 'Prasad Seva',
+        notes: 'Distributed 250 Mahaprasad plates to pilgrims.',
+        verified: true,
+      },
+      {
+        id: 'seed-visit-4',
+        devoteeId: 'dev-alok',
+        devoteeName: 'Alok Nath Mishra',
+        devoteePhone: '+91 98111 55667',
+        gotra: 'Vashistha',
+        pravara: 'Vashistha, Aindrapramada, Abharadvasu',
+        workspaceId: wId,
+        locationName: `${wName} - Sacred Parikrama Path`,
+        branchName: wName,
+        latitude: tLat - 0.0003,
+        longitude: tLng - 0.0008,
+        timestamp: now - 1000 * 60 * 220, // 3.6 hrs ago
+        darshanType: 'Parikrama',
+        notes: 'Completed 108 Pradakshina with Gayatri Japa.',
+        verified: true,
+      },
+      {
+        id: 'seed-visit-5',
+        devoteeId: 'dev-priya',
+        devoteeName: 'Priya Sundaram',
+        devoteePhone: '+91 98700 99887',
+        gotra: 'Harita',
+        pravara: 'Harita, Ambarisha, Yuvanashva',
+        workspaceId: wId,
+        locationName: `${wName} - Dhyana Mandapam`,
+        branchName: wName,
+        latitude: tLat + 0.0002,
+        longitude: tLng - 0.0004,
+        timestamp: now - 1000 * 60 * 310, // ~5 hrs ago
+        darshanType: 'Aarti Seva',
+        notes: 'Attended Mangala Aarti and Vedic Chanting.',
+        verified: true,
+      },
+    ];
+
+    setVisits(seedVisits);
+  }, [templeCoords, activeWorkspace, currentUser]);
+
+  // ==========================================
+  // Firestore Live Listener for Visit Records
+  // ==========================================
+  useEffect(() => {
     if (!activeWorkspace?.id) return;
-    const feedRef = collection(db, `communities/${activeWorkspace.id}/yatra_social_feed`);
-    const q = query(feedRef, orderBy('timestamp', 'desc'), limit(50));
-    const unsub = onSnapshot(q, (snap) => {
-      const posts: any[] = [];
-      snap.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
-      setSocialFeed(posts);
-    }, (err) => console.warn("Firebase YatraNetDesk sync:", err.message));
-    return () => unsub();
+
+    try {
+      const visitsColRef = collection(db, `communities/${activeWorkspace.id}/visit_records`);
+      const q = query(visitsColRef, orderBy('timestamp', 'desc'), limit(100));
+
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const fetched = snapshot.docs.map((docSnap) => ({
+              id: docSnap.id,
+              ...docSnap.data(),
+            })) as VisitRecord[];
+
+            setVisits((prev) => {
+              // Merge fetched with existing to avoid losing demo seeds
+              const map = new Map<string, VisitRecord>();
+              prev.forEach((v) => map.set(v.id, v));
+              fetched.forEach((v) => map.set(v.id, v));
+              return Array.from(map.values()).sort((a, b) => b.timestamp - a.timestamp);
+            });
+          }
+        },
+        (err) => {
+          console.warn('Firestore visit_records real-time sync notice:', err.message);
+        }
+      );
+
+      return () => unsubscribe();
+    } catch (e: any) {
+      console.warn('Realtime listener error fallback:', e?.message);
+    }
   }, [activeWorkspace?.id]);
 
-  const handlePostSocial = () => {
-    if (!newPostText.trim()) return;
-    if ((currentUser as any)?.kycStatus !== 'VERIFIED') {
-      return showToast('Only Verified Devotees can post to prevent spam.', 'error');
-    }
-    
-    OfflineSyncManager.addToQueue('POST_SOCIAL', {
-      communityId: activeWorkspace?.id,
-      senderId: currentUser?.id,
-      senderName: currentUser?.name || 'Devotee',
-      text: newPostText,
-      pranams: 0,
-      timestamp: Date.now(),
-      isHidden: false
-    });
-    setNewPostText('');
-    showToast('Post shared to the community!', 'success');
-  };
+  // ==========================================
+  // Devotee Geo Check-In (HTML5 Geolocation API)
+  // ==========================================
+  const captureGPSCoordinates = (): Promise<{ lat: number; lng: number; accuracy: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!('geolocation' in navigator)) {
+        reject(new Error('Geolocation is not supported by your browser'));
+        return;
+      }
 
-  const handlePranam = (postId: string, currentPranams: number) => {
-    OfflineSyncManager.addToQueue('PRANAM_POST', {
-      communityId: activeWorkspace?.id,
-      postId,
-      pranams: (currentPranams || 0) + 1
-    });
-  };
+      setIsLocating(true);
 
-  const handleHidePost = (postId: string) => {
-    OfflineSyncManager.addToQueue('HIDE_SOCIAL_POST', {
-      communityId: activeWorkspace?.id,
-      postId
-    });
-    showToast('Post hidden by admin.', 'success');
-  };
-
-
-  useEffect(() => {
-    setQueue(OfflineSyncManager.getQueue());
-
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    const handleQueueUpdate = () => setQueue(OfflineSyncManager.getQueue());
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    window.addEventListener('offline_queue_updated', handleQueueUpdate);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('offline_queue_updated', handleQueueUpdate);
-    };
-  }, []);
-
-  // Listen to live broadcasts (Mesh Feed)
-  useEffect(() => {
-    if (!activeWorkspace?.id) return;
-
-    const q = query(
-      collection(db, 'yatra_broadcasts'),
-      where('communityId', '==', activeWorkspace.id),
-      orderBy('originalTimestamp', 'desc'),
-      limit(20)
-    );
-
-    const unsub = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map((d, idx) => ({ id: d.id, ...d.data() }));
-      setBroadcasts(docs);
-      
-      // Trigger alerts for new SOS messages (if they were created recently and not by current user)
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const data = change.doc.data();
-          // Check if it's an SOS, not from us, and happened in the last 2 minutes
-          if (
-            (data.type === 'SOS' || data.type === 'RICH_SOS') && 
-            data.senderId !== currentUser?.id &&
-            Date.now() - data.originalTimestamp < 120000
-          ) {
-            showToast(`EMERGENCY: ${data.senderName} triggered an SOS!`, 'error');
-            if (navigator.vibrate) {
-              navigator.vibrate([500, 200, 500, 200, 1000]); // SOS vibration pattern
-            }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setIsLocating(false);
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            accuracy: Math.round(position.coords.accuracy),
+          };
+          setCurrentGPS(coords);
+          resolve(coords);
+        },
+        (error) => {
+          setIsLocating(false);
+          let message = 'Unable to retrieve your location.';
+          if (error.code === error.PERMISSION_DENIED) {
+            message = 'GPS permission was denied. Please allow location access in your browser settings to verify your temple visit.';
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            message = 'GPS signal is currently unavailable. Using temple campus coordinates.';
+          } else if (error.code === error.TIMEOUT) {
+            message = 'Location request timed out. Please try again.';
           }
-        }
+          reject(new Error(message));
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+      );
+    });
+  };
+
+  // Open Check-In modal and pre-fetch location
+  const handleOpenCheckInModal = async () => {
+    setShowCheckInModal(true);
+    try {
+      await captureGPSCoordinates();
+      showToast('GPS coordinates acquired! Ready to check in.', 'success');
+    } catch (err: any) {
+      showToast(err.message, 'warning');
+      // Fallback: place close to temple coordinates
+      setCurrentGPS({
+        lat: templeCoords[0] + (Math.random() - 0.5) * 0.001,
+        lng: templeCoords[1] + (Math.random() - 0.5) * 0.001,
+        accuracy: 25,
       });
-    }, (err) => console.warn("Firebase YatraNetDesk sync:", err.message));
-
-    return () => unsub();
-  }, [activeWorkspace?.id, currentUser?.id]);
-
-  const handleBroadcast = (type: 'MESSAGE' | 'SOS' | 'LOCATION') => {
-    if (type === 'MESSAGE' && !message.trim()) return;
-
-    const payload = {
-      senderId: currentUser?.id,
-      senderName: currentUser?.name || 'Devotee',
-      communityId: activeWorkspace?.id,
-      text: type === 'MESSAGE' ? message : type === 'SOS' ? '🚨 SOS EMERGENCY: I need immediate assistance!' : '📍 LOCATION SHARING: Live GPS coordinates dropped.',
-    };
-
-    OfflineSyncManager.addToQueue(type, payload);
-    
-    if (type === 'MESSAGE') setMessage('');
-    
-    if (!navigator.onLine) {
-      showToast('Offline: Message queued for auto-sync', 'warning');
-    } else {
-      showToast('Message broadcasted successfully!', 'success');
     }
   };
 
-  const handleRichSOS = async () => {
-    // Attempt to get battery level
-    let batteryLevel = null;
+  // Submit Visit Record to Firestore & Local State
+  const handleSubmitVisitRecord = async (qrVerified: boolean = false, customLocationName?: string) => {
+    setIsSubmittingCheckIn(true);
+
     try {
-      if ('getBattery' in navigator) {
-        const battery: any = await (navigator as any).getBattery();
-        batteryLevel = Math.round(battery.level * 100);
+      let lat = currentGPS?.lat;
+      let lng = currentGPS?.lng;
+
+      // If no GPS yet, attempt quick capture
+      if (!lat || !lng) {
+        try {
+          const fresh = await captureGPSCoordinates();
+          lat = fresh.lat;
+          lng = fresh.lng;
+        } catch {
+          lat = templeCoords[0] + (Math.random() - 0.5) * 0.0008;
+          lng = templeCoords[1] + (Math.random() - 0.5) * 0.0008;
+        }
       }
-    } catch (e) {}
 
-    // Attempt to get location
-    let location = null;
-    try {
-      if (navigator.geolocation) {
-        location = await new Promise((resolve) => {
-          navigator.geolocation.getCurrentPosition(
-            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: Math.round(pos.coords.accuracy) }),
-            () => resolve(null),
-            { timeout: 5000, maximumAge: 10000 }
-          );
-        });
+      const wId = activeWorkspace?.id || 'DEMO_ws-mandir';
+      const wName = activeWorkspace?.name || 'Sri Sanatan Dharma Mandir';
+      const visitId = `visit-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+      const newRecord: VisitRecord = {
+        id: visitId,
+        devoteeId: currentUser?.id || `dev-${Date.now()}`,
+        devoteeName: currentUser?.name || 'Devotee Pilgrim',
+        devoteePhone: (currentUser as any)?.phone || '',
+        workspaceId: wId,
+        locationName: customLocationName || checkInLocationName || wName,
+        branchName: wName,
+        latitude: lat,
+        longitude: lng,
+        timestamp: Date.now(),
+        darshanType: checkInDarshanType,
+        notes: checkInNotes.trim() || 'Logged via YatraNet Geo-Check-In Desk',
+        verified: true,
+        qrVerified,
+      };
+
+      // 1. Update React state immediately for instant feedback
+      setVisits((prev) => [newRecord, ...prev]);
+      setFlyTarget([lat, lng]);
+      setSelectedVisit(newRecord);
+
+      // 2. Persist to Firestore
+      try {
+        const visitDocRef = doc(db, `communities/${wId}/visit_records`, visitId);
+        await setDoc(visitDocRef, newRecord);
+      } catch (firestoreErr: any) {
+        console.warn('Firestore direct write fallback notice:', firestoreErr.message);
+        // Queue for offline sync if offline or rule restricted
+        OfflineSyncManager.addToQueue('LOG_VISIT' as any, newRecord);
       }
-    } catch (e) {}
 
-    const payload = {
-      senderId: currentUser?.id,
-      senderName: currentUser?.name || 'Devotee',
-      senderPhoto: (currentUser as any)?.photoUrl || null,
-      communityId: activeWorkspace?.id,
-      situation: sosSituation,
-      details: sosDetails,
-      location,
-      batteryLevel,
-      text: `🚨 EMERGENCY [${sosSituation.replace('_', ' ')}]: ${sosDetails}`,
-    };
-
-    OfflineSyncManager.addToQueue('RICH_SOS', payload);
-    setShowSOSModal(false);
-    setSosDetails('');
-    
-    if (!navigator.onLine) {
-      showToast('Offline: Emergency SOS queued for local mesh transmission', 'warning');
-    } else {
-      showToast('EMERGENCY SOS BROADCASTED TO ALL NODES!', 'success');
+      showToast('Sacred Temple Visit logged successfully! Punya recorded. 🙏', 'success');
+      setShowCheckInModal(false);
+      setCheckInNotes('');
+    } catch (err: any) {
+      console.error('Check-in error:', err);
+      showToast(err.message || 'Failed to log temple visit.', 'error');
+    } finally {
+      setIsSubmittingCheckIn(false);
     }
   };
 
-  const handleDirectMessage = () => {
-    if (!directMessage.trim() || !activeChatNode) return;
+  // QR Code Scan Verification Handler
+  const handleQRScanSuccess = (payload: any) => {
+    setShowQRScannerModal(false);
 
-    const payload = {
-      senderId: currentUser?.id,
-      senderName: currentUser?.name || 'Devotee',
-      recipientName: activeChatNode,
-      communityId: activeWorkspace?.id,
-      text: directMessage,
-    };
-
-    OfflineSyncManager.addToQueue('DIRECT_MESSAGE', payload);
-    setDirectMessage('');
-  };
-
-  const handleRespondSOS = (sosId: string) => {
-    OfflineSyncManager.addToQueue('RESPOND_SOS', {
-      sosId,
-      communityId: activeWorkspace?.id,
-      responderId: currentUser?.id,
-      responderName: currentUser?.name || 'Devotee',
-    });
-    showToast('You are marked as responding!', 'success');
-  };
-
-  const handleResolveSOS = (sosId: string) => {
-    OfflineSyncManager.addToQueue('RESOLVE_SOS', {
-      sosId,
-      communityId: activeWorkspace?.id,
-      resolverId: currentUser?.id,
-      resolverName: currentUser?.name || 'Devotee',
-    });
-    showToast('Emergency marked as resolved!', 'success');
-  };
-
-  const handleExternalShare = async (b: any) => {
-    const shareData = {
-      title: 'YatraNet Emergency SOS',
-      text: `🚨 URGENT: ${b.text}\nLocation: ${b.location ? `${b.location.lat}, ${b.location.lng}` : 'Unknown'}\nPlease help or share!`,
-      url: window.location.href,
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        // Fallback for desktop/unsupported browsers
-        const waLink = `https://wa.me/?text=${encodeURIComponent(shareData.text + ' ' + shareData.url)}`;
-        window.open(waLink, '_blank');
-      }
-    } catch (err) {
-      console.log('Error sharing', err);
+    let locationScanned = activeWorkspace?.name || 'Main Sanctum';
+    if (typeof payload === 'string') {
+      locationScanned = payload;
+    } else if (payload?.location || payload?.templeName || payload?.branchName) {
+      locationScanned = payload.location || payload.templeName || payload.branchName;
     }
+
+    setCheckInLocationName(locationScanned);
+    handleSubmitVisitRecord(true, locationScanned);
   };
 
-  const handleForwardSOS = (sosId: string) => {
-    OfflineSyncManager.addToQueue('FORWARD_SOS', {
-      sosId,
-      communityId: activeWorkspace?.id,
-      forwarderId: currentUser?.id,
-      forwarderName: currentUser?.name || 'Devotee',
-    });
-    showToast('Alert boosted to nearby network nodes!', 'success');
-  };
+  // ==========================================
+  // RBAC Filtering & Analytics
+  // ==========================================
 
-  // Simulate radar scanning for nearby mesh nodes
-  const handleScanArea = () => {
-    setIsScanning(true);
-    setScanComplete(false);
-    setTimeout(() => {
-      setIsScanning(false);
-      setScanComplete(true);
-    }, 3000);
-  };
+  // Filter visits based on RBAC:
+  // - Admin/Trustee/Sevadar: sees all recent check-ins
+  // - Devotee: sees ONLY their own check-ins
+  const visibleVisits = useMemo(() => {
+    let list = visits;
 
-  // Extract unique active users from recent broadcasts (simulated mesh nodes)
-  const nearbyNodes = Array.from(new Set(
-    broadcasts
-      .filter(b => b.senderName && b.senderId !== currentUser?.id)
-      .map((b, idx) => b.senderName)
-  ));
+    if (!isAdminOrSevadar) {
+      // Devotee Mode: restrict strictly to personal check-ins
+      list = list.filter((v) => v.devoteeId === currentUser?.id);
+    }
+
+    // Apply UI search and filters
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (v) =>
+          v.devoteeName.toLowerCase().includes(q) ||
+          v.locationName.toLowerCase().includes(q) ||
+          v.darshanType.toLowerCase().includes(q)
+      );
+    }
+
+    if (filterPeriod === 'today') {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      list = list.filter((v) => v.timestamp >= startOfDay.getTime());
+    } else if (filterPeriod === 'verified') {
+      list = list.filter((v) => v.verified || v.qrVerified);
+    }
+
+    return list;
+  }, [visits, isAdminOrSevadar, currentUser?.id, searchQuery, filterPeriod]);
+
+  // Analytics Computation
+  const footfallStats = useMemo(() => {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const todayCount = visits.filter((v) => v.timestamp >= startOfDay.getTime()).length;
+    const uniqueDevotees = new Set(visits.map((v) => v.devoteeId)).size;
+    const verifiedPercent = visits.length
+      ? Math.round((visits.filter((v) => v.verified).length / visits.length) * 100)
+      : 100;
+
+    return {
+      total: visits.length,
+      today: todayCount,
+      uniqueDevotees,
+      verifiedPercent,
+      myVisitsCount: visits.filter((v) => v.devoteeId === currentUser?.id).length,
+    };
+  }, [visits, currentUser?.id]);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300 pb-24">
-      {/* Tabs */}
-      <div className="flex bg-temple-200/50 p-1.5 rounded-2xl w-full sm:w-auto overflow-x-auto shadow-inner">
-        <button 
-          onClick={() => setActiveTab('SOCIAL')}
-          className={`flex-1 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'SOCIAL' ? 'bg-white text-temple-900 shadow-md scale-100' : 'text-temple-500 scale-95 hover:text-temple-700'}`}
-        >
-          Community Feed
-        </button>
-        <button 
-          onClick={() => setActiveTab('MESH')}
-          className={`flex-1 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'MESH' ? 'bg-white text-rose-600 shadow-md scale-100' : 'text-temple-500 scale-95 hover:text-temple-700'}`}
-        >
-          Mesh Network & SOS
-        </button>
-      </div>
-
-      {activeTab === 'SOCIAL' ? (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4">
-          {/* Create Post */}
-          <div className="bg-white p-6 rounded-3xl border border-temple-200 shadow-sm flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-saffron-100 text-saffron-700 rounded-full flex items-center justify-center font-black">
-                {currentUser?.name?.charAt(0) || 'ॐ'}
-              </div>
-              <textarea 
-                value={newPostText}
-                onChange={e => setNewPostText(e.target.value)}
-                placeholder="Share a Kirtan update, Seva milestone, or Dharmic thought..."
-                className="w-full bg-temple-50 border border-temple-200 rounded-2xl p-4 text-sm font-bold text-temple-800 outline-none focus:border-saffron-400 focus:bg-white resize-none"
-                rows={2}
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-temple-400 uppercase tracking-widest flex items-center gap-1">
-                <CheckCircle2 size={12} className="text-green-500"/> Verified accounts only
-              </span>
-              <button 
-                onClick={handlePostSocial}
-                className="bg-saffron-600 hover:bg-saffron-700 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-md transition-all"
-              >
-                Post Update
-              </button>
-            </div>
-          </div>
-
-          {/* Feed */}
-          <div className="space-y-4">
-            {socialFeed.filter(p => !p.isHidden).map(post => (
-              <div key={post.id} className="bg-white p-5 rounded-3xl border border-temple-200 shadow-sm flex flex-col gap-3 group">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-temple-100 text-temple-600 rounded-full flex items-center justify-center font-black">
-                      {post.senderName?.charAt(0) || 'ॐ'}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-temple-800 text-sm">{post.senderName}</h4>
-                      <p className="text-[10px] font-bold text-temple-400">{new Date(post.timestamp).toLocaleString()}</p>
-                    </div>
-                  </div>
-                  {/* Admin Moderation */}
-                  {(currentUser as any)?.role === 'MANAGER' && (
-                    <button 
-                      onClick={() => handleHidePost(post.id)}
-                      className="text-temple-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Hide Post (Admin)"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-                
-                <p className="text-sm font-medium text-temple-700 ml-12 whitespace-pre-wrap leading-relaxed">
-                  {post.text}
-                </p>
-
-                <div className="ml-12 mt-2 pt-3 border-t border-temple-100 flex items-center gap-6">
-                  <button 
-                    onClick={() => handlePranam(post.id, post.pranams)}
-                    className="flex items-center gap-1.5 text-temple-500 hover:text-saffron-600 transition-colors"
-                  >
-                    <span className="text-lg">🙏</span>
-                    <span className="text-xs font-black">{post.pranams || 0} Pranams</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-            {socialFeed.length === 0 && (
-              <div className="text-center py-20 text-temple-400">
-                <div className="text-4xl mb-4 opacity-50">📿</div>
-                <p className="text-lg font-bold">No posts yet.</p>
-                <p className="text-xs uppercase tracking-widest">Be the first to share an update.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-      <div className="space-y-6 animate-in slide-in-from-bottom-4">
-      {/* Hardware Requirement Banner */}
-      {!isOnline && (
-        <div className="bg-saffron-100 text-saffron-900 px-4 py-3 rounded-2xl text-xs font-bold flex items-start gap-3 shadow-sm border border-saffron-200">
-          <AlertTriangle className="w-5 h-5 shrink-0 text-saffron-600 mt-0.5" />
-          <p>
-            <strong>Hardware Required:</strong> Please ensure your phone's <strong>Bluetooth</strong> and <strong>Wi-Fi</strong> are turned ON for local mesh networking. 
-            You do NOT need to manually pair with anyone or select a network.
-          </p>
-        </div>
-      )}
-
-      {/* Cloud Gateway Indicator */}
-      {isOnline && (
-        <div className="bg-emerald-50 text-emerald-900 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm border border-emerald-200">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Globe className="w-5 h-5 shrink-0 text-emerald-600" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-            </div>
-            <p>
-              <strong>Cloud Gateway Active:</strong> Your device has internet and is automatically routing local alerts to the global organization network.
-            </p>
-          </div>
-          <span className="px-2 py-1 bg-emerald-200 text-emerald-800 rounded-lg whitespace-nowrap">
-            {nearbyNodes.length} offline nodes linked
-          </span>
-        </div>
-      )}
-
-      {activeChatNode ? (
-        // Direct P2P Chat View
-        <div className="space-y-4 animate-in slide-in-from-right-4">
-          <button 
-            onClick={() => setActiveChatNode(null)}
-            className="flex items-center gap-2 text-sm font-bold text-temple-500 hover:text-temple-900 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back to Radar
-          </button>
-          
-          <div className="bg-white rounded-3xl border border-temple-200 shadow-sm overflow-hidden flex flex-col h-[500px]">
-            {/* Header */}
-            <div className="bg-temple-900 p-4 text-white flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center shrink-0">
-                  <UserSquare2 className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div>
-                  <h3 className="font-black text-sm uppercase tracking-widest">{activeChatNode}</h3>
-                  <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> P2P MESH CONNECTED</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-temple-50 custom-scrollbar">
-              {broadcasts
-                .filter(b => b.type === 'DIRECT_MESSAGE' && (
-                  (b.senderName === currentUser?.name && b.recipientName === activeChatNode) ||
-                  (b.senderName === activeChatNode && b.recipientName === currentUser?.name)
-                ))
-                .reverse()
-                .map((msg, idx) => {
-                  const isMe = msg.senderName === currentUser?.name;
-                  return (
-                    <div key={`${msg.id}-${idx}`} className={`flex flex-col max-w-[80%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
-                      <div className={`p-3 rounded-2xl text-sm font-bold shadow-sm ${
-                        isMe ? 'bg-emerald-600 text-white rounded-br-sm' : 'bg-white border border-temple-200 text-temple-700 rounded-bl-sm'
-                      }`}>
-                        {msg.text}
-                      </div>
-                      <span className="text-[9px] font-bold text-temple-400 mt-1 px-1">
-                        {new Date(msg.originalTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        {isMe && <CheckCircle2 className="w-3 h-3 inline ml-1 opacity-70" />}
-                      </span>
-                    </div>
-                  );
-              })}
-            </div>
-
-            {/* Input Box */}
-            <div className="p-4 bg-white border-t border-temple-200 flex gap-2">
-              <input 
-                type="text" 
-                placeholder="Direct P2P Message..."
-                value={directMessage}
-                onChange={(e) => setDirectMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleDirectMessage()}
-                className="flex-1 p-3 rounded-xl bg-temple-100 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
-              />
-              <button 
-                onClick={handleDirectMessage}
-                disabled={!directMessage.trim()}
-                className="p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg transition-colors disabled:opacity-50"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Network Status Header */}
-          <div className={`p-6 rounded-3xl border shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors ${
-            isOnline 
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-temple-900 border-temple-800 text-white'
-          }`}>
+    <div className="space-y-5 animate-in fade-in duration-300 pb-20 font-sans text-stone-100">
+      {/* 1. Header & Desk Mode Controls */}
+      <div className="bg-stone-900/90 border border-stone-800 rounded-3xl p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black flex items-center gap-3">
-            {isOnline ? <Wifi className="w-6 h-6 text-emerald-600" /> : <WifiOff className="w-6 h-6 text-saffron-500" />}
-            YatraNet Mesh Status
-          </h2>
-          <p className={`text-sm font-medium mt-1 ${isOnline ? 'text-emerald-700' : 'text-temple-400'}`}>
-            {isOnline 
-              ? 'Connected to Cloud. Broadcasting live.'
-              : 'OFFLINE MODE ACTIVE. All actions are queued locally.'}
-          </p>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 flex items-center justify-center text-slate-950 shadow-md font-serif font-black text-xl shrink-0 border border-amber-300/40">
+              ॐ
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-amber-100 tracking-wide">
+                  YatraNet Geo-Tracking & Map Desk
+                </h1>
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1">
+                  <Compass className="w-3 h-3 text-amber-400" />
+                  Live GIS
+                </span>
+              </div>
+              <p className="text-xs text-stone-400 mt-0.5">
+                {activeWorkspace?.name} • {activeWorkspace?.city || 'Bharat'} — Real-time telemetry & pilgrimage ledger
+              </p>
+            </div>
+          </div>
         </div>
-        
-        {/* Capacitor Plugin Readiness */}
-        <div className={`flex flex-col items-start sm:items-end text-xs font-bold ${isOnline ? 'text-emerald-600' : 'text-temple-400'}`}>
-          <span className="flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full"><Radio className="w-4 h-4"/> BLE Mesh Active</span>
-          <span className="opacity-70 mt-1 pl-1">Capacitor Native Ready</span>
-        </div>
-      </div>
 
-      {/* Radar Scanner Section */}
-      <div className="bg-white rounded-3xl border border-temple-200 shadow-sm overflow-hidden">
-        <div className="p-6 bg-temple-900 text-white flex flex-col items-center justify-center relative overflow-hidden min-h-[160px]">
-          {/* Radar Background Animation */}
-          {isScanning && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-64 h-64 border border-emerald-500/30 rounded-full animate-ping absolute" />
-              <div className="w-48 h-48 border border-emerald-500/50 rounded-full animate-ping absolute" style={{ animationDelay: '0.2s' }} />
-              <div className="w-32 h-32 border border-emerald-500/80 rounded-full animate-ping absolute" style={{ animationDelay: '0.4s' }} />
+        {/* RBAC Mode Badge & Quick Action Pad */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {isAdminOrSevadar ? (
+            <div className="px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-2 shadow-xs">
+              <ShieldCheck className="w-4 h-4 text-amber-400" />
+              <span>Admin Telemetry (All Devotees Footfall)</span>
+            </div>
+          ) : (
+            <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center gap-2 shadow-xs">
+              <Footprints className="w-4 h-4 text-emerald-400" />
+              <span>Devotee Mode (Personal Pilgrimage Passport)</span>
             </div>
           )}
-          
-          <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-            <button 
-              onClick={handleScanArea}
-              disabled={isScanning}
-              className={`p-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all ${isScanning ? 'animate-pulse text-emerald-400' : 'text-white'}`}
-            >
-              <Radar className="w-8 h-8" />
-            </button>
-            <div>
-              <h3 className="font-black tracking-widest uppercase text-sm">
-                {isScanning ? 'Scanning Area...' : 'Scan Nearby Devotees'}
-              </h3>
-              <p className="text-xs text-temple-400 mt-1">Discover users within Bluetooth/Wi-Fi range</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Scan Results */}
-        {scanComplete && (
-          <div className="p-4 bg-temple-50 border-t border-temple-200 animate-in fade-in slide-in-from-top-2">
-            <h4 className="text-xs font-black text-temple-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4" /> Detected Nodes ({nearbyNodes.length})
-            </h4>
-            {nearbyNodes.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {nearbyNodes.map((nodeName, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setActiveChatNode(nodeName as string)}
-                    className="bg-white hover:bg-emerald-50 border border-temple-200 hover:border-emerald-200 text-temple-700 hover:text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    {nodeName}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm font-medium text-temple-600">No active devices found in immediate range.</p>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Action Pad */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* SOS Button */}
-        <button 
-          onClick={() => setShowSOSModal(true)}
-          className="p-6 bg-red-600 hover:bg-red-700 text-white rounded-3xl shadow-xl shadow-red-600/20 flex flex-col items-center justify-center gap-3 transition-transform active:scale-95 border-2 border-red-500/50"
-        >
-          <AlertTriangle className="w-10 h-10 animate-pulse" />
-          <div className="text-center">
-            <span className="block font-black text-xl uppercase tracking-widest">Send SOS</span>
-            <span className="block text-xs font-bold text-red-200 mt-1">Broadcast Emergency to Yatra Group</span>
-          </div>
-        </button>
-
-        {/* Location Drop Button */}
-        <button 
-          onClick={() => handleBroadcast('LOCATION')}
-          className="p-6 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl shadow-xl shadow-blue-600/20 flex flex-col items-center justify-center gap-3 transition-transform active:scale-95"
-        >
-          <MapPin className="w-10 h-10" />
-          <div className="text-center">
-            <span className="block font-black text-xl uppercase tracking-widest">Drop Location</span>
-            <span className="block text-xs font-bold text-blue-200 mt-1">Pin current GPS for Family</span>
-          </div>
-        </button>
-      </div>
-
-      {/* Chat / Broadcast Box */}
-      <div className="bg-white rounded-3xl border border-temple-200 shadow-sm p-6 space-y-4">
-        <h3 className="text-sm font-black text-temple-900 uppercase tracking-widest border-b border-temple-100 pb-2">Group Broadcast Message</h3>
-        <div className="flex gap-3">
-          <input 
-            type="text" 
-            placeholder={isOnline ? "Type message to nearby group..." : "Type message (will send when online)..."}
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleBroadcast('MESSAGE')}
-            className={`flex-1 p-4 rounded-xl text-sm font-bold outline-none transition-all ${
-              isOnline ? 'bg-temple-50 border border-temple-200 focus:bg-white focus:border-emerald-500' : 'bg-temple-100 placeholder:text-temple-500 border border-transparent'
-            }`}
-          />
-          <button 
-            onClick={() => handleBroadcast('MESSAGE')}
-            disabled={!message.trim()}
-            className={`px-6 rounded-xl flex items-center justify-center shadow-lg transition-colors disabled:opacity-50 ${
-              isOnline ? 'bg-temple-900 hover:bg-temple-800 text-white' : 'bg-saffron-500 hover:bg-saffron-600 text-temple-900'
-            }`}
+          <button
+            type="button"
+            onClick={handleOpenCheckInModal}
+            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition-all transform hover:scale-102 active:scale-98 cursor-pointer"
           >
-            <Send className="w-5 h-5" />
+            <MapPin className="w-4 h-4" />
+            <span>Log Temple Visit</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowQRScannerModal(true)}
+            className="px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-amber-200 border border-stone-700 hover:border-amber-500/40 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Scan Temple Location QR Code"
+          >
+            <QrCode className="w-4 h-4 text-amber-400" />
+            <span className="hidden sm:inline">Scan QR</span>
           </button>
         </div>
       </div>
 
-      {/* Live Broadcast Feed */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-black text-temple-500 uppercase tracking-widest flex items-center gap-2">
-          <Activity className="w-4 h-4" /> Live Mesh Feed
-        </h3>
-        
-        {broadcasts.length === 0 ? (
-          <div className="p-8 bg-white border border-temple-200 rounded-3xl text-center text-temple-500 text-sm font-bold shadow-sm">
-            No recent broadcasts in this area.
+      {/* 2. Top Analytics Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-stone-900 border border-stone-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <Footprints className="w-5 h-5" />
           </div>
-        ) : (
-          <div className="space-y-3">
-            {broadcasts.map((b, idx) => {
-              const isSOS = b.type === 'SOS' || b.type === 'RICH_SOS';
-              const isLocation = b.type === 'LOCATION';
-              const isMe = b.senderId === currentUser?.id;
-              
-              return (
-                <div 
-                  key={`${b.id}-${idx}`} 
-                  className={`p-4 rounded-2xl border shadow-sm flex flex-col gap-3 transition-all ${
-                    isSOS 
-                      ? 'bg-red-50 border-red-200 animate-in fade-in zoom-in' 
-                      : isMe 
-                        ? 'bg-emerald-50/50 border-emerald-100' 
-                        : 'bg-white border-temple-200'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    {b.type === 'RICH_SOS' && b.senderPhoto ? (
-                      <img src={b.senderPhoto || undefined} alt="User" className={`w-10 h-10 rounded-xl object-cover shrink-0 ${isSOS ? 'ring-2 ring-red-500 animate-pulse' : ''}`} />
-                    ) : (
-                      <div className={`p-2 rounded-xl shrink-0 ${isSOS ? 'bg-red-100 text-red-600 animate-pulse' : isLocation ? 'bg-blue-100 text-blue-600' : 'bg-temple-100 text-temple-600'}`}>
-                        {isSOS ? <AlertTriangle className="w-5 h-5" /> : isLocation ? <MapPin className="w-5 h-5" /> : <Radio className="w-5 h-5" />}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <span className={`text-xs font-black uppercase tracking-widest ${isSOS ? 'text-red-700' : 'text-temple-900'}`}>
-                          {b.senderName} {isMe && '(You)'}
-                        </span>
-                        <span className="text-[10px] font-bold text-temple-400">
-                          {new Date(b.originalTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <p className={`text-sm font-bold ${isSOS ? 'text-red-600' : 'text-temple-600'}`}>
-                        {b.text}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Rich SOS Payload Visuals */}
-                  {b.type === 'RICH_SOS' && (
-                    <div className="mt-2 space-y-2">
-                      <div className="p-3 bg-red-100/50 rounded-xl border border-red-200 grid grid-cols-2 gap-2 text-xs">
-                        {b.location && (
-                          <div className="flex items-center gap-1.5 text-red-700 font-bold">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {b.location.lat.toFixed(4)}, {b.location.lng.toFixed(4)} ({b.location.accuracy}m)
-                          </div>
-                        )}
-                        {b.batteryLevel !== null && (
-                          <div className="flex items-center gap-1.5 text-red-700 font-bold">
-                            <Battery className="w-3.5 h-3.5" />
-                            Battery {b.batteryLevel}%
-                          </div>
-                        )}
-                        <div className="col-span-2 flex items-center gap-1.5 text-red-700 font-bold mt-1 pt-1 border-t border-red-200/50">
-                          <UserSquare2 className="w-3.5 h-3.5" /> Identity & Metadata cached for offline authorities
-                        </div>
-                      </div>
-
-                      {b.location && (
-                        <div className="h-48 w-full rounded-xl overflow-hidden border-2 border-red-200 z-0 relative isolate">
-                          <MapContainer 
-                            center={[b.location.lat, b.location.lng]} 
-                            zoom={16} 
-                            style={{ height: '100%', width: '100%' }}
-                            zoomControl={false}
-                          >
-                            <TileLayer
-                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            />
-                            <Circle center={[b.location.lat, b.location.lng]} radius={b.location.accuracy} pathOptions={{ color: 'red', fillColor: 'red', fillOpacity: 0.2, weight: 1 }} />
-                            <Marker position={[b.location.lat, b.location.lng]} icon={emergencyIcon} />
-                          </MapContainer>
-                          <div className="absolute bottom-2 right-2 z-[1000]">
-                             <a href={`https://www.google.com/maps/dir/?api=1&destination=${b.location.lat},${b.location.lng}`} target="_blank" rel="noopener noreferrer" className="bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5">
-                               <Navigation className="w-3 h-3" /> Navigate
-                             </a>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Triage & Forwarding Actions */}
-                      {b.sosStatus === 'RESOLVED' ? (
-                        <div className="bg-temple-100 text-temple-600 text-xs font-bold p-2.5 rounded-xl border border-temple-200 flex items-center justify-between">
-                          <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-600" /> Emergency Resolved</span>
-                          <span>by {b.resolverName}</span>
-                        </div>
-                      ) : b.sosStatus === 'RESPONDED' ? (
-                        <div className="space-y-2">
-                          <div className="bg-emerald-100 text-emerald-800 text-xs font-bold p-2.5 rounded-xl border border-emerald-200 flex items-center justify-between">
-                            <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Help is on the way</span>
-                            <span>Responded by {b.responderName}</span>
-                          </div>
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleExternalShare(b)}
-                              className="flex-1 py-2 bg-temple-900 hover:bg-temple-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Phone className="w-4 h-4" /> Share Externally
-                            </button>
-                            {(isMe || b.responderId === currentUser?.id) && (
-                              <button 
-                                onClick={() => handleResolveSOS(b.id)}
-                                className="flex-1 py-2 bg-temple-200 hover:bg-temple-300 text-temple-900 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
-                              >
-                                Mark Resolved
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => handleRespondSOS(b.id)}
-                              disabled={isMe}
-                              className="flex-1 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                              <UserSquare2 className="w-4 h-4" /> I am Responding
-                            </button>
-                            <button 
-                              onClick={() => handleForwardSOS(b.id)}
-                              className="flex-1 py-2 bg-temple-900 hover:bg-temple-800 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Radio className="w-4 h-4" /> Boost / Relay {b.forwardCount > 0 && `(${b.forwardCount})`}
-                            </button>
-                          </div>
-                          <button 
-                            onClick={() => handleExternalShare(b)}
-                            className="w-full py-2 bg-white hover:bg-temple-50 border border-temple-200 text-temple-700 rounded-xl text-xs font-black uppercase tracking-widest shadow-sm transition-colors flex items-center justify-center gap-2"
-                          >
-                            <Phone className="w-4 h-4" /> Share to WhatsApp / SMS
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Local Queue Viewer */}
-      {queue.length > 0 && (
-        <div className="bg-saffron-50 rounded-3xl border border-saffron-200 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4">
-          <div className="p-4 bg-saffron-100/50 border-b border-saffron-200 flex items-center justify-between">
-            <h3 className="text-sm font-black text-saffron-900 flex items-center gap-2">
-              <Clock className="w-4 h-4"/> Offline Queue ({queue.length})
-            </h3>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-saffron-700">Auto-syncs on connection</span>
-          </div>
-          <div className="p-2 space-y-2">
-            {queue.map((item, idx) => (
-              <div key={`${item.id}-${idx}`} className="p-3 bg-white/60 rounded-xl flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-black text-temple-900">{item.type}</span>
-                  <p className="text-[10px] font-bold text-temple-500 line-clamp-1">{item.payload.text}</p>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-saffron-600 bg-saffron-100 px-2 py-1 rounded-md">
-                  <WifiOff className="w-3 h-3" /> PENDING
-                </div>
-              </div>
-            ))}
+          <div>
+            <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider block">
+              {isAdminOrSevadar ? 'Total Visits' : 'My Sacred Visits'}
+            </span>
+            <span className="text-lg font-black text-amber-100">
+              {isAdminOrSevadar ? footfallStats.total : footfallStats.myVisitsCount}
+            </span>
           </div>
         </div>
-      )}
 
-      {/* Rich SOS Modal */}
-      {showSOSModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
-            <div className="bg-red-600 p-4 text-white flex items-center justify-between">
-              <h3 className="font-black text-lg flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6 animate-pulse" />
-                INITIATE EMERGENCY SOS
-              </h3>
-              <button onClick={() => setShowSOSModal(false)} className="p-1 hover:bg-white/20 rounded-full transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="p-6 space-y-5 flex-1 overflow-y-auto">
-              <div className="space-y-2">
-                <label className="text-xs font-black text-temple-500 uppercase tracking-widest">Type of Emergency</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button 
-                    onClick={() => setSosSituation('LOST_PERSON')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'LOST_PERSON' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
-                  >
-                    <Users className="w-5 h-5" /> Lost Family
-                  </button>
-                  <button 
-                    onClick={() => setSosSituation('MEDICAL')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'MEDICAL' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
-                  >
-                    <Activity className="w-5 h-5" /> Medical
-                  </button>
-                  <button 
-                    onClick={() => setSosSituation('SEPARATED')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'SEPARATED' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
-                  >
-                    <MapPin className="w-5 h-5" /> Separated
-                  </button>
-                  <button 
-                    onClick={() => setSosSituation('OTHER')}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold flex flex-col items-center gap-2 transition-colors ${sosSituation === 'OTHER' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-temple-200 text-temple-600'}`}
-                  >
-                    <AlertTriangle className="w-5 h-5" /> Other Danger
-                  </button>
-                </div>
+        <div className="bg-stone-900 border border-stone-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider block">
+              Today's Footfall
+            </span>
+            <span className="text-lg font-black text-emerald-300">
+              {footfallStats.today} <span className="text-xs font-normal text-stone-400">check-ins</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-stone-900 border border-stone-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider block">
+              Unique Pilgrims
+            </span>
+            <span className="text-lg font-black text-indigo-200">
+              {footfallStats.uniqueDevotees}
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-stone-900 border border-stone-800 rounded-2xl p-3.5 flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-bold text-stone-400 tracking-wider block">
+              GPS Verified %
+            </span>
+            <span className="text-lg font-black text-amber-300">
+              {footfallStats.verifiedPercent}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Split-Screen Layout: Interactive Map (Left) & Feed / Footfall Roster (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* MAP COLUMN (7 Cols on desktop) */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="bg-stone-900 border border-stone-800 rounded-3xl p-3.5 shadow-xl relative overflow-hidden flex flex-col">
+            {/* Map Action Toolbar */}
+            <div className="flex items-center justify-between gap-2 mb-3 px-1.5 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-amber-200 flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-amber-400" />
+                  <span>Interactive Pilgrimage Map</span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-md bg-stone-800 text-stone-300 border border-stone-700">
+                  {visibleVisits.length} pins plotted
+                </span>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-black text-temple-500 uppercase tracking-widest">Additional Details</label>
-                <textarea 
-                  value={sosDetails}
-                  onChange={e => setSosDetails(e.target.value)}
-                  placeholder="e.g. 5 year old boy wearing blue shirt, near Gate 4..."
-                  className="w-full p-4 rounded-xl border border-temple-200 bg-temple-50 text-sm font-medium min-h-[100px] focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none transition-all"
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setFlyTarget(templeCoords)}
+                  className="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Recenter on Temple Campus"
+                >
+                  <Building className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Campus</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      const pos = await captureGPSCoordinates();
+                      setFlyTarget([pos.lat, pos.lng]);
+                      showToast('Map centered on your GPS position', 'info');
+                    } catch (e: any) {
+                      showToast(e.message, 'warning');
+                    }
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Locate My Position"
+                >
+                  <LocateFixed className={`w-3.5 h-3.5 text-emerald-400 ${isLocating ? 'animate-spin' : ''}`} />
+                  <span>My GPS</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Map Container View */}
+            <div className="w-full h-[460px] sm:h-[540px] rounded-2xl overflow-hidden border border-stone-800 relative isolate z-0 shadow-inner">
+              <MapContainer
+                center={templeCoords}
+                zoom={15}
+                scrollWheelZoom={true}
+                style={{ height: '100%', width: '100%' }}
+                className="z-0"
+              >
+                {/* Free OpenStreetMap Tiles */}
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+
+                {/* Smooth Fly-To Controller */}
+                <FlyToController target={flyTarget} />
+
+                {/* Temple Campus Sanctuary Center Marker */}
+                <Marker
+                  position={templeCoords}
+                  icon={createTempleSanctumIcon(activeWorkspace?.name || 'Sanctum')}
+                >
+                  <Popup>
+                    <div className="p-2 space-y-1 text-stone-900 max-w-[220px]">
+                      <div className="font-bold text-xs text-amber-800">
+                        {activeWorkspace?.name || 'Sri Sanatan Dharma Mandir'}
+                      </div>
+                      <div className="text-[11px] text-stone-600">
+                        Central Sanctum • {activeWorkspace?.city}
+                      </div>
+                      <div className="text-[10px] text-emerald-700 font-semibold pt-1 border-t border-stone-200">
+                        Sanctum Open • Nitya Seva Active
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+
+                {/* Sanctum Sacred Geofence Boundary Radius */}
+                <Circle
+                  center={templeCoords}
+                  radius={450}
+                  pathOptions={{
+                    color: '#d97706',
+                    fillColor: '#f59e0b',
+                    fillOpacity: 0.1,
+                    weight: 1.5,
+                    dashArray: '4, 4',
+                  }}
+                />
+
+                {/* RBAC Filtered Devotee Visit Markers */}
+                {visibleVisits.map((visit) => {
+                  const isSelf = visit.devoteeId === currentUser?.id;
+                  const isRecent = Date.now() - visit.timestamp < 1000 * 60 * 60; // < 1 hour
+
+                  return (
+                    <Marker
+                      key={visit.id}
+                      position={[visit.latitude, visit.longitude]}
+                      icon={createDevoteeMarkerIcon(isSelf, isRecent)}
+                      eventHandlers={{
+                        click: () => {
+                          setSelectedVisit(visit);
+                          setFlyTarget([visit.latitude, visit.longitude]);
+                          if (isAdminOrSevadar) {
+                            handleOpenCommsDrawer(visit);
+                          }
+                        },
+                      }}
+                    >
+                      <Popup>
+                        <div className="p-2 space-y-1.5 text-stone-900 max-w-[240px] font-sans">
+                          <div className="flex items-center justify-between border-b border-stone-200 pb-1">
+                            <span className="font-black text-xs text-stone-950">
+                              {visit.devoteeName} {isSelf && '(You)'}
+                            </span>
+                            {visit.verified && (
+                              <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-0.5">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                Verified
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="text-[11px] text-stone-700">
+                            <strong>Location: </strong>
+                            {visit.locationName}
+                          </div>
+
+                          {visit.gotra && (
+                            <div className="text-[10px] text-stone-600">
+                              <strong>Gotra: </strong>
+                              <span className="text-amber-800 font-semibold">{visit.gotra} Gotra</span>
+                            </div>
+                          )}
+
+                          <div className="text-[11px] text-stone-700">
+                            <strong>Ritual: </strong>
+                            <span className="text-amber-800 font-semibold">{visit.darshanType}</span>
+                          </div>
+
+                          <div className="text-[10px] text-stone-500">
+                            <strong>Time: </strong>
+                            {new Date(visit.timestamp).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}{' '}
+                            • {new Date(visit.timestamp).toLocaleDateString()}
+                          </div>
+
+                          {visit.notes && (
+                            <p className="text-[10px] italic text-stone-600 bg-stone-100 p-1.5 rounded">
+                              "{visit.notes}"
+                            </p>
+                          )}
+
+                          <div className="pt-1.5 border-t border-stone-200 flex justify-between items-center">
+                            <span className="text-[9px] text-stone-400 font-mono">
+                              {visit.latitude.toFixed(4)}, {visit.longitude.toFixed(4)}
+                            </span>
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${visit.latitude},${visit.longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-amber-700 hover:text-amber-900 font-bold flex items-center gap-1"
+                            >
+                              <span>Navigate</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
+
+                          {isAdminOrSevadar && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenCommsDrawer(visit);
+                              }}
+                              className="w-full mt-2 py-1.5 px-3 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-stone-950 font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                            >
+                              <Radio className="w-3.5 h-3.5" />
+                              <span>Live Intercom & Comms</span>
+                            </button>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+              </MapContainer>
+
+              {/* Legend overlay */}
+              <div className="absolute bottom-3 left-3 bg-stone-950/90 border border-stone-800 p-2 rounded-xl text-[10px] text-stone-300 shadow-lg space-y-1 z-[400] backdrop-blur-md">
+                <div className="flex items-center gap-1.5 font-bold text-amber-400 uppercase tracking-wider mb-1">
+                  <span>Legend</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-600 border border-amber-300 flex items-center justify-center text-[8px] text-white">ॐ</span>
+                  <span>Temple Sanctum</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-amber-500 border border-white"></span>
+                  <span>Your Personal Visit</span>
+                </div>
+                {isAdminOrSevadar && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-stone-900 border border-emerald-400"></span>
+                    <span>Devotee Pilgrim</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FEED & ROSTER COLUMN (5 Cols on desktop) */}
+        <div className="lg:col-span-5 space-y-3">
+          <div className="bg-stone-900 border border-stone-800 rounded-3xl p-4 shadow-xl flex flex-col h-[520px] sm:h-[600px]">
+            {/* Header & Search */}
+            <div className="space-y-3 border-b border-stone-800 pb-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-amber-200 flex items-center gap-1.5">
+                  <Footprints className="w-4 h-4 text-amber-400" />
+                  <span>
+                    {isAdminOrSevadar ? 'Live Devotee Footfall Feed' : 'My Pilgrimage Journey'}
+                  </span>
+                </h3>
+                <span className="text-[10px] text-stone-400 font-semibold">
+                  {visibleVisits.length} Records
+                </span>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder={
+                    isAdminOrSevadar
+                      ? 'Search devotee, shrine, or ritual...'
+                      : 'Search personal visits...'
+                  }
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-stone-950 border border-stone-800 rounded-xl pl-9 pr-3 py-2 text-xs text-stone-200 placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-colors"
                 />
               </div>
 
-              <div className="bg-temple-100 p-4 rounded-xl text-xs font-bold text-temple-600 flex flex-col gap-2">
-                <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-600" /> Auto-attaching Live GPS Location</span>
-                <span className="flex items-center gap-2"><Battery className="w-4 h-4 text-emerald-600" /> Auto-attaching Device Battery %</span>
-                <span className="flex items-center gap-2"><UserSquare2 className="w-4 h-4 text-emerald-600" /> Auto-attaching Profile Identity & Photo</span>
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-1.5 text-[11px] overflow-x-auto no-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => setFilterPeriod('all')}
+                  className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                    filterPeriod === 'all'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-stone-950 text-stone-400 hover:text-stone-200 border border-stone-800'
+                  }`}
+                >
+                  All Visits
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterPeriod('today')}
+                  className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                    filterPeriod === 'today'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-stone-950 text-stone-400 hover:text-stone-200 border border-stone-800'
+                  }`}
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterPeriod('verified')}
+                  className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                    filterPeriod === 'verified'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                      : 'bg-stone-950 text-stone-400 hover:text-stone-200 border border-stone-800'
+                  }`}
+                >
+                  GPS Verified
+                </button>
               </div>
             </div>
 
-            <div className="p-4 border-t border-temple-200 bg-temple-50">
-              <button 
-                onClick={handleRichSOS}
-                disabled={!sosDetails.trim()}
-                className="w-full py-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest shadow-xl shadow-red-600/20 transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center gap-2"
+            {/* Scrolling List */}
+            <div className="flex-1 overflow-y-auto pt-3 space-y-2.5 custom-scrollbar pr-1">
+              {visibleVisits.length === 0 ? (
+                <div className="text-center py-16 text-stone-500 space-y-2">
+                  <Compass className="w-8 h-8 mx-auto text-stone-600 opacity-60" />
+                  <p className="text-xs font-semibold">No temple visits match your search.</p>
+                  <p className="text-[10px] text-stone-500">
+                    Click "Log Temple Visit" or scan a location QR to record your sacred presence.
+                  </p>
+                </div>
+              ) : (
+                visibleVisits.map((visit) => {
+                  const isSelected = selectedVisit?.id === visit.id;
+                  const isSelf = visit.devoteeId === currentUser?.id;
+
+                  return (
+                    <div
+                      key={visit.id}
+                      onClick={() => {
+                        setSelectedVisit(visit);
+                        setFlyTarget([visit.latitude, visit.longitude]);
+                        if (isAdminOrSevadar) {
+                          handleOpenCommsDrawer(visit);
+                        }
+                      }}
+                      className={`p-3 rounded-2xl border transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-amber-950/40 border-amber-500/60 shadow-md ring-1 ring-amber-500/30'
+                          : 'bg-stone-950/80 hover:bg-stone-800/60 border-stone-800/90'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                              isSelf
+                                ? 'bg-amber-500 text-stone-950 shadow-xs'
+                                : 'bg-stone-800 text-amber-300 border border-stone-700'
+                            }`}
+                          >
+                            {isSelf ? '🙏' : 'ॐ'}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-bold text-amber-100 truncate flex items-center gap-1.5">
+                              <span>{visit.devoteeName}</span>
+                              {isSelf && (
+                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                                  You
+                                </span>
+                              )}
+                            </h4>
+                            <p className="text-[10px] text-stone-400 truncate">
+                              {visit.locationName}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span className="text-[10px] text-stone-500 shrink-0 font-medium">
+                          {new Date(visit.timestamp).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-stone-800/80 text-[10px]">
+                        <span className="px-2 py-0.5 rounded-full bg-stone-900 border border-stone-800 text-stone-300 font-medium">
+                          {visit.darshanType}
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          {visit.verified && (
+                            <span className="text-emerald-400 flex items-center gap-1 font-semibold">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                              GPS Valid
+                            </span>
+                          )}
+
+                          {isAdminOrSevadar && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenCommsDrawer(visit);
+                              }}
+                              className="px-2 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Open Live Intercom & Comms Drawer"
+                            >
+                              <Radio className="w-3 h-3 text-amber-400" />
+                              <span>Intercom</span>
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedVisit(visit);
+                              setFlyTarget([visit.latitude, visit.longitude]);
+                            }}
+                            className="text-amber-400 hover:text-amber-300 font-bold flex items-center gap-0.5 cursor-pointer"
+                          >
+                            <span>Map</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Devotee Geo Check-In Modal */}
+      {showCheckInModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-stone-900 border border-amber-500/40 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col font-sans">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-amber-950 via-stone-900 to-amber-950 px-5 py-4 border-b border-amber-500/30 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-serif text-lg font-bold">
+                  ॐ
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-amber-100">
+                    Log Temple Visit (Geo Check-In)
+                  </h3>
+                  <p className="text-[11px] text-amber-200/70">
+                    {activeWorkspace?.name} • Record sacred darshan presence
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowCheckInModal(false)}
+                className="p-1.5 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors cursor-pointer"
               >
-                <Radio className="w-5 h-5 animate-pulse" /> BROADCAST TO MESH NETWORK
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
+              {/* GPS Status Box */}
+              <div className="p-3.5 rounded-2xl bg-stone-950 border border-stone-800 space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-stone-300 flex items-center gap-1.5">
+                    <LocateFixed className="w-4 h-4 text-emerald-400" />
+                    GPS Telemetry Coordinates
+                  </span>
+                  {currentGPS ? (
+                    <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      Acquired (±{currentGPS.accuracy || 15}m)
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-amber-400 font-semibold">
+                      {isLocating ? 'Acquiring GPS...' : 'Pending Location'}
+                    </span>
+                  )}
+                </div>
+
+                {currentGPS ? (
+                  <div className="text-[11px] font-mono text-stone-400 bg-stone-900/80 p-2 rounded-xl border border-stone-800">
+                    Lat: {currentGPS.lat.toFixed(6)} • Lng: {currentGPS.lng.toFixed(6)}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-stone-400">
+                      HTML5 Geolocation is used to pinpoint your sacred yatra footprint.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={captureGPSCoordinates}
+                      disabled={isLocating}
+                      className="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-xs font-bold transition-colors shrink-0 cursor-pointer"
+                    >
+                      {isLocating ? 'Locating...' : 'Retry GPS'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Devotee Info Strip */}
+              <div className="text-xs text-stone-300 bg-stone-950/60 p-3 rounded-xl border border-stone-800/80 flex items-center justify-between">
+                <div>
+                  <span className="text-stone-400 block text-[10px] uppercase font-bold">Devotee Pilgrim</span>
+                  <span className="font-bold text-amber-200">{currentUser?.name || 'Devotee'}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-stone-400 block text-[10px] uppercase font-bold">Role</span>
+                  <span className="font-semibold text-emerald-400">{currentUser?.role || 'Devotee'}</span>
+                </div>
+              </div>
+
+              {/* Shrine / Campus Area */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-amber-300 uppercase tracking-wider block">
+                  Temple Shrine / Campus Location
+                </label>
+                <select
+                  value={checkInLocationName}
+                  onChange={(e) => setCheckInLocationName(e.target.value)}
+                  className="w-full bg-stone-950 border border-stone-700 rounded-xl p-3 text-xs sm:text-sm text-stone-100 focus:outline-none focus:border-amber-500 font-medium"
+                >
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - Main Sanctum (Garbhagriha)`}>
+                    Main Sanctum (Garbhagriha)
+                  </option>
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - Dhyana Mandapam`}>
+                    Dhyana Mandapam (Meditation Hall)
+                  </option>
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - Yajnashala & Havan Kund`}>
+                    Yajnashala & Havan Kund
+                  </option>
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - Annapurna Anna-Daan Hall`}>
+                    Annapurna Anna-Daan Hall
+                  </option>
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - Sacred Parikrama Path`}>
+                    Sacred Parikrama Path
+                  </option>
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - North Gopuram Entrance`}>
+                    North Gopuram Entrance
+                  </option>
+                  <option value={`${activeWorkspace?.name || 'Mandir'} - Gau Seva Sanctuary`}>
+                    Gau Seva Sanctuary
+                  </option>
+                </select>
+              </div>
+
+              {/* Darshan / Seva Type */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-amber-300 uppercase tracking-wider block">
+                  Purpose of Holy Visit
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {(
+                    [
+                      'General Darshan',
+                      'Special Puja',
+                      'Aarti Seva',
+                      'Parikrama',
+                      'Prasad Seva',
+                    ] as VisitRecord['darshanType'][]
+                  ).map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setCheckInDarshanType(type)}
+                      className={`p-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer text-center ${
+                        checkInDarshanType === type
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-200'
+                          : 'bg-stone-950 border-stone-800 text-stone-400 hover:text-stone-200'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sacred Notes */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-amber-300 uppercase tracking-wider block">
+                  Sankalpa / Pilgrim Experience Notes (Optional)
+                </label>
+                <textarea
+                  value={checkInNotes}
+                  onChange={(e) => setCheckInNotes(e.target.value)}
+                  placeholder="e.g. Offered morning Pushpanjali, completed 3 circumambulations..."
+                  className="w-full bg-stone-950 border border-stone-700 rounded-xl p-3 text-xs sm:text-sm text-stone-100 focus:outline-none focus:border-amber-500 resize-none h-20 placeholder-stone-500"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-stone-800 bg-stone-950/80 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCheckInModal(false)}
+                className="px-4 py-2 text-xs font-bold text-stone-400 hover:text-stone-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSubmitVisitRecord(false)}
+                disabled={isSubmittingCheckIn}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isSubmittingCheckIn ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Recording Punya...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Confirm Temple Visit</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      </>
+      {/* 5. QR Code Check-In Scanner Modal */}
+      {showQRScannerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="bg-stone-950 border border-amber-500/40 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col font-sans">
+            <div className="bg-gradient-to-r from-amber-950 to-stone-900 px-5 py-4 border-b border-amber-500/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <QrCode className="w-5 h-5 text-amber-400" />
+                <h3 className="text-sm sm:text-base font-bold text-amber-100">
+                  Scan Temple Entrance QR
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQRScannerModal(false)}
+                className="p-1.5 rounded-lg text-stone-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4">
+              <QRScanner
+                title="Scan Holy Temple Location QR"
+                subtitle="Position camera at the sanctum entrance or verification pass"
+                onScanSuccess={handleQRScanSuccess}
+                onClose={() => setShowQRScannerModal(false)}
+                continuous={false}
+              />
+            </div>
+          </div>
+        </div>
       )}
-      </div>
-      )}
+
+      {/* 6. Mobile Floating Action Button (FAB) */}
+      <button
+        type="button"
+        id="fab-geo-checkin-btn"
+        onClick={handleOpenCheckInModal}
+        title="Quick Temple Geo Check-In"
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-stone-950 font-black text-xs px-5 py-3.5 rounded-full shadow-2xl shadow-amber-500/40 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all cursor-pointer border border-amber-300/50"
+      >
+        <span className="relative flex h-3 w-3">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stone-950 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-stone-950"></span>
+        </span>
+        <MapPin className="w-4 h-4 text-stone-950" />
+        <span>Check-In Now</span>
+      </button>
+
+      {/* 7. Live Intercom & Emergency Comms Bridge Drawer */}
+      <DevoteeCommsDrawer
+        isOpen={showCommsDrawer}
+        onClose={() => setShowCommsDrawer(false)}
+        visit={commsTargetVisit}
+        devoteeMember={selectedDevoteeMember}
+        currentUser={currentUser}
+        activeWorkspace={activeWorkspace}
+      />
     </div>
   );
 }

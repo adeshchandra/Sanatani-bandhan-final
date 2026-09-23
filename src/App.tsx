@@ -80,6 +80,7 @@ const GodModeBackend = lazy(() => import('./components/common/GodModeBackend').t
 
 // Public / Devotee Portal
 const DevoteePortal = lazy(() => import('./components/devotee/DevoteePortal').then(m => ({ default: m.DevoteePortal })));
+const DevoteeAccountPortal = lazy(() => import('./components/domain5/DevoteeAccountPortal').then(m => ({ default: m.default })));
 const MemberAppShell = lazy(() => import('./components/devotee/MemberAppShell').then(m => ({ default: m.default })));
 
 const YatraNetDesk = lazy(() => import('./components/domain7/YatraNetDesk').then(m => ({ default: m.default })));
@@ -144,7 +145,9 @@ const AppContent: React.FC = () => {
   const renderActiveDesk = () => {
     switch (activeModule) {
       case 'devotee-portal':
-        return <DevoteePortal />;
+      case 'personal-portal':
+      case 'devotee-account':
+        return <DevoteeAccountPortal />;
       case 'dashboard':
         return (
           <DashboardHome

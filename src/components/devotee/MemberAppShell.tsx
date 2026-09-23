@@ -14,6 +14,7 @@ import SanataniVivahDesk from '../domain4/SanataniVivahDesk';
 import { PurohitMarketDesk } from '../domain3/PurohitMarketDesk';
 import SanataniSocialFeed from './SanataniSocialFeed';
 import { PersonalAccountDesk } from '../account/PersonalAccountDesk';
+import DevoteeAccountPortal from '../domain5/DevoteeAccountPortal';
 import YatraNetDesk from '../domain7/YatraNetDesk';
 import { DevoteePortal } from './DevoteePortal';
 import { calculatePanchang } from '../../utils/panchang';
@@ -77,13 +78,13 @@ export default function MemberAppShell() {
       case 'SADHANA': 
         return <div className="h-full overflow-hidden"><PersonalSadhanaDesk /></div>;
       case 'PORTAL': 
-        return <div className="h-full overflow-y-auto custom-scrollbar"><DevoteePortal /></div>;
+        return <div className="h-full overflow-y-auto custom-scrollbar"><DevoteeAccountPortal initialTab="PASS" onNavigateDesk={handleNavigateFromAccount} /></div>;
       case 'YATRA_NET': 
         return <div className="h-full overflow-y-auto p-2 sm:p-4 custom-scrollbar"><YatraNetDesk /></div>;
       case 'VIVAH': 
         return <div className="h-full overflow-hidden"><SanataniVivahDesk /></div>;
       case 'PROFILE': 
-        return <PersonalAccountDesk onNavigateDesk={handleNavigateFromAccount} />;
+        return <div className="h-full overflow-y-auto custom-scrollbar"><DevoteeAccountPortal initialTab="PASS" onNavigateDesk={handleNavigateFromAccount} /></div>;
       default: 
         return <SanataniSocialFeed />;
     }

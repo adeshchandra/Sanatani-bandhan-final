@@ -418,31 +418,33 @@ service cloud.firestore {
     match /communities/{communityId}/{collectionName}/{docId} {
       allow read: if isTenantUser(communityId);
       allow write: if isTenantUser(communityId) && (
-        collectionName in ['vivah_profiles', 'vivah_connections', 'sadhana_logs', 'social_feed', 'yatra_social_feed', 'purohit_gigs', 'purohit_applications'] ||
+        collectionName in ['vivah_profiles', 'vivah_connections', 'sadhana_logs', 'social_feed', 'yatra_social_feed', 'purohit_gigs', 'purohit_applications', 'visit_records', 'check_ins'] ||
         isDemoWorkspace(communityId) ||
         hasRole('Trustee') || hasRole('Priest')
       );
     }
 
     match /{collection}/{docId} {
-      allow read: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'residentPujas', 'pitruRecords'] && (
+      allow read: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'visit_records', 'festivals', 'residentPujas', 'pitruRecords'] && (
         isSuperAdmin() || (
           isTenantUser(resource.data.workspaceId) && (
             isDemoWorkspace(resource.data.workspaceId) ||
             hasRole('Trustee') || hasRole('Sevadar') || hasRole('Priest') || hasRole('Accountant') ||
-            docId == request.auth.uid
+            docId == request.auth.uid ||
+            (collection == 'visit_records' && resource.data.devoteeId == request.auth.uid)
           )
         )
       );
-      allow create: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'residentPujas', 'pitruRecords'] && (
+      allow create: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'visit_records', 'festivals', 'residentPujas', 'pitruRecords'] && (
         isSuperAdmin() || (
           isTenantUser(request.resource.data.workspaceId) && (
             isDemoWorkspace(request.resource.data.workspaceId) ||
-            hasRole('Trustee') || hasRole('Sevadar') || hasRole('Priest') || hasRole('Accountant')
+            hasRole('Trustee') || hasRole('Sevadar') || hasRole('Priest') || hasRole('Accountant') ||
+            (collection == 'visit_records' && request.resource.data.devoteeId == request.auth.uid)
           )
         )
       );
-      allow update: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'residentPujas', 'pitruRecords'] && (
+      allow update: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'visit_records', 'festivals', 'residentPujas', 'pitruRecords'] && (
         isSuperAdmin() || (
           isTenantUser(resource.data.workspaceId) &&
           request.resource.data.workspaceId == resource.data.workspaceId && (
@@ -451,7 +453,7 @@ service cloud.firestore {
           )
         )
       );
-      allow delete: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'festivals', 'residentPujas', 'pitruRecords'] && (
+      allow delete: if collection in ['families', 'guests', 'annadanam', 'gurukulStudents', 'campaigns', 'resolutions', 'shifts', 'checkIns', 'visit_records', 'festivals', 'residentPujas', 'pitruRecords'] && (
         isSuperAdmin() || (
           isTenantUser(resource.data.workspaceId) &&
           (isDemoWorkspace(resource.data.workspaceId) || hasRole('Trustee'))

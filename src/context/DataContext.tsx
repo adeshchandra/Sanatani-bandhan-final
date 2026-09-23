@@ -972,6 +972,7 @@ interface DataContextType {
   addGuest: (guest: Omit<GuestRecord, 'id' | 'visitDate'>) => boolean;
   promoteGuestToMember: (guestId: string) => void;
   addTreasuryTransaction: (tx: Omit<TreasuryTransaction, 'id' | 'auditVerified'>) => boolean;
+  updateTreasuryTransaction: (id: string, updates: Partial<TreasuryTransaction>) => void;
   addAsset: (asset: Omit<AssetRecord, 'id'>) => boolean;
   updateInventoryStock: (id: string, newStock: number) => void;
   addInventoryItem: (item: Omit<InventoryItem, 'id' | 'lastRestockedDate'>) => boolean;
@@ -1672,6 +1673,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
+  const updateTreasuryTransaction = (id: string, updates: Partial<TreasuryTransaction>) => {
+    setAllTreasury((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+    );
+    try {
+      setDoc(doc(db, 'treasury', id), { ...updates, updatedAt: serverTimestamp() }, { merge: true }).catch(console.warn);
+      setDoc(doc(db, 'donations', id), { ...updates, updatedAt: serverTimestamp() }, { merge: true }).catch(console.warn);
+    } catch (e) {
+      console.warn('Update treasury transaction error:', e);
+    }
+  };
+
   const addAsset = (asset: Omit<AssetRecord, 'id'>): boolean => {
     if (!checkAndIncrementModuleQuota('assets')) return false;
 
@@ -1991,6 +2004,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addGuest,
         promoteGuestToMember,
         addTreasuryTransaction,
+        updateTreasuryTransaction,
         addAsset,
         updateInventoryStock,
         addInventoryItem,

@@ -51,7 +51,7 @@ async function startServer() {
         return res.status(400).json({ success: false, error: "Could not initialize AI client with provided key" });
       }
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         contents: "Respond in 2 words: Key Verified",
       });
       res.json({ success: true, message: response.text || "Key verified successfully!" });
@@ -115,7 +115,7 @@ Return ONLY valid JSON matching this schema:
 }`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -176,7 +176,7 @@ Return ONLY valid JSON matching this schema:
 }`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -209,6 +209,11 @@ Return ONLY valid JSON matching this schema:
         conversationHistory = [],
         customApiKey,
         apiKey,
+        systemInstruction: clientSystemInstruction,
+        panchangContext,
+        location,
+        activeFestivals,
+        aartiSchedule,
       } = req.body;
 
       const ai = getGenAI(customApiKey || apiKey);
@@ -366,37 +371,38 @@ Return ONLY valid JSON matching this schema:
         });
       }
 
-      const systemInstruction = `You are the supreme Vedic Scholar, Dharmacharya, and Hindu Institutional Administrator for "Sanatani Bandhan" (Universal Hindu ERP & SaaS Platform).
+      const baseInstruction = clientSystemInstruction || `You are the official Dharmic AI Copilot for ${workspaceName} located in ${location || 'Bharat'}.
 Your mission is to provide deep, authoritative, culturally reverent, and actionable guidance combining:
 1. Authentic Hindu Scriptures (Vedas, Upanishads, Bhagavad Gita, Dharmashastras, Puranas, Agamas, Arthashastra, Chanakya Niti).
-2. Modern institutional administration and SOPs (Temple management, Goshala welfare, Annadanam logistics, 80G accounting, crowd management, Gotra lineage, event broadcasting).
+2. Live Temple & Panchang context:
+   - Organization: ${workspaceName} (${workspaceType})
+   - Location: ${location || 'Bharat'}
+   - Panchang: ${typeof panchangContext === 'object' ? JSON.stringify(panchangContext) : (panchangContext || 'Live Daily Panchang')}
+   - Active Festivals/Vrats: ${activeFestivals || 'Nitya Seva & Puja'}
+   - Temple Aarti Timings: ${aartiSchedule || 'Mangala, Madhyahna, Sandhya, and Shayana Aarti'}
+   - Sampradaya: ${sampradaya}
+   - Output Language: ${language} (en: English, hi: Hindi, bn: Bengali, sa: Sanskrit)`;
 
-Current System Context:
-- Active Desk / Module: "${activeModule}"
-- Organization Type: "${workspaceType}" (e.g. Mandir, Goshala, Gurukul, Ashram, Sangha, Seva Trust)
-- Organization Name: "${workspaceName}"
-- Sampradaya / Tradition: "${sampradaya}"
-- Preferred Language: "${language}" (en: English, hi: Hindi, bn: Bengali, sa: Sanskrit)
-- Context Focus: "${contextMode}"
+      const systemInstruction = `${baseInstruction}
 
-Instructions for your response:
-1. Provide an authentic Sanskrit verse (Shloka/Mantra) in Devanagari script with IAST transliteration, English meaning, and exact scripture reference.
+INSTRUCTIONS FOR YOUR RESPONSE:
+1. Provide an authentic Sanskrit verse (Shloka/Mantra) in Devanagari script with IAST transliteration, meaning, and scripture reference whenever suitable.
 2. Deliver a clear, authoritative summary and 3-5 concise, highly actionable guidance points.
-3. Reference specific workflows relevant to the active module within the Sanatani Bandhan software.
+3. Be conversational, reverent, and directly address user queries on scriptures, rituals, fasts, temple timings, or temple operations.
 4. Suggest 3 concise follow-up questions the user can ask next.
 
 Return ONLY a valid JSON object matching this exact schema:
 {
   "title": "Concise, auspicious title for this guidance",
-  "summary": "2-3 sentences of clear authoritative synthesis",
-  "shloka": "Sanskrit verse in Devanagari script",
-  "shlokaTransliteration": "IAST romanized pronunciation",
-  "shlokaMeaning": "Meaning in the requested language",
-  "scriptureSource": "Exact scripture source (e.g. Bhagavad Gita 2.47, Taittiriya Upanishad 1.11)",
+  "summary": "Clear, direct, authoritative explanation answering the user inquiry",
+  "shloka": "Optional Sanskrit verse in Devanagari script if applicable (or empty string)",
+  "shlokaTransliteration": "IAST romanized pronunciation (or empty string)",
+  "shlokaMeaning": "Meaning in the requested language (or empty string)",
+  "scriptureSource": "Exact scripture source (e.g. Bhagavad Gita 2.47, Garuda Purana, Dharma Sindhu)",
   "guidancePoints": [
-    "Actionable bullet point 1",
-    "Actionable bullet point 2",
-    "Actionable bullet point 3"
+    "Actionable point 1",
+    "Actionable point 2",
+    "Actionable point 3"
   ],
   "moduleActions": [
     { "label": "Action button text", "targetModule": "${activeModule}", "tip": "Short explanation" }
@@ -417,12 +423,12 @@ Return ONLY a valid JSON object matching this exact schema:
         ...historyFormatted,
         {
           role: "user",
-          parts: [{ text: `User Query regarding module [${activeModule}]: ${prompt}` }]
+          parts: [{ text: `Devotee Query regarding [${activeModule}]: ${prompt}` }]
         }
       ];
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         contents,
         config: {
           systemInstruction,
@@ -431,7 +437,18 @@ Return ONLY a valid JSON object matching this exact schema:
         }
       });
 
-      const parsed = JSON.parse(response.text || "{}");
+      let parsed: any;
+      try {
+        parsed = JSON.parse(response.text || "{}");
+      } catch (pe) {
+        parsed = {
+          title: "Dharmic AI Response",
+          summary: response.text || "Guidance received.",
+          guidancePoints: [],
+          suggestedQueries: ["What are the rules for Ekadashi fasting?", "When is the next evening aarti?", "What samagri is needed for Satyanarayan Puja?"]
+        };
+      }
+
       return res.json({
         success: true,
         result: parsed,
@@ -448,21 +465,23 @@ Return ONLY a valid JSON object matching this exact schema:
         shlokaMeaning: "Where there is righteousness and adherence to sacred duty, there is victory.",
         scriptureSource: "Mahabharata - Bhishma Parva",
         guidancePoints: [
-          "Ensure all administrative actions align with the core Dharmic ethos of your institution.",
-          "Verify records in your active module to maintain transparency.",
-          "Foster harmony among Pujaris, Trustees, and Devotees through open communication."
-        ],
-        moduleActions: [
-          { label: "Return to Dashboard", targetModule: "dashboard", tip: "View overall institutional status" }
+          "Follow prescribed temple Shaucha (cleanliness) and ritual protocols.",
+          "Verify the exact Tithi and Muhurat with the temple Panjika before commencing major rituals.",
+          "Contact the Purohit desk or temple administrative office for custom Sankalp bookings."
         ],
         suggestedQueries: [
-          "How to enhance devotee engagement?",
-          "Best practices for temple inventory and asset tracking"
+          "What are the rules for Ekadashi fasting?",
+          "When is the next evening aarti?",
+          "What samagri is needed for Satyanarayan Puja?"
         ],
         isMock: true,
-        error: err.message
       };
-      return res.json({ success: true, result: fallback, isMock: true });
+      return res.json({
+        success: true,
+        result: fallback,
+        isMock: true,
+        error: err.message
+      });
     }
   });
 
@@ -481,7 +500,7 @@ Return ONLY a valid JSON object matching this exact schema:
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         contents: prompt,
         config: {
           systemInstruction:

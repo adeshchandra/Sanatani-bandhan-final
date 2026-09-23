@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   QrCode, X, Download, Award, ShieldCheck, Sparkles, Heart, Clock, 
@@ -12,7 +12,7 @@ import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { generateDevoteeCardPDF, generateTaxReceiptPDF } from '../../utils/pdfGenerator';
-import { generateSecureQRToken } from '../../utils/qrUtils';
+import { generateSecureQRToken, generateDynamicToken } from '../../utils/qrUtils';
 import { useToast } from '../../context/ToastContext';
 
 interface MySpaceModalProps {
@@ -91,6 +91,47 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
   const editPhotoRef = useRef<HTMLInputElement>(null);
 
   const activeMember = currentDevotee || devotees[0];
+  const [dynamicGatePassQr, setDynamicGatePassQr] = useState<string>('');
+  const [gatePassSecondsLeft, setGatePassSecondsLeft] = useState<number>(300);
+
+  const refreshDynamicPass = useCallback(() => {
+    if (!activeMember) return;
+    const dynamicToken = generateDynamicToken(
+      {
+        uid: activeMember.id,
+        id: activeMember.id,
+        name: activeMember.fullName || activeMember.name,
+        fullName: activeMember.fullName || activeMember.name,
+        sevaTier: activeMember.sevaTier || 'Devotee',
+        workspaceId: activeWorkspace?.id || 'default',
+        purpose: 'Sanctum Darshan & Prasad Entry',
+      },
+      300
+    );
+
+    QRCode.toDataURL(dynamicToken, {
+      margin: 1,
+      width: 280,
+      color: { dark: '#0f172a', light: '#ffffff' },
+    }).then((url) => setDynamicGatePassQr(url));
+    setGatePassSecondsLeft(300);
+  }, [activeMember, activeWorkspace]);
+
+  useEffect(() => {
+    if (!activeMember) return;
+    refreshDynamicPass();
+    const interval = setInterval(() => {
+      setGatePassSecondsLeft((prev) => {
+        if (prev <= 1) {
+          refreshDynamicPass();
+          return 300;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeMember, refreshDynamicPass]);
 
   useEffect(() => {
     if (!activeMember) return;
@@ -358,34 +399,62 @@ export const MySpaceModal: React.FC<MySpaceModalProps> = ({ isOpen, onClose, onN
               <div className="space-y-6 animate-in fade-in flex flex-col items-center justify-center py-4">
                  <div className="bg-white rounded-3xl shadow-xl border border-temple-200 w-full max-w-sm overflow-hidden relative">
                     <div className="bg-gradient-to-r from-saffron-500 to-red-600 p-6 text-center">
+                       <div className="flex items-center justify-center gap-1.5 mb-1">
+                          <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles size={11} /> Anti-Screenshot Dynamic Pass
+                          </span>
+                       </div>
                        <h3 className="text-2xl font-black text-white tracking-widest uppercase">Gate Pass</h3>
-                       <p className="text-saffron-100 text-xs font-bold mt-1">{activeWorkspace.name}</p>
+                       <p className="text-saffron-100 text-xs font-bold mt-0.5">{activeWorkspace.name}</p>
                     </div>
-                    <div className="p-8 flex flex-col items-center bg-white relative">
+                    <div className="p-6 flex flex-col items-center bg-white relative">
                        <div className="absolute -left-4 top-0 w-8 h-8 bg-temple-50 rounded-full shadow-inner border border-temple-100"></div>
                        <div className="absolute -right-4 top-0 w-8 h-8 bg-temple-50 rounded-full shadow-inner border border-temple-100"></div>
 
-                       <img
-                         src={qrDataUrl || undefined}
-                         alt="Safe Gate Pass QR"
-                         className="w-48 h-48 rounded-2xl shadow-md border-4 border-white mb-6 bg-white p-2"
-                       />
+                       {/* QR Image with Refresh Timer */}
+                       <div className="relative mb-3">
+                         <img
+                           src={dynamicGatePassQr || qrDataUrl || undefined}
+                           alt="Dynamic Gate Pass QR"
+                           className="w-48 h-48 rounded-2xl shadow-md border-4 border-temple-50 bg-white p-2"
+                         />
+                       </div>
+
+                       {/* Expiry Countdown Chip */}
+                       <div className="flex items-center gap-2 mb-3">
+                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-mono font-bold">
+                           <Clock size={13} className="text-amber-600 animate-spin" style={{ animationDuration: '6s' }} />
+                           <span>
+                             Valid: {Math.floor(gatePassSecondsLeft / 60)}:
+                             {(gatePassSecondsLeft % 60).toString().padStart(2, '0')}
+                           </span>
+                         </div>
+                         <button
+                           type="button"
+                           onClick={refreshDynamicPass}
+                           className="p-1 rounded-full bg-temple-100 hover:bg-temple-200 text-temple-700 transition-colors"
+                           title="Force Refresh Dynamic Token"
+                         >
+                           <Sparkles size={13} />
+                         </button>
+                       </div>
+
                        <h4 className="text-xl font-black text-temple-900 text-center">{activeMember.fullName || activeMember.name}</h4>
-                       <p className="text-sm font-mono font-bold text-temple-500 tracking-widest mt-1 text-center">{activeMember.id}</p>
+                       <p className="text-sm font-mono font-bold text-temple-500 tracking-widest mt-0.5 text-center">{activeMember.id}</p>
 
                        {completionScore === 100 ? (
-                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-full mt-5 border border-emerald-200 flex items-center gap-1.5">
+                         <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1.5 rounded-full mt-3 border border-emerald-200 flex items-center gap-1.5">
                            <ShieldCheck size={14}/> Identity Verified
                          </p>
                        ) : (
-                         <button onClick={() => setProfileTab('IDENTITY')} className="text-[10px] font-black text-temple-500 hover:text-saffron-600 uppercase tracking-widest bg-temple-100 hover:bg-saffron-50 px-3 py-1.5 rounded-full mt-5 border border-temple-200 hover:border-saffron-200 flex items-center gap-1.5 transition-colors">
+                         <button onClick={() => setProfileTab('IDENTITY')} className="text-[10px] font-black text-temple-500 hover:text-saffron-600 uppercase tracking-widest bg-temple-100 hover:bg-saffron-50 px-3 py-1.5 rounded-full mt-3 border border-temple-200 hover:border-saffron-200 flex items-center gap-1.5 transition-colors">
                            <AlertTriangle size={14}/> Complete Profile
                          </button>
                        )}
                     </div>
-                    <div className="bg-temple-50 p-5 border-t border-temple-100 text-center">
+                    <div className="bg-temple-50 p-4 border-t border-temple-100 text-center">
                        <p className="text-[10px] font-bold text-temple-500 uppercase tracking-widest leading-relaxed">
-                         Present this secure pass to volunteers at any event gate. It contains <strong className="text-red-500">no</strong> sensitive login credentials.
+                         Screenshots expire automatically. Present this dynamic live pass to volunteers at entry gates.
                        </p>
                     </div>
                  </div>
