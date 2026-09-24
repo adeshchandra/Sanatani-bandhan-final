@@ -14,6 +14,8 @@ import { Footer } from './components/common/Footer';
 import { QuickChandaModal } from './components/common/QuickChandaModal';
 import { MySpaceModal } from './components/common/MySpaceModal';
 import { QuickGuideModal } from './components/common/QuickGuideModal';
+import { RBACQuickGuideDrawer } from './components/common/RBACQuickGuideDrawer';
+import { QuickGuideProvider, useQuickGuide } from './context/QuickGuideContext';
 import { GlobalTelemetryModal } from './components/common/GlobalTelemetryModal';
 import { DharmicQueryAssistant } from './components/common/DharmicQueryAssistant';
 import { TawkToWidget } from './components/common/TawkToWidget';
@@ -38,27 +40,38 @@ const VanshavaliDesk = lazy(() => import('./components/domain1/VanshavaliDesk').
 const GuestManagerDesk = lazy(() => import('./components/domain1/GuestManagerDesk').then(m => ({ default: m.GuestManagerDesk })));
 const BulkImportDesk = lazy(() => import('./components/domain1/BulkImportDesk').then(m => ({ default: m.BulkImportDesk })));
 const RakthaSevaDesk = lazy(() => import('./components/domain1/RakthaSevaDesk').then(m => ({ default: m.RakthaSevaDesk })));
+const FederationMultiBranchDesk = lazy(() => import('./components/domain1/FederationMultiBranchDesk').then(m => ({ default: m.FederationMultiBranchDesk })));
 
 // Domain 2: Financials & Assets
 const TreasuryLedgerDesk = lazy(() => import('./components/domain2/TreasuryLedgerDesk').then(m => ({ default: m.TreasuryLedgerDesk })));
 const TaxReceiptDesk = lazy(() => import('./components/domain2/TaxReceiptDesk').then(m => ({ default: m.TaxReceiptDesk })));
+const Form10BDComplianceDesk = lazy(() => import('./components/domain2/Form10BDComplianceDesk').then(m => ({ default: m.Form10BDComplianceDesk })));
 const MandirCampaignsDesk = lazy(() => import('./components/domain2/MandirCampaignsDesk').then(m => ({ default: m.MandirCampaignsDesk })));
 const KarmaLedgerDesk = lazy(() => import('./components/domain2/KarmaLedgerDesk').then(m => ({ default: m.KarmaLedgerDesk })));
 const AssetInventoryDesk = lazy(() => import('./components/domain2/AssetInventoryDesk').then(m => ({ default: m.AssetInventoryDesk })));
 const InventoryDesk = lazy(() => import('./components/domain2/InventoryDesk').then(m => ({ default: m.InventoryDesk })));
+const HundiCountingAuditDesk = lazy(() => import('./components/domain2/HundiCountingAuditDesk').then(m => ({ default: m.HundiCountingAuditDesk })));
+const RatnaBhandarAssetDesk = lazy(() => import('./components/domain2/RatnaBhandarAssetDesk').then(m => ({ default: m.RatnaBhandarAssetDesk })));
+const QuickChandaPOS = lazy(() => import('./components/domain2/QuickChandaPOS').then(m => ({ default: m.QuickChandaPOS })));
 
 // Domain 3: Vedic Rituals & Astrology
 const PoojaBookingDesk = lazy(() => import('./components/domain3/PoojaBookingDesk').then(m => ({ default: m.PoojaBookingDesk })));
 const MandirPujaDesk = lazy(() => import('./components/domain3/MandirPujaDesk').then(m => ({ default: m.MandirPujaDesk })));
 const PurohitMarketDesk = lazy(() => import('./components/domain3/PurohitMarketDesk').then(m => ({ default: m.PurohitMarketDesk })));
 const PurohitDesk = lazy(() => import('./components/domain3/PurohitDesk').then(m => ({ default: m.PurohitDesk })));
+const PurohitManagementDesk = lazy(() => import('./components/domain3/PurohitManagementDesk').then(m => ({ default: m.PurohitManagementDesk })));
+const PurohitPortalUnified = lazy(() => import('./components/domain3/PurohitPortalUnified').then(m => ({ default: m.PurohitPortalUnified })));
 const PitruShradhDesk = lazy(() => import('./components/domain3/PitruShradhDesk').then(m => ({ default: m.PitruShradhDesk })));
 const PanchangMuhuratDesk = lazy(() => import('./components/domain3/PanchangMuhuratDesk').then(m => ({ default: m.PanchangMuhuratDesk })));
+const PanchangAstrologyEngine = lazy(() => import('./components/domain3/PanchangAstrologyEngine').then(m => ({ default: m.PanchangAstrologyEngine })));
+const YatraNetCommandCenter = lazy(() => import('./components/domain3/YatraNetCommandCenter').then(m => ({ default: m.YatraNetCommandCenter })));
 
 // Domain 4: Gau Seva & Community
 const GauSevaDesk = lazy(() => import('./components/domain4/GauSevaDesk').then(m => ({ default: m.GauSevaDesk })));
 const AnnadanamKitchenDesk = lazy(() => import('./components/domain4/AnnadanamKitchenDesk').then(m => ({ default: m.AnnadanamKitchenDesk })));
 const VedicSevaShikshaDesk = lazy(() => import('./components/domain4/VedicSevaShikshaDesk').then(m => ({ default: m.VedicSevaShikshaDesk })));
+const AshramGoshalaGurukulDesk = lazy(() => import('./components/domain4/AshramGoshalaGurukulDesk').then(m => ({ default: m.AshramGoshalaGurukulDesk })));
+const SmartBhandarProcurementDesk = lazy(() => import('./components/domain4/SmartBhandarProcurementDesk').then(m => ({ default: m.SmartBhandarProcurementDesk })));
 
 // Domain 5: Outreach & Scriptures
 const WhatsAppBroadcasterDesk = lazy(() => import('./components/domain5/WhatsAppBroadcasterDesk').then(m => ({ default: m.WhatsAppBroadcasterDesk })));
@@ -72,6 +85,7 @@ const SanataniVivahDesk = lazy(() => import('./components/domain4/SanataniVivahD
 // Domain 6: Enterprise Control & Multi-Workspace
 const WorkspaceSelectorDesk = lazy(() => import('./components/domain6/WorkspaceSelectorDesk').then(m => ({ default: m.WorkspaceSelectorDesk })));
 const MasterSettingsDesk = lazy(() => import('./components/domain6/MasterSettingsDesk').then(m => ({ default: m.MasterSettingsDesk })));
+const FamilyRootsMatrimonyDesk = lazy(() => import('./components/domain6/FamilyRootsMatrimonyDesk').then(m => ({ default: m.FamilyRootsMatrimonyDesk })));
 const AppStoreDesk = lazy(() => import('./components/domain6/AppStoreDesk').then(m => ({ default: m.AppStoreDesk })));
 const CrisisCommandCenter = lazy(() => import('./components/domain6/CrisisCommandCenter').then(m => ({ default: m.CrisisCommandCenter })));
 const UserRolesDesk = lazy(() => import('./components/domain6/UserRolesDesk').then(m => ({ default: m.UserRolesDesk })));
@@ -128,7 +142,7 @@ const AppContent: React.FC = () => {
   const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
 
   const [isSahayataOpen, setIsSahayataOpen] = useState<boolean>(false);
-  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const { openGuide } = useQuickGuide();
 
   if (viewMode === 'MEMBER') {
     return (
@@ -175,14 +189,47 @@ const AppContent: React.FC = () => {
       case 'bulkImport':
       case 'universal-csv':
         return checkPermission(['MANAGER', 'TRUSTEE']) ? <BulkImportDesk /> : <RestrictedAccess />;
+      case 'federation':
+      case 'federation-multi-branch':
+      case 'multi-branch':
+      case 'branch-federation':
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <FederationMultiBranchDesk /> : <RestrictedAccess />;
 
       // Domain 2
+      case 'quick-chanda-pos':
+      case 'quickChandaPos':
+      case 'chanda-pos':
+      case 'counter-pos':
+        return <QuickChandaPOS />;
       case 'treasury':
       case 'treasury-ledger':
-        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <TreasuryLedgerDesk onOpenQuickPay={() => setIsQuickChandaOpen(true)} /> : <RestrictedAccess />;
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? (
+          <TreasuryLedgerDesk
+            onOpenQuickPay={() => setIsQuickChandaOpen(true)}
+            onNavigate={(mod) => setActiveModule(mod)}
+          />
+        ) : (
+          <RestrictedAccess />
+        );
+      case 'hundi':
+      case 'hundi-audit':
+      case 'hundi-counting':
+      case 'golak':
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <HundiCountingAuditDesk /> : <RestrictedAccess />;
+      case 'ratna-bhandar':
+      case 'ratnaBhandar':
+      case 'sacred-assets':
+      case 'bullion-vault':
+      case 'toshakhana':
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'PUROHIT']) ? <RatnaBhandarAssetDesk /> : <RestrictedAccess />;
       case 'taxReceipts':
       case 'tax-receipt-80g':
         return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <TaxReceiptDesk /> : <RestrictedAccess />;
+      case 'form10bd':
+      case 'form-10bd':
+      case 'form10bdCompliance':
+      case 'form-10bd-compliance':
+        return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <Form10BDComplianceDesk /> : <RestrictedAccess />;
       case 'campaigns':
       case 'mandir-campaigns':
         return checkPermission(['MANAGER', 'TRUSTEE']) ? <MandirCampaignsDesk /> : <RestrictedAccess />;
@@ -203,18 +250,32 @@ const AppContent: React.FC = () => {
       case 'mandirPuja':
       case 'aarti-roster':
         return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <MandirPujaDesk /> : <RestrictedAccess />;
+      case 'purohitManagement':
+      case 'purohit-management':
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitManagementDesk /> : <RestrictedAccess />;
       case 'purohitDesk':
       case 'purohit-desk':
-        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitManagementDesk /> : <RestrictedAccess />;
+      case 'purohitPortal':
+      case 'purohit-portal':
+      case 'purohitUnified':
+      case 'purohit-unified':
       case 'purohitMarket':
       case 'purohit-marketplace':
-        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitMarketDesk /> : <RestrictedAccess />;
+        return <PurohitPortalUnified />;
       case 'pitruShradh':
       case 'pitru-shradh':
         return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PitruShradhDesk /> : <RestrictedAccess />;
       case 'panchang':
       case 'panchang-muhurat':
-        return <PanchangMuhuratDesk />;
+      case 'panchang-astrology-engine':
+      case 'panchang-engine':
+        return <PanchangAstrologyEngine />;
+      case 'yatranet':
+      case 'yatranet-gis':
+      case 'yatra-gis':
+      case 'crowd-control':
+        return <YatraNetCommandCenter />;
 
       // Domain 4
       case 'goshala':
@@ -226,6 +287,17 @@ const AppContent: React.FC = () => {
       case 'dharamshala':
       case 'dharamshala-yatri-bhavan':
         return <DharamshalaDesk />;
+      case 'smartBhandar':
+      case 'smart-bhandar':
+      case 'bhandar':
+      case 'bhandar-procurement':
+      case 'smartBhandarProcurement':
+        return <SmartBhandarProcurementDesk />;
+      case 'ashramKutir':
+      case 'ashram-kutir':
+      case 'ashramGoshalaGurukul':
+      case 'ashram-goshala-gurukul':
+        return <AshramGoshalaGurukulDesk />;
       case 'gurukul':
       case 'gurukul-education':
       case 'gurukulAcademy':
@@ -263,6 +335,11 @@ const AppContent: React.FC = () => {
       case 'sanatani-vivah':
       case 'matrimony':
         return <SanataniVivahDesk />;
+      case 'familyRootsMatrimony':
+      case 'family-roots-matrimony':
+      case 'familyRoots':
+      case 'family-roots':
+        return <FamilyRootsMatrimonyDesk />;
       case 'yatraNet':
       case 'yatra-net':
         return <YatraNetDesk />;
@@ -329,7 +406,7 @@ const AppContent: React.FC = () => {
         onOpenTelemetry={() => setIsTelemetryOpen(true)}
         onOpenAssistant={() => setIsAssistantOpen(true)}
         onOpenSahayata={() => setIsSahayataOpen(true)}
-        onOpenGuide={() => setIsGuideOpen(true)}
+        onOpenGuide={() => openGuide(activeModule)}
       />
 
       <div className="flex grow overflow-hidden">
@@ -393,6 +470,9 @@ const AppContent: React.FC = () => {
       />
 
       <TawkToWidget />
+
+      {/* Shastric & Statutory Quick Guide & SOP Drawer */}
+      <RBACQuickGuideDrawer />
 
       {/* Demo Sandbox Watermark */}
       {activeWorkspace?.id?.startsWith('DEMO_') && (
@@ -506,8 +586,10 @@ export default function App() {
             <AuthWorkspaceProvider>
               <NotificationProvider>
                 <DataProvider>
-                  <AppRouter />
-                  <GlobalSOSListener />
+                  <QuickGuideProvider>
+                    <AppRouter />
+                    <GlobalSOSListener />
+                  </QuickGuideProvider>
                 </DataProvider>
               </NotificationProvider>
             </AuthWorkspaceProvider>

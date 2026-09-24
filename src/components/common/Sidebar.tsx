@@ -50,7 +50,9 @@ import { Layers, LayoutDashboard,
   ArrowLeftRight,
   Filter,
   Check,
-  ShieldCheck
+  ShieldCheck,
+  Network,
+  Boxes
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -77,10 +79,15 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'vanshavali', name: 'Ancestral Lineage (Vanshavali)', domain: 1, domainTitle: 'Core Command & CRM', icon: GitFork },
   { id: 'guests', name: 'Guest & Visitor CRM', domain: 1, domainTitle: 'Core Command & CRM', icon: UserPlus },
   { id: 'bulkImport', name: 'Bulk CSV Ingestion', domain: 1, domainTitle: 'Core Command & CRM', icon: FileSpreadsheet },
+  { id: 'federation', name: 'Federation & Multi-Branch HQ', domain: 1, domainTitle: 'Core Command & CRM', icon: Network, badge: 'HQ Rollup' },
 
   // Domain 2: Financials & Assets
+  { id: 'quick-chanda-pos', name: 'Quick Chanda Counter POS', domain: 2, domainTitle: 'Financials & Assets', icon: Receipt, badge: 'High-Speed' },
   { id: 'treasury', name: 'Treasury & Expense Ledger', domain: 2, domainTitle: 'Financials & Assets', icon: Landmark, badge: 'Auto-Audit' },
+  { id: 'hundi-audit', name: 'Hundi & Golak Dual Audit', domain: 2, domainTitle: 'Financials & Assets', icon: Lock, badge: '2-Key' },
+  { id: 'ratna-bhandar', name: 'Ratna Bhandar & Bullion Vault', domain: 2, domainTitle: 'Financials & Assets', icon: Sparkles, badge: 'Dual-PIN' },
   { id: 'taxReceipts', name: 'Tax Certificates (80G/12A)', domain: 2, domainTitle: 'Financials & Assets', icon: Receipt },
+  { id: 'form10bd', name: 'Form 10BD & CBDT Filing', domain: 2, domainTitle: 'Financials & Assets', icon: FileSpreadsheet, badge: 'E-File' },
   { id: 'campaigns', name: 'Crowdfunding & Mandir Nirman', domain: 2, domainTitle: 'Financials & Assets', icon: Target },
   { id: 'karmaLedger', name: 'Karma Merit & Volunteer Ledger', domain: 2, domainTitle: 'Financials & Assets', icon: Sparkles },
   { id: 'assets', name: 'Fixed Assets & Deity Ornaments', domain: 2, domainTitle: 'Financials & Assets', icon: Layers },
@@ -93,11 +100,13 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'purohitMarket', name: 'Global Scholar Marketplace', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: Globe, badge: 'KYC Verified' },
   { id: 'pitruShradh', name: 'Pitru Paksha & Shradh Alerts', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: HeartHandshake },
   { id: 'panchang', name: 'Vedic Panjika & Muhurat', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: Calendar },
+  { id: 'yatranet-gis', name: 'YatraNet GIS Crowd & SOS', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: Radio, badge: 'Live GIS' },
 
   // Domain 4: Specialized Desks
   { id: 'rakthaSeva', name: 'Raktha Seva (Blood Registry)', domain: 4, domainTitle: 'Specialized Desks', icon: HeartPulse, badge: 'Life Saver' },
   { id: 'goshala', name: 'Goshala Sanctuary & Gomata Records', domain: 4, domainTitle: 'Specialized Desks', icon: Heart, badge: 'Gau Seva' },
   { id: 'annadanam', name: 'Annadanam & Prasad Seva', domain: 4, domainTitle: 'Specialized Desks', icon: Utensils },
+  { id: 'smartBhandar', name: 'Smart Bhandar & Recipe BOM', domain: 4, domainTitle: 'Specialized Desks', icon: Boxes, badge: 'Auto-Procure' },
   { id: 'ashramKutir', name: 'Ashram Kutir & Sadhana Stays', domain: 4, domainTitle: 'Specialized Desks', icon: Moon },
   { id: 'dharamshala', name: 'Dharamshala Yatri Bhavan', domain: 4, domainTitle: 'Specialized Desks', icon: Home },
   { id: 'gurukul', name: 'Gurukul Residential Monitoring', domain: 4, domainTitle: 'Specialized Desks', icon: GraduationCap },
@@ -205,8 +214,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       
       // 2. Check RBAC permissions
       let hasRole = true;
-      if (m.id === 'bulkImport') hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
-      else if (['treasury', 'taxReceipts'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+      if (['bulkImport', 'federation'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+      else if (['treasury', 'taxReceipts', 'form10bd'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
       else if (['campaigns', 'assets'].includes(m.id)) hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
       else if (m.id === 'inventory') hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']);
       else if (['poojaBooking', 'mandirPuja', 'purohitDesk', 'purohitMarket', 'pitruShradh'].includes(m.id)) {

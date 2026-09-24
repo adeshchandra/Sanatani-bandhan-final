@@ -14,6 +14,7 @@ import {
   Flame,
   Shield,
   HelpCircle,
+  BookOpen,
   PanelLeftClose,
   PanelLeftOpen,
   UserCircle,
@@ -197,10 +198,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenGuide}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all shadow-xs cursor-pointer group"
+              title="Shastric & Statutory Quick Guide (SOP) & Lexicon"
             >
-              <HelpCircle className="w-4 h-4" />
-              <span>Guide</span>
+              <BookOpen className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+              <span>SOP Guide</span>
             </button>
           )}
           {onOpenAssistant && (
@@ -293,15 +295,14 @@ export const Header: React.FC<HeaderProps> = ({
                   <QrCode className="w-4 h-4 text-indigo-400" /> My Smart Pass
                 </button>
                 {onOpenGuide && (
-            <button
-              type="button"
-              onClick={onOpenGuide}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-bold transition-all"
-            >
-              <HelpCircle className="w-4 h-4" />
-              <span>Guide</span>
-            </button>
-          )}
+                  <button
+                    type="button"
+                    onClick={() => { setShowRoleDropdown(false); onOpenGuide(); }}
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-amber-300 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    <BookOpen className="w-4 h-4 text-amber-400" /> Shastric SOP & Lexicon
+                  </button>
+                )}
           {onOpenAssistant && (
                   <button onClick={() => { setShowRoleDropdown(false); onOpenAssistant(); }} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 text-temple-300 text-xs font-bold transition-colors">
                     <Sparkles className="w-4 h-4 text-saffron-500" /> Dharmic AI Assistant

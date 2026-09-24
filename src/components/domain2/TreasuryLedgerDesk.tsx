@@ -23,6 +23,7 @@ import {
   CreditCard,
   AlertCircle,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useData } from '../../context/DataContext';
@@ -35,6 +36,7 @@ import { MemberSearchSelect } from '../common/MemberSearchSelect';
 
 interface TreasuryLedgerDeskProps {
   onOpenQuickPay?: () => void;
+  onNavigate?: (module: string) => void;
 }
 
 type FundType = 'Unrestricted' | 'Restricted';
@@ -85,7 +87,7 @@ const TRUST_FUNDS: FundDefinition[] = [
   },
 ];
 
-export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQuickPay }) => {
+export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQuickPay, onNavigate }) => {
   const { activeWorkspace } = useAuthWorkspace();
   const { treasury, donations, addTreasuryTransaction } = useData();
   const { showToast } = useToast();
@@ -450,6 +452,19 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
 
           {/* Action Toolbar */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            {/* Hundi & Golak Dual Audit Desk */}
+            {onNavigate && (
+              <button
+                type="button"
+                onClick={() => onNavigate('hundi-audit')}
+                className="px-3.5 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-amber-200 text-xs font-bold flex items-center gap-1.5 shadow transition-all cursor-pointer"
+                title="Open Hundi & Golak Dual-Custody Vault & Counting Desk"
+              >
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>Hundi Vault Desk</span>
+              </button>
+            )}
+
             {/* Tally CSV Export */}
             <button
               type="button"

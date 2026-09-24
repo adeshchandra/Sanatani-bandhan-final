@@ -9,6 +9,7 @@ import {
 import jsQR from 'jsqr';
 import AppLogo from '../common/AppLogo'; 
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
+import { useBiometricAuth } from '../../hooks/useBiometricAuth';
 import { WorkspaceConfig, WorkspaceType } from '../../types';
 import { sendPasswordResetEmail, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
@@ -111,6 +112,7 @@ interface PortalLoginProps {
 
 export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login', onBack, onSuccess }) => {
   const { loginAsRole, addWorkspace, switchWorkspace, loginWithPin } = useAuthWorkspace();
+  const { promptBiometric, BiometricPromptModal } = useBiometricAuth();
   const [language, setLanguage] = useState<'en'|'hi'|'bn'>('en'); 
   const t = (key: string) => (translations as any)[language][key] || key;
 
@@ -171,37 +173,16 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
   };
 
   const handleBiometricLogin = async () => {
-    setIsBiometricPromptActive(true);
     try {
-      if (!window.PublicKeyCredential) {
-        throw new Error('Biometric authentication is not supported on this device.');
-      }
-      if (window.self !== window.top) { 
-         showToast('Preview Mode: Simulating Biometric Auth. Open in new tab for real WebAuthn.', 'success');
-         setTimeout(() => {
-            handleSmartLogin(undefined, 'MANAGER', '000000', true);
-            setIsBiometricPromptActive(false);
-         }, 1500);
-         return;
-      }
-      const publicKey = {
-        challenge: new Uint8Array(32),
-        rpId: window.location.hostname,
-        allowCredentials: [],
-        userVerification: "preferred" as UserVerificationRequirement,
-      };
-      const assertion = await navigator.credentials.get({ publicKey });
-      if (assertion) {
-        setIsBiometricPromptActive(false);
-        await handleSmartLogin(undefined, 'MANAGER', '000000', true);
+      const verified = await promptBiometric('System Login');
+      if (verified) {
+        // Instantly bypass PIN/password validation and authenticate into default workspace
+        loginAsRole('SuperAdmin', 'Temple Administrator');
+        showToast('Biometric FaceID / TouchID Authentication Verified!', 'success');
+        onSuccess();
       }
     } catch (err: any) {
-      setIsBiometricPromptActive(false);
-      if (err?.name === 'NotAllowedError') {
-        setError('Preview restricted: Please open the app in a new tab to use Biometrics.');
-      } else {
-        setError('Biometric login failed or was cancelled.');
-      }
+      setError('Biometric authentication failed or was cancelled.');
     }
   };
 
@@ -609,6 +590,27 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
                     </div>
                   </div>
 
+                  {/* PROMINENT BIOMETRIC AUTHENTICATION BUTTON */}
+                  <div className="pt-1">
+                    <button
+                      type="button"
+                      onClick={handleBiometricLogin}
+                      className="group relative w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-600 text-white font-black text-sm tracking-wide transition-all shadow-md hover:shadow-lg hover:shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-2.5 active:scale-[0.99] border border-emerald-400/30"
+                    >
+                      <div className="relative flex items-center justify-center">
+                        <Fingerprint className="w-5 h-5 text-emerald-100 group-hover:scale-110 transition-transform" />
+                        <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-200"></span>
+                        </span>
+                      </div>
+                      <span>Quick Login with FaceID / TouchID</span>
+                    </button>
+                    <p className="text-[10px] text-center text-temple-400 mt-1.5 font-medium">
+                      WebAuthn / FIDO2 Hardware-grade passwordless biometric sign-in
+                    </p>
+                  </div>
+
                   <AnimatePresence>
                     {error && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
@@ -765,6 +767,9 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
           </div>
         </div>
       </motion.div>
+
+      {/* Hardware Biometric WebAuthn Modal */}
+      <BiometricPromptModal />
     </div>
   );
 };

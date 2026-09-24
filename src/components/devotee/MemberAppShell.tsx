@@ -12,6 +12,7 @@ import { NotificationPanel } from '../common/NotificationPanel';
 import PersonalSadhanaDesk from '../domain5/PersonalSadhanaDesk';
 import SanataniVivahDesk from '../domain4/SanataniVivahDesk';
 import { PurohitMarketDesk } from '../domain3/PurohitMarketDesk';
+import PurohitPortalUnified from '../domain3/PurohitPortalUnified';
 import SanataniSocialFeed from './SanataniSocialFeed';
 import { PersonalAccountDesk } from '../account/PersonalAccountDesk';
 import DevoteeAccountPortal from '../domain5/DevoteeAccountPortal';
@@ -74,7 +75,7 @@ export default function MemberAppShell() {
       case 'HOME': 
         return <SanataniSocialFeed />;
       case 'PUROHIT': 
-        return <div className="h-full overflow-hidden"><PurohitMarketDesk /></div>;
+        return <div className="h-full overflow-y-auto custom-scrollbar"><PurohitPortalUnified /></div>;
       case 'SADHANA': 
         return <div className="h-full overflow-hidden"><PersonalSadhanaDesk /></div>;
       case 'PORTAL': 
