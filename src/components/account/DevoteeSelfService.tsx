@@ -130,10 +130,7 @@ export const DevoteeSelfService: React.FC = () => {
     try {
       let user = auth.currentUser;
       if (!user) {
-        // Avoid anonymous auth if it's disabled.
-        // const cred = await signInAnonymously(auth);
         throw new Error("Please log in properly before updating email.");
-        user = cred.user;
       }
       await verifyBeforeUpdateEmail(user, formData.email);
       setVerificationLinkSent(true);

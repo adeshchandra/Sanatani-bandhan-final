@@ -55,8 +55,8 @@ export type SevaTier = 'Ratna' | 'Vishesh' | 'Kormi' | 'Sadharan';
 
 export interface TenantScoped {
   workspaceId: string;
-  createdAt: number;
-  updatedAt: number;
+  createdAt?: number | string;
+  updatedAt?: number | string;
 }
 
 export interface Workspace extends TenantScoped {
@@ -92,6 +92,7 @@ export interface Workspace extends TenantScoped {
   idCardValidThru?: string;
   idCardIssuedOn?: string;
   gotra?: string;
+  planId?: string;
 }
 
 export interface WorkspaceConfig extends Partial<TenantScoped> {
@@ -127,6 +128,7 @@ export interface WorkspaceConfig extends Partial<TenantScoped> {
   idCardValidThru?: string;
   idCardIssuedOn?: string;
   gotra?: string;
+  planId?: string;
 }
 
 export interface AuditLog extends TenantScoped {
@@ -311,6 +313,7 @@ export interface TreasuryTransaction extends TenantScoped {
   vendorName?: string;
   devoteeId?: string;
   devoteeName?: string;
+  devoteePan?: string;
   paymentMode: 'UPI / QR' | 'Cash' | 'Bank Transfer' | 'Cheque' | 'Card' | string;
   referenceNo?: string;
   memoImageUrl?: string;
@@ -455,7 +458,7 @@ export interface PoojaBooking extends TenantScoped {
 export type PujaBooking = PoojaBooking;
 export type PoojaBookingRecord = PoojaBooking;
 
-export interface ResidentPujaSchedule extends TenantScoped {
+export interface ResidentPujaSchedule extends Partial<TenantScoped> {
   id: string;
   ritualName?: string;
   pujaName?: string;
@@ -471,7 +474,7 @@ export interface ResidentPujaSchedule extends TenantScoped {
   dailyAttendanceAvg?: number;
 }
 
-export interface PurohitProfile extends TenantScoped {
+export interface PurohitProfile extends Partial<TenantScoped> {
   id: string;
   fullName?: string;
   name?: string;
@@ -646,7 +649,7 @@ export interface CampaignCrowdfund extends TenantScoped {
   topDonors: { name: string; amount: number; city: string }[];
 }
 
-export interface MatrimonyProfile extends TenantScoped {
+export interface MatrimonyProfile extends Partial<TenantScoped> {
   id: string;
   fullName?: string;
   name?: string;

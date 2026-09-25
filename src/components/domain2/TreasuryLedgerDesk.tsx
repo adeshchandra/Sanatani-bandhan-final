@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 import {
   Landmark,
@@ -26,13 +26,14 @@ import {
   Lock,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
-import { useData } from '../../context/DataContext';
+import { useData, INITIAL_TREASURY } from '../../context/DataContext';
 import { TreasuryTransaction } from '../../types';
 import { generateTaxReceiptPDF, generateTreasuryLedgerPDF } from '../../utils/pdfGenerator';
 import { printThermalReceipt } from '../../utils/printUtils';
 import { useToast } from '../../context/ToastContext';
 import { compressExpenseMemo } from '../../utils/imageCompression';
 import { MemberSearchSelect } from '../common/MemberSearchSelect';
+import { getTransactions } from '../../services/treasuryService';
 
 interface TreasuryLedgerDeskProps {
   onOpenQuickPay?: () => void;
@@ -88,9 +89,35 @@ const TRUST_FUNDS: FundDefinition[] = [
 ];
 
 export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQuickPay, onNavigate }) => {
-  const { activeWorkspace } = useAuthWorkspace();
-  const { treasury, donations, addTreasuryTransaction } = useData();
+  const { activeWorkspace, activeWorkspaceId } = useAuthWorkspace();
+  const workspaceId = activeWorkspaceId || activeWorkspace?.id || 'DEMO_ws-mandir';
+  const { donations, addTreasuryTransaction } = useData();
   const { showToast } = useToast();
+
+  const [treasury, setTreasury] = useState<TreasuryTransaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchTransactions = async () => {
+    if (!workspaceId) return;
+    setLoading(true);
+    try {
+      const records = await getTransactions(workspaceId);
+      if (records && records.length > 0) {
+        setTreasury(records as TreasuryTransaction[]);
+      } else {
+        setTreasury(INITIAL_TREASURY || []);
+      }
+    } catch (err) {
+      console.error('Error fetching treasury transactions from Firestore:', err);
+      setTreasury(INITIAL_TREASURY || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [workspaceId]);
 
   // Combine treasury and donations ensuring no missing records
   const allLedgerRecords = useMemo(() => {
@@ -389,7 +416,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
     const txId = `tx_${Date.now()}`;
     const newTx: any = {
       id: txId,
-      workspaceId: activeWorkspace.id,
+      workspaceId,
       date: voucherDate,
       type: voucherType,
       category: voucherCategory,
@@ -409,6 +436,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
 
     try {
       addTreasuryTransaction(newTx);
+      setTreasury((prev) => [newTx, ...prev]);
       showToast(
         `${voucherType === 'Income' ? 'Receipt' : 'Payment'} Voucher recorded on the General Ledger!`,
         'success',
@@ -781,9 +809,15 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
         </div>
 
         {/* HIGH-DENSITY PROFESSIONAL DATA TABLE */}
-        <div className="bg-temple-900/90 border border-temple-800 rounded-3xl shadow-xl overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left text-xs text-temple-200">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-temple-900/90 border border-temple-800 rounded-3xl shadow-xl text-center">
+            <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p className="text-xs font-semibold text-amber-300">Loading Treasury Records from Firestore...</p>
+          </div>
+        ) : (
+          <div className="bg-temple-900/90 border border-temple-800 rounded-3xl shadow-xl overflow-hidden">
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="w-full text-left text-xs text-temple-200">
               <thead className="bg-temple-950/90 text-temple-400 border-b border-temple-800 text-[11px] uppercase tracking-wider font-extrabold">
                 <tr>
                   <th className="py-3.5 px-4">Date</th>
@@ -959,6 +993,7 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
             </table>
           </div>
         </div>
+        )}
 
         {/* ATTACHED MEMO MODAL */}
         {selectedMemoUrl && (

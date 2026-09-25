@@ -845,7 +845,9 @@ export const PurohitManagementDesk: React.FC = () => {
                                 {priest.name || priest.fullName}
                               </h3>
                               {priest.verifiedByMandirTrust && (
-                                <BadgeCheck className="w-4 h-4 text-emerald-400 shrink-0" title="Parishad Verified" />
+                                <span title="Parishad Verified">
+                                  <BadgeCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                                </span>
                               )}
                             </div>
                             <p className="text-xs text-amber-400 font-semibold line-clamp-1 mt-0.5">

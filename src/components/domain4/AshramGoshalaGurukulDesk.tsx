@@ -331,7 +331,7 @@ export const AshramGoshalaGurukulDesk: React.FC = () => {
   };
 
   const handleToggleCleaningStatus = (room: AshramKutirRoom) => {
-    const nextStatus =
+    const nextStatus: 'Ready' | 'Needs Cleaning' | 'Maintenance' =
       room.cleaningStatus === 'Ready'
         ? 'Needs Cleaning'
         : room.cleaningStatus === 'Needs Cleaning'
@@ -1205,7 +1205,9 @@ export const AshramGoshalaGurukulDesk: React.FC = () => {
                           <div className="flex items-center gap-1.5">
                             <h3 className="text-base font-black text-white">{cow.name}</h3>
                             {isAdopted && (
-                              <Award className="w-4 h-4 text-amber-400 fill-amber-400" title="Sponsored Gomata" />
+                              <span title="Sponsored Gomata">
+                                <Award className="w-4 h-4 text-amber-400 fill-amber-400" />
+                              </span>
                             )}
                           </div>
                           <span className="text-xs text-amber-400/90 font-mono">

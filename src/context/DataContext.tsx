@@ -23,6 +23,7 @@ import {
   ShlokaCardItem,
   TrusteeResolution,
   SevadarDutyShift,
+  TenantScoped,
 } from '../types';
 import { trackTreasuryPurchase, trackSignUp, trackGenerateLead } from '../utils/gtm';
 import { useAuthWorkspace } from './AuthWorkspaceContext';
@@ -971,7 +972,7 @@ interface DataContextType {
   updateVanshavali: (tree: VanshavaliNode) => void;
   addGuest: (guest: Omit<GuestRecord, 'id' | 'visitDate'>) => boolean;
   promoteGuestToMember: (guestId: string) => void;
-  addTreasuryTransaction: (tx: Omit<TreasuryTransaction, 'id' | 'auditVerified'>) => boolean;
+  addTreasuryTransaction: (tx: Omit<TreasuryTransaction, 'id' | 'auditVerified' | 'createdAt' | 'updatedAt'> & Partial<TenantScoped>) => boolean;
   updateTreasuryTransaction: (id: string, updates: Partial<TreasuryTransaction>) => void;
   addAsset: (asset: Omit<AssetRecord, 'id'>) => boolean;
   updateInventoryStock: (id: string, newStock: number) => void;
@@ -1246,7 +1247,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const key = `${DEMO_QUOTA_KEY_PREFIX}${activeWorkspace.id}_${moduleName}`;
     const currentCount = parseInt(localStorage.getItem(key) || '0', 10);
 
-    if (currentCount >= 6 && currentRole !== 'SUPER_ADMIN') {
+    const roleUpper = (currentRole || '').toUpperCase();
+    if (currentCount >= 6 && roleUpper !== 'SUPER_ADMIN' && roleUpper !== 'SUPERADMIN') {
       showToast(
         `Demo Quota Limit (4 manual inputs) reached for ${moduleName} in ${activeWorkspace.name}. Records auto-purge on schedule.`,
         'warning',
@@ -1595,7 +1597,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showToast(`Guest ${guest.name} promoted to enrolled Member!`, 'success');
   };
 
-  const addTreasuryTransaction = (tx: Omit<TreasuryTransaction, 'id' | 'auditVerified'>): boolean => {
+  const addTreasuryTransaction = (tx: Omit<TreasuryTransaction, 'id' | 'auditVerified' | 'createdAt' | 'updatedAt'> & Partial<TenantScoped>): boolean => {
     if (!checkAndIncrementModuleQuota('treasury')) return false;
     const id = `tx-${Date.now()}`;
     const now = Date.now();
@@ -1603,6 +1605,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...tx,
       id,
       workspaceId: tx.workspaceId || activeWorkspace.id,
+      createdAt: tx.createdAt || now,
+      updatedAt: tx.updatedAt || now,
       auditVerified: true,
       taxReceiptNumber: tx.is80GEligible ? `SB-80G-${new Date().getFullYear()}-${id.slice(-4)}` : undefined,
       _createdAt: now,

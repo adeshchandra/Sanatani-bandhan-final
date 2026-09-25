@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Compass,
   Radio,
@@ -29,6 +29,7 @@ import {
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useQuickGuide } from '../../context/QuickGuideContext';
 import { useToast } from '../../context/ToastContext';
+import { addAlert, updateAlertStatus, subscribeToAlerts } from '../../services/yatranetService';
 
 // Sector Definition & State Interface
 export type SectorStatus = 'SAFE' | 'CROWDED' | 'CRITICAL';
@@ -168,13 +169,35 @@ const INITIAL_ALERTS: EmergencyAlert[] = [
 ];
 
 export const YatraNetCommandCenter: React.FC = () => {
-  const { activeWorkspace, currentUser } = useAuthWorkspace();
+  const { activeWorkspace, activeWorkspaceId, currentUser } = useAuthWorkspace();
+  const workspaceId = activeWorkspaceId || activeWorkspace?.id || 'DEMO_ws-mandir';
   const { openGuide } = useQuickGuide();
   const { showToast } = useToast();
 
   // Core State
   const [sectors, setSectors] = useState<SectorZone[]>(INITIAL_SECTORS);
   const [alerts, setAlerts] = useState<EmergencyAlert[]>(INITIAL_ALERTS);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Real-time Fetch: subscribe to alerts in Firestore
+  useEffect(() => {
+    if (!workspaceId) return;
+    setLoading(true);
+    const unsubscribe = subscribeToAlerts(workspaceId, (liveAlerts) => {
+      if (liveAlerts && liveAlerts.length > 0) {
+        setAlerts(liveAlerts as EmergencyAlert[]);
+      } else {
+        setAlerts(INITIAL_ALERTS);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [workspaceId]);
 
   // Sevadar Redeployment Form State
   const [fromSectorId, setFromSectorId] = useState<string>('sec-main-gate');
@@ -218,7 +241,13 @@ export const YatraNetCommandCenter: React.FC = () => {
   };
 
   // Dispatch Medical Sevadars Action
-  const handleDispatchMedical = (alertId: string) => {
+  const handleDispatchMedical = async (alertId: string) => {
+    try {
+      await updateAlertStatus(workspaceId, alertId, 'RESPONDING');
+    } catch (err) {
+      console.error('Failed to update alert status in Firestore:', err);
+    }
+
     setAlerts((prevAlerts) =>
       prevAlerts.map((a) => {
         if (a.id === alertId) {
@@ -240,7 +269,13 @@ export const YatraNetCommandCenter: React.FC = () => {
   };
 
   // Resolve Alert Action
-  const handleResolveAlert = (alertId: string) => {
+  const handleResolveAlert = async (alertId: string) => {
+    try {
+      await updateAlertStatus(workspaceId, alertId, 'RESOLVED');
+    } catch (err) {
+      console.error('Failed to resolve alert status in Firestore:', err);
+    }
+
     setAlerts((prevAlerts) =>
       prevAlerts.map((a) => {
         if (a.id === alertId) {
@@ -258,6 +293,32 @@ export const YatraNetCommandCenter: React.FC = () => {
     );
 
     showToast('Emergency SOS marked as RESOLVED.', 'info', 'Alert Cleared');
+  };
+
+  // Broadcast / Trigger New SOS Alert
+  const handleBroadcastSOS = async () => {
+    const newAlertData: Partial<EmergencyAlert> = {
+      sectorId: 'sec-garbhagriha',
+      sectorName: 'Inner Sanctum Garbhagriha Enclosure',
+      title: 'Crowd Surge Alert: Sanctum Queue',
+      description: 'Devotee velocity slowed near sanctum barrier. Sevadar assistance requested.',
+      severity: 'CRITICAL_SOS',
+      status: 'ACTIVE',
+      timestamp: new Date().toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      reportedBy: currentUser?.fullName || currentUser?.name || 'Central Command',
+    };
+
+    try {
+      const created = await addAlert(workspaceId, newAlertData);
+      setAlerts((prev) => [{ id: created.id, ...newAlertData } as EmergencyAlert, ...prev]);
+      showToast('New Emergency SOS Broadcast logged to cloud ledger!', 'success', 'SOS Broadcast');
+    } catch (err) {
+      console.error('Error broadcasting SOS alert:', err);
+      showToast('Failed to broadcast alert to database.', 'error');
+    }
   };
 
   // Execute Sevadar Redeployment
@@ -608,14 +669,30 @@ export const YatraNetCommandCenter: React.FC = () => {
                   Emergency SOS & Dispatch Feed
                 </h3>
               </div>
-              <span className="text-[11px] font-mono text-red-400 font-bold">
-                {activeAlertCount} Active Calls
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleBroadcastSOS}
+                  className="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Broadcast New Emergency Alert"
+                >
+                  <Bell className="w-3 h-3 text-red-400" />
+                  <span>+ New SOS</span>
+                </button>
+                <span className="text-[11px] font-mono text-red-400 font-bold">
+                  {activeAlertCount} Active Calls
+                </span>
+              </div>
             </div>
 
             {/* Alert List */}
             <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
-              {alerts.length === 0 ? (
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                  <p className="text-xs font-semibold text-slate-400">Syncing live alerts from Firestore...</p>
+                </div>
+              ) : alerts.length === 0 ? (
                 <p className="text-center text-xs text-slate-500 py-6">
                   No active incidents. Sanctum security is optimal.
                 </p>

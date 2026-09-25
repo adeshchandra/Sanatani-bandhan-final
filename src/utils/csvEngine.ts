@@ -1,4 +1,4 @@
-import { DevoteeMember, SevaTier, UserRole } from '../types';
+import { DevoteeMember, SevaTier, UserRole, ROLE_MIGRATION_MAP } from '../types';
 
 export interface IngestedDevoteeRow {
   fullName: string;
@@ -214,19 +214,20 @@ export const bulkIngestDevotees = (
 
     const fullName = row['Name'] || row['FullName'] || row['fullName'] || `Member ${index + 1}`;
     const gotra = row['Gotra'] || row['gotra'] || 'Kashyapa';
-    const rawRole = (row['Role'] || row['role'] || 'DEVOTEE').toUpperCase();
-    const role: UserRole = ['DEVOTEE', 'MANAGER', 'SUPER_ADMIN', 'SUPER_ADMIN'].includes(rawRole)
-      ? (rawRole as UserRole)
-      : 'DEVOTEE';
+    const rawRole = (row['Role'] || row['role'] || 'Devotee').trim();
+    const role: UserRole = ROLE_MIGRATION_MAP[rawRole] || ROLE_MIGRATION_MAP[rawRole.toUpperCase()] || 'Devotee';
 
     const rawTier = row['Tier'] || row['tier'] || 'Sadharan';
     const sevaTier: SevaTier = ['Ratna', 'Vishesh', 'Kormi', 'Sadharan'].includes(rawTier)
       ? (rawTier as SevaTier)
       : 'Sadharan';
 
+    const now = Date.now();
     const newMember: DevoteeMember = {
-      id: `dev-${Date.now()}-${index}`,
+      id: `dev-${now}-${index}`,
       workspaceId,
+      createdAt: now,
+      updatedAt: now,
       fullName,
       spiritualName: row['SpiritualName'] || row['spiritualName'] || undefined,
       phone: rawPhone,

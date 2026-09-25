@@ -1124,26 +1124,26 @@ export const PersonalAccountDesk: React.FC<{
                 </div>
 
                 {/* Role Switcher if authorized */}
-                {(currentRole === 'SUPER_ADMIN' || currentRole === 'MANAGER' || currentRole === 'TRUSTEE' ) && (
+                {((currentRole as string) === 'SuperAdmin' || (currentRole as string) === 'SUPER_ADMIN' || (currentRole as string) === 'Sevadar' || (currentRole as string) === 'MANAGER' || (currentRole as string) === 'Trustee' || (currentRole as string) === 'TRUSTEE') && (
                   <div className="pt-4 border-t border-temple-200 space-y-2">
                     <label className="text-xs font-bold text-temple-700 uppercase tracking-wider">
                       Switch Role Mode
                     </label>
                     <div className="flex flex-wrap gap-2">
                       <button
-                        onClick={() => switchRole('SUPER_ADMIN')}
+                        onClick={() => switchRole('SuperAdmin')}
                         className="px-4 py-2 bg-temple-100 hover:bg-temple-200 text-temple-800 rounded-xl text-xs font-bold"
                       >
                         Trustee / Head Admin
                       </button>
                       <button
-                        onClick={() => switchRole('MANAGER')}
+                        onClick={() => switchRole('Sevadar')}
                         className="px-4 py-2 bg-temple-100 hover:bg-temple-200 text-temple-800 rounded-xl text-xs font-bold"
                       >
                         Staff Manager
                       </button>
                       <button
-                        onClick={() => switchRole('DEVOTEE')}
+                        onClick={() => switchRole('Devotee')}
                         className="px-4 py-2 bg-temple-100 hover:bg-temple-200 text-temple-800 rounded-xl text-xs font-bold"
                       >
                         Devotee View

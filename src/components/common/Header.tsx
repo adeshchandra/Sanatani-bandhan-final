@@ -80,13 +80,28 @@ export const Header: React.FC<HeaderProps> = ({
   const panchang = calculatePanchang();
   const taxonomy = useWorkspaceTaxonomy();
 
-  const getRoleLabel = (r: UserRole) => {
+  const getRoleLabel = (r: UserRole | string) => {
     switch (r) {
-      case 'SUPER_ADMIN': return 'God Mode';
-      
-      
-      case 'MANAGER': return 'Staff Manager';
-      case 'DEVOTEE': return `Personal Mode (${taxonomy.memberNoun})`;
+      case 'SuperAdmin':
+      case 'SUPER_ADMIN':
+        return 'God Mode';
+      case 'Trustee':
+      case 'TRUSTEE':
+        return 'Trustee Mode';
+      case 'Accountant':
+      case 'ACCOUNTANT':
+        return 'Accountant Mode';
+      case 'Priest':
+      case 'PUROHIT':
+        return 'Purohit Mode';
+      case 'Sevadar':
+      case 'MANAGER':
+      case 'VOLUNTEER':
+        return 'Staff Manager';
+      case 'Devotee':
+      case 'DEVOTEE':
+      default:
+        return `Personal Mode (${taxonomy.memberNoun})`;
     }
   };
 
@@ -333,7 +348,7 @@ export const Header: React.FC<HeaderProps> = ({
                   Role-Based Access
                 </p>
               </div>
-              {(['SUPER_ADMIN', 'MANAGER', 'DEVOTEE'] as UserRole[]).map((r, idx) => (
+              {(['SuperAdmin', 'Trustee', 'Priest', 'Accountant', 'Sevadar', 'Devotee'] as UserRole[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => { switchRole(r); setShowRoleDropdown(false); }}

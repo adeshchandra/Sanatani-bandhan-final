@@ -1042,7 +1042,9 @@ export const PurohitPortalUnified: React.FC = () => {
                             Pt. Radheshyam Dwivedi
                           </h3>
                           {currentVerificationStage === 'VERIFIED_MASTER' && (
-                            <Award className="w-4 h-4 text-amber-400 fill-amber-400" title="Parishad Gold Certified" />
+                            <span title="Parishad Gold Certified">
+                              <Award className="w-4 h-4 text-amber-400 fill-amber-400" />
+                            </span>
                           )}
                         </div>
                         <p className="text-xs text-amber-400 font-bold">Veda Vibhushan & Acharya</p>

@@ -17,12 +17,12 @@ interface RolePermission {
 }
 
 export const UserRolesDesk: React.FC = () => {
-  const { currentUser, updateCurrentUserRole } = useAuthWorkspace();
+  const { currentUser, updateCurrentUserRole, switchRole } = useAuthWorkspace();
   const { showToast } = useToast();
 
   const roleDefinitions: RolePermission[] = [
     {
-      role: 'SUPER_ADMIN',
+      role: 'SuperAdmin',
       title: 'Param Adhyaksha (Superadmin)',
       description: 'Supreme control over all 46 modules, workspace switching, vault access, and cryptographic audits.',
       canAccessTreasury: true,
@@ -33,7 +33,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
     },
     {
-      role: 'TRUSTEE',
+      role: 'Trustee',
       title: 'Trustee / Mandir Committee',
       description: 'Treasury approval authority, asset registry audit, budget allocation, and board resolutions.',
       canAccessTreasury: true,
@@ -44,7 +44,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-saffron-500/20 text-saffron-300 border-saffron-500/40',
     },
     {
-      role: 'ACCOUNTANT',
+      role: 'Accountant',
       title: 'Pradhan Koshadhyaksha (Accountant)',
       description: 'Double-entry ledger entry, 80G tax receipt generation, bhandara invoices, bank reconciliation.',
       canAccessTreasury: true,
@@ -55,7 +55,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     },
     {
-      role: 'PUROHIT',
+      role: 'Priest',
       title: 'Mukhya Purohit (Head Priest)',
       description: 'Pooja calendar scheduling, Sankalp verification, Aarti roster, Shradh alerts, Panjika muhurats.',
       canAccessTreasury: false,
@@ -66,7 +66,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
     },
     {
-      role: 'VOLUNTEER',
+      role: 'Sevadar',
       title: 'Mukhya Sevadar (Volunteer Coordinator)',
       description: 'Bhandara food distribution logging, crowd flow scanning, visitor welcome desk entry.',
       canAccessTreasury: false,
@@ -77,7 +77,7 @@ export const UserRolesDesk: React.FC = () => {
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
     },
     {
-      role: 'DEVOTEE',
+      role: 'Devotee',
       title: 'Bhakt / Sadhak (Registered Devotee)',
       description: 'Personal Smart Pass ID, donation history, pooja booking tracking, and livestream access.',
       canAccessTreasury: false,
@@ -90,8 +90,12 @@ export const UserRolesDesk: React.FC = () => {
   ];
 
   const handleSwitchMyRole = (newRole: UserRole) => {
-    updateCurrentUserRole(newRole);
-    showToast(`Role switched to ${newRole.toUpperCase()}! UI permissions immediately updated.`, 'info', 'RBAC Session Updated');
+    if (updateCurrentUserRole) {
+      updateCurrentUserRole(newRole);
+    } else {
+      switchRole(newRole);
+    }
+    showToast(`Role switched to ${newRole}! UI permissions immediately updated.`, 'info', 'RBAC Session Updated');
   };
 
   return (
@@ -104,7 +108,7 @@ export const UserRolesDesk: React.FC = () => {
               Role-Based Access Control (RBAC)
             </span>
             <span className="text-xs text-temple-400 font-mono">
-              Current Session: <span className="font-bold text-saffron-400">{currentUser.role.toUpperCase()}</span>
+              Current Session: <span className="font-bold text-saffron-400">{(currentUser?.role || 'Devotee').toUpperCase()}</span>
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-temple-100">
@@ -119,7 +123,7 @@ export const UserRolesDesk: React.FC = () => {
       {/* Roles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {roleDefinitions.map((def, idx) => {
-          const isCurrent = currentUser.role === def.role;
+          const isCurrent = currentUser?.role === def.role;
 
           return (
             <div

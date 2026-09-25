@@ -67,7 +67,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
   const [ttlMinutes, setTtlMinutes] = useState(60);
 
   useEffect(() => {
-    if (currentRole === 'SUPER_ADMIN') {
+    if ((currentRole as string) === 'SUPER_ADMIN' || currentRole === 'SuperAdmin') {
       setIsUnlocked(true);
     }
   }, [currentRole]);
@@ -83,7 +83,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
       godAccessKey.trim().toLowerCase() === 'godmode'
     ) {
       setIsUnlocked(true);
-      switchRole('SUPER_ADMIN');
+      switchRole('SuperAdmin');
       showToast('Omnipresent God Mode Backend Activated. Full sovereign access granted.', 'success');
       return;
     } 
@@ -92,7 +92,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
        if (godEmail.trim() !== '') {
           await signInWithEmailAndPassword(auth, godEmail, godAccessKey);
           setIsUnlocked(true);
-          switchRole('SUPER_ADMIN');
+          switchRole('SuperAdmin');
           showToast('Authenticated successfully.', 'success');
        } else {
           showToast('Please enter an email or a valid master key.', 'error');
@@ -443,7 +443,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                 Global RBAC Role Switching (Instant Permission Override)
               </h4>
               <div className="flex flex-wrap gap-2">
-                {(['SUPER_ADMIN', 'SUPER_ADMIN', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER', 'DEVOTEE'] as UserRole[]).map((r, idx) => (
+                {(['SuperAdmin', 'Trustee', 'Accountant', 'Priest', 'Sevadar', 'Devotee'] as UserRole[]).map((r) => (
                   <button
                     key={r}
                     type="button"

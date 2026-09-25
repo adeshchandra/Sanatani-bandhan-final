@@ -1,4 +1,5 @@
 import React, { useState, Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -26,6 +27,8 @@ import { isModuleAllowed } from './lib/workspaceRegistry';
 import { useToast } from './context/ToastContext';
 import { useData } from './context/DataContext';
 import { WorkspaceType, WorkspaceConfig } from './types';
+import { AdminLayout } from './admin/AdminLayout';
+import { SuperAdminDashboard } from './admin/SuperAdminDashboard';
 
 import { NotificationProvider } from './context/NotificationContext';
 const QRScanner = lazy(() => import('./components/admin/QRScanner').then(m => ({ default: m.QRScanner })));
@@ -41,6 +44,7 @@ const GuestManagerDesk = lazy(() => import('./components/domain1/GuestManagerDes
 const BulkImportDesk = lazy(() => import('./components/domain1/BulkImportDesk').then(m => ({ default: m.BulkImportDesk })));
 const RakthaSevaDesk = lazy(() => import('./components/domain1/RakthaSevaDesk').then(m => ({ default: m.RakthaSevaDesk })));
 const FederationMultiBranchDesk = lazy(() => import('./components/domain1/FederationMultiBranchDesk').then(m => ({ default: m.FederationMultiBranchDesk })));
+const SevadarRosterDesk = lazy(() => import('./components/domain1/SevadarRosterDesk').then(m => ({ default: m.SevadarRosterDesk })));
 
 // Domain 2: Financials & Assets
 const TreasuryLedgerDesk = lazy(() => import('./components/domain2/TreasuryLedgerDesk').then(m => ({ default: m.TreasuryLedgerDesk })));
@@ -99,7 +103,6 @@ const MemberAppShell = lazy(() => import('./components/devotee/MemberAppShell').
 
 const YatraNetDesk = lazy(() => import('./components/domain7/YatraNetDesk').then(m => ({ default: m.default })));
 const DharamshalaDesk = lazy(() => import('./components/domain4/DharamshalaDesk').then(m => ({ default: m.DharamshalaDesk })));
-const SevadarRosterDesk = lazy(() => import('./components/domain6/SevadarRosterDesk').then(m => ({ default: m.SevadarRosterDesk })));
 const PanchayatPollingDesk = lazy(() => import('./components/domain6/PanchayatPollingDesk').then(m => ({ default: m.PanchayatPollingDesk })));
 
 
@@ -122,7 +125,7 @@ const AppContent: React.FC = () => {
   const { showToast } = useToast();
   const [activeModule, setActiveModule] = useState<string>('dashboard');
   React.useEffect(() => {
-    if (currentRole === 'DEVOTEE' && activeModule === 'dashboard') {
+    if ((currentRole === 'Devotee' || (currentRole as string) === 'DEVOTEE') && activeModule === 'dashboard') {
       setActiveModule('devotee-portal');
     }
   }, [currentRole, activeModule]);
@@ -194,6 +197,11 @@ const AppContent: React.FC = () => {
       case 'multi-branch':
       case 'branch-federation':
         return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? <FederationMultiBranchDesk /> : <RestrictedAccess />;
+      case 'sevadar-roster':
+      case '/sevadar-roster':
+      case 'sevadarRoster':
+      case 'sevadar-hr':
+        return checkPermission(['TRUSTEE', 'MANAGER', 'SEVADAR', 'VOLUNTEER']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
 
       // Domain 2
       case 'quick-chanda-pos':
@@ -486,7 +494,7 @@ const AppContent: React.FC = () => {
 };
 
 
-const AppRouter: React.FC = () => {
+const MainAppView: React.FC = () => {
   const { isAuthenticated, loginWithPin, addWorkspace, switchWorkspace, loginAsRole, firebaseUser } = useAuthWorkspace();
   const { devotees, seedDemoData } = useData();
   const [view, setView] = useState<'landing' | 'login' | 'signup'>('landing');
@@ -553,7 +561,7 @@ const AppRouter: React.FC = () => {
     switchWorkspace(demoId);
     
     // Inject test user session
-    loginAsRole('SUPER_ADMIN', 'Demo User');
+    loginAsRole('SuperAdmin', 'Demo User');
     if (seedDemoData) {
       seedDemoData(demoId, type);
     }
@@ -573,6 +581,19 @@ const AppRouter: React.FC = () => {
       onSignupClick={() => setView('signup')} 
       onDemoStart={handleStartDemo}
     />
+  );
+};
+
+const AppRouter: React.FC = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AdminLayout />} path="/admin">
+          <Route element={<SuperAdminDashboard />} index />
+        </Route>
+        <Route element={<MainAppView />} path="*" />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

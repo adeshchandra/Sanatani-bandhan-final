@@ -165,7 +165,14 @@ export interface AuthWorkspaceContextType {
   currentRole: UserRole;
   currentDevotee: DevoteeMember | null;
   setCurrentDevotee: (devotee: DevoteeMember | null) => void;
-  currentUser?: { id: string; name: string; role: UserRole };
+  currentUser?: {
+    id: string;
+    name: string;
+    fullName?: string;
+    phone?: string;
+    email?: string;
+    role: UserRole;
+  };
   isAuthenticated: boolean;
   viewMode: 'MANAGER' | 'MEMBER';
   setViewMode: (mode: 'MANAGER' | 'MEMBER') => void;
@@ -556,9 +563,13 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const currentUser = useMemo(() => {
+    const displayName = currentDevotee?.fullName || user?.displayName || 'Acharya / Trustee Administrator';
     return {
       id: currentDevotee?.id || user?.uid || 'admin-root',
-      name: currentDevotee?.fullName || user?.displayName || 'Acharya / Trustee Administrator',
+      name: displayName,
+      fullName: displayName,
+      phone: currentDevotee?.phone || user?.phoneNumber || '+91 98765 43210',
+      email: currentDevotee?.email || user?.email || 'admin@sanatanmandir.org',
       role: role || currentRole,
     };
   }, [currentDevotee, user, role, currentRole]);

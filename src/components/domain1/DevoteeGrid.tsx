@@ -40,7 +40,7 @@ import {
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useWorkspaceTaxonomy } from '../../hooks/useWorkspaceTaxonomy';
-import { useData } from '../../context/DataContext';
+import { useData, INITIAL_DEVOTEES } from '../../context/DataContext';
 import { useScopedData } from '../../hooks/useScopedData';
 import { DevoteeMember, SevaTier, UserRole } from '../../types';
 import { exportToCSV } from '../../utils/csvEngine';
@@ -55,9 +55,11 @@ import { generateStandardA_AutoLoginQR, generateStandardB_GatePassQR } from '../
 import { usePlanGate } from '../../hooks/usePlanGate';
 import { UpsellModal } from '../common/UpsellModal';
 import { QuickChandaModal } from '../common/QuickChandaModal';
+import { addDevotee, getDevotees } from '../../services/devoteeService';
 
 export const DevoteeGrid: React.FC = () => {
-  const { activeWorkspace, currentRole, currentDevotee, checkPermission } = useAuthWorkspace();
+  const { activeWorkspace, activeWorkspaceId, currentRole, currentDevotee, checkPermission } = useAuthWorkspace();
+  const workspaceId = activeWorkspaceId || activeWorkspace?.id || 'DEMO_ws-mandir';
   const { checkGate, showUpsell, upsellModule, closeUpsell } = usePlanGate();
   
   const canExport = checkPermission(['TRUSTEE', 'MANAGER', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
@@ -65,8 +67,32 @@ export const DevoteeGrid: React.FC = () => {
   const canViewFinancials = checkPermission(['TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
   const canRegister = checkPermission(['TRUSTEE', 'MANAGER', 'ACCOUNTANT', 'PUROHIT', 'VOLUNTEER', 'SUPER_ADMIN', 'SUPER_ADMIN', 'SUPER_ADMIN']);
 
-  const { treasury, poojas, addDevotee, updateDevotee, deleteDevotee } = useData();
-  const devotees = useScopedData<DevoteeMember>('devotees', {}, { orderBy: { field: 'fullName', direction: 'asc' } });
+  const { treasury, poojas, updateDevotee, deleteDevotee } = useData();
+  const [devotees, setDevotees] = useState<DevoteeMember[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchDevotees = async () => {
+    if (!workspaceId) return;
+    setLoading(true);
+    try {
+      const records = await getDevotees(workspaceId);
+      if (records && records.length > 0) {
+        setDevotees(records as DevoteeMember[]);
+      } else {
+        setDevotees(INITIAL_DEVOTEES || []);
+      }
+    } catch (err) {
+      console.error('Error fetching devotees:', err);
+      setDevotees(INITIAL_DEVOTEES || []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDevotees();
+  }, [workspaceId]);
+
   const { showToast, confirm } = useToast();
 
   const taxonomy = useWorkspaceTaxonomy();
@@ -301,14 +327,14 @@ export const DevoteeGrid: React.FC = () => {
         return;
       }
       
-      const res = addDevotee({
-        workspaceId: activeWorkspace.id,
+      const newDevoteeData = {
+        workspaceId,
         fullName,
         spiritualName: spiritualName.trim() || undefined,
         phone: phone.trim(),
         email: email.trim() || undefined,
         pin: Math.floor(1000 + Math.random() * 9000).toString(),
-        role: 'DEVOTEE',
+        role: 'DEVOTEE' as const,
         sevaIndex: 350,
         sevaTier,
         gotra,
@@ -317,34 +343,36 @@ export const DevoteeGrid: React.FC = () => {
         culturalDistinction: culturalDistinction.trim() || undefined,
         address: address.trim() || undefined,
         birthDate: birthDate || undefined,
-        activeStatus: 'Active',
+        activeStatus: 'Active' as const,
         totalDonated: 0,
         volunteerHours: 0,
         photoUrl: photoUrl || undefined,
         medicalNotes: medicalNotes.trim() || undefined,
-      });
+      };
 
-      if (typeof res === 'string') {
+      try {
+        const res = await addDevotee(workspaceId, newDevoteeData);
+        showToast('Devotee registered successfully in Firestore!', 'success');
+
+        // Instantly refresh the grid state so the new devotee appears
+        const freshList = await getDevotees(workspaceId);
+        if (freshList && freshList.length > 0) {
+          setDevotees(freshList as DevoteeMember[]);
+        } else {
+          setDevotees(prev => [{ id: res.id, ...newDevoteeData } as DevoteeMember, ...prev]);
+        }
+
         const newDevotee = {
-           id: res,
-           workspaceId: activeWorkspace.id,
-           fullName,
-           spiritualName: spiritualName.trim() || undefined,
-           phone: phone.trim(),
-           email: email.trim() || undefined,
-           pin: 'XXXX',
-           role: 'DEVOTEE' as const,
-           sevaIndex: 350,
-           sevaTier,
-           gotra,
-           activeStatus: 'Active' as const,
-           totalDonated: 0,
-           volunteerHours: 0,
+          id: res.id,
+          ...newDevoteeData,
         };
         // Auto-generate the account creation PDF (ID Card)
         setTimeout(() => {
-           handlePrintCard(newDevotee as DevoteeMember);
+          handlePrintCard(newDevotee as unknown as DevoteeMember);
         }, 500);
+      } catch (err: any) {
+        console.error('Error adding devotee to Firestore:', err);
+        showToast('Failed to register devotee in database.', 'error');
       }
     }
 
@@ -664,7 +692,12 @@ export const DevoteeGrid: React.FC = () => {
       </div>
 
       {/* Devotees Views */}
-      {layoutView === 'grid' ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-16 bg-white border border-temple-200 rounded-xl shadow-sm text-center">
+          <div className="w-8 h-8 border-4 border-saffron-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+          <p className="text-xs font-semibold text-temple-700">Loading Devotee Records from Firestore...</p>
+        </div>
+      ) : layoutView === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredDevotees.map((devotee, idx) => (
             <div
@@ -1099,7 +1132,7 @@ export const DevoteeGrid: React.FC = () => {
                         <option value="PUROHIT">Purohit / Priest</option>
                         <option value="ACCOUNTANT">Accountant</option>
                         <option value="MANAGER">Manager</option>
-                        {currentRole === 'SUPER_ADMIN' ? (
+                        {(currentRole as string) === 'SUPER_ADMIN' || currentRole === 'SuperAdmin' ? (
                            <option value="TRUSTEE">Trustee</option>
                         ) : null}
                       </select>

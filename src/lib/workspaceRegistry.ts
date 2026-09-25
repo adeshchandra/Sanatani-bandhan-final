@@ -493,7 +493,7 @@ export const workspaceRegistry: Record<WorkspaceType, string[]> = {
 export const isModuleAllowed = (workspace: any, moduleId: string): boolean => {
   if (!workspace) return true;
   if (moduleId === 'dashboard' || moduleId === 'appStore') return true;
-  if (['sadhana-karma', 'sanatani-vivah', 'yatraNet'].includes(moduleId)) return true;
+  if (['sadhana-karma', 'sanatani-vivah', 'yatraNet', 'sevadar-roster', 'sevadarRoster'].includes(moduleId)) return true;
 
   const workspaceType = typeof workspace === 'string' ? workspace : workspace.type;
   const allowedModules = workspaceRegistry[workspaceType as WorkspaceType];

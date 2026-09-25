@@ -24,6 +24,7 @@ import { useToast } from '../../context/ToastContext';
 import { printThermalReceipt } from '../../utils/printUtils';
 import { generate80GTaxReceipt } from '../../utils/pdfGenerator';
 import { TreasuryTransaction } from '../../types';
+import { addTransaction } from '../../services/treasuryService';
 
 interface QuickChandaModalProps {
   isOpen: boolean;
@@ -43,7 +44,8 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
   prefilledDevoteeId,
   prefilledDevoteeName,
 }) => {
-  const { activeWorkspace } = useAuthWorkspace();
+  const { activeWorkspace, activeWorkspaceId } = useAuthWorkspace();
+  const workspaceId = activeWorkspaceId || activeWorkspace?.id || 'DEMO_ws-mandir';
   const { devotees, addTreasuryTransaction } = useData();
   const { showToast } = useToast();
 
@@ -141,7 +143,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
   }, [paymentMode, cashTendered, amount]);
 
   // Submit Handler
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const numericAmount = Number(amount);
@@ -157,7 +159,7 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
 
     const newTx: TreasuryTransaction = {
       id: txId,
-      workspaceId: activeWorkspace.id,
+      workspaceId,
       date: new Date().toISOString().slice(0, 10),
       type: 'Income',
       category,
@@ -175,15 +177,18 @@ export const QuickChandaModal: React.FC<QuickChandaModalProps> = ({
       auditVerified: true,
     };
 
-    // Save to Firestore via DataContext
+    // Save to Firestore via tenant treasury service
     try {
-      addTreasuryTransaction(newTx);
+      await addTransaction(workspaceId, newTx);
+      if (addTreasuryTransaction) {
+        addTreasuryTransaction(newTx);
+      }
       setLastRecordedTx(newTx);
       setIsSuccess(true);
       showToast(`Donation of ₹${numericAmount.toLocaleString('en-IN')} logged successfully!`, 'success', 'POS Counter');
     } catch (err: any) {
       console.error('[POS Error]', err);
-      showToast('Failed to record transaction. Please retry.', 'error', 'Error');
+      showToast('Failed to record transaction in database. Please retry.', 'error', 'Error');
     }
   };
 

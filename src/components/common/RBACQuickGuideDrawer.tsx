@@ -23,6 +23,7 @@ import {
   Building,
   GraduationCap,
   Users,
+  UserCheck,
   Flame,
   HelpCircle,
   ArrowRight,
@@ -163,6 +164,7 @@ const MODULE_ICONS: Record<string, { icon: React.ElementType; color: string; lab
   GOSHALA_DESK: { icon: Heart, color: 'text-emerald-400', label: 'Goshala Sanctuary' },
   HUNDI_VAULT: { icon: Lock, color: 'text-amber-400', label: 'Hundi & Golak Vault Audit' },
   RATNA_BHANDAR: { icon: Sparkles, color: 'text-yellow-400', label: 'Ratna Bhandar & Bullion' },
+  SEVADAR_ROSTER: { icon: UserCheck, color: 'text-amber-400', label: 'Sevadar HR Desk & Volunteer Roster' },
 };
 
 export const RBACQuickGuideDrawer: React.FC = () => {

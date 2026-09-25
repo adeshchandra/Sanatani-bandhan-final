@@ -481,7 +481,7 @@ export const SanataniSocialFeed: React.FC = () => {
     const newComment: FeedComment = {
       id: 'c_' + Date.now(),
       authorName: currentUser?.name || 'Devotee',
-      authorRole: (currentUser?.role === 'TRUSTEE' ? 'Trustee' : currentUser?.role === 'MANAGER' ? 'Staff' : 'Devotee'),
+      authorRole: (['Trustee', 'SuperAdmin'].includes(currentUser?.role || '') ? 'Trustee' : currentUser?.role === 'Sevadar' ? 'Staff' : 'Devotee'),
       avatarLetter: (currentUser?.name || 'D').charAt(0).toUpperCase(),
       text,
       timestamp: 'Just now'
@@ -532,10 +532,10 @@ export const SanataniSocialFeed: React.FC = () => {
       id: 'post-' + Date.now(),
       workspaceId: activeWorkspace?.id || 'demo',
       authorName: currentUser?.name || 'Acharya Devotee',
-      authorRole: (currentUser?.role === 'TRUSTEE' ? 'Trustee' : currentUser?.role === 'MANAGER' ? 'Trustee' : 'Devotee'),
+      authorRole: (['Trustee', 'SuperAdmin'].includes(currentUser?.role || '') ? 'Trustee' : currentUser?.role === 'Sevadar' ? 'Volunteer' : 'Devotee'),
       authorCity: activeWorkspace?.city || 'Varanasi',
       avatarLetter: (currentUser?.name || 'D').charAt(0).toUpperCase(),
-      isOfficial: currentUser?.role === 'TRUSTEE' || currentUser?.role === 'MANAGER',
+      isOfficial: ['Trustee', 'SuperAdmin', 'Sevadar'].includes(currentUser?.role || ''),
       category: finalCategoryName,
       customCategoryName: isCustomCat ? customCategoryName.trim() : undefined,
       customCategoryEmoji: isCustomCat ? customCategoryEmoji : undefined,

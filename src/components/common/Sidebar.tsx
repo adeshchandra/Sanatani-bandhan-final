@@ -80,6 +80,7 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'guests', name: 'Guest & Visitor CRM', domain: 1, domainTitle: 'Core Command & CRM', icon: UserPlus },
   { id: 'bulkImport', name: 'Bulk CSV Ingestion', domain: 1, domainTitle: 'Core Command & CRM', icon: FileSpreadsheet },
   { id: 'federation', name: 'Federation & Multi-Branch HQ', domain: 1, domainTitle: 'Core Command & CRM', icon: Network, badge: 'HQ Rollup' },
+  { id: 'sevadar-roster', name: 'Sevadar HR & Volunteer Roster', domain: 1, domainTitle: 'Core Command & CRM', icon: UserCheck, badge: 'SOP / KYC' },
 
   // Domain 2: Financials & Assets
   { id: 'quick-chanda-pos', name: 'Quick Chanda Counter POS', domain: 2, domainTitle: 'Financials & Assets', icon: Receipt, badge: 'High-Speed' },
@@ -130,7 +131,6 @@ export const MODULE_CATALOG: NavItem[] = [
   // Domain 6: Governance & Security
   { id: 'trusteeGovernance', name: 'Trustee Board & Governance', domain: 6, domainTitle: 'Governance & Security', icon: Scale },
   { id: 'legalVault', name: 'Encrypted Legal Vault (80G/Deeds)', domain: 6, domainTitle: 'Governance & Security', icon: Lock },
-  { id: 'sevadarRoster', name: 'Sevadar Shift Roster', domain: 6, domainTitle: 'Governance & Security', icon: UserCheck },
   { id: 'qrScanner', name: 'QR Gate Scanner', domain: 6, domainTitle: 'Governance & Security', icon: ShieldCheck, badge: 'Check-in' },
   { id: 'appStore', name: 'App Store & Add-ons', domain: 6, domainTitle: 'Governance & Security', icon: Layers, badge: 'Integrations' },
   { id: 'masterSettings', name: 'Organization Settings & Logos', domain: 6, domainTitle: 'Governance & Security', icon: Settings },
@@ -227,8 +227,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       else if (['workspace-hub', 'masterSettings', 'appStore', 'spiritualSettings', 'panchayatPolls'].includes(m.id)) {
         hasRole = checkPermission(['TRUSTEE']);
       }
-      else if (['user-roles-rbac', 'trusteeGovernance', 'sevadarRoster', 'auditLog', 'legalVault', 'crisis-command', 'socialWall'].includes(m.id)) {
-        hasRole = checkPermission(['TRUSTEE', 'MANAGER']);
+      else if (['user-roles-rbac', 'trusteeGovernance', 'sevadarRoster', 'sevadar-roster', 'auditLog', 'legalVault', 'crisis-command', 'socialWall'].includes(m.id)) {
+        hasRole = checkPermission(['TRUSTEE', 'MANAGER', 'SEVADAR', 'VOLUNTEER']);
       }
       else if (['devotee-portal', 'devotees', 'family', 'vanshavali', 'guests', 'karmaLedger', 'rakthaSeva', 'goshala', 'annadanam', 'ashramKutir', 'dharamshala', 'gurukul', 'gurukulAcademy', 'vidyalaya', 'satsang', 'sanghaDrills', 'sevaTrust', 'granthLibrary', 'matrimony', 'utsavPanjika', 'shlokaFeed', 'dharmicAssistant', 'dharmaMarketing', 'sadhana-karma', 'sanatani-vivah', 'yatraNet'].includes(m.id)) {
         // These are open to all logged-in users in the organization view (devotee, volunteer, purohit, accountant, manager, trustee, superadmin)

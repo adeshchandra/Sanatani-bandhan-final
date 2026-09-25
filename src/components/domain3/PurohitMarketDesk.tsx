@@ -23,7 +23,7 @@ export function PurohitMarketDesk({ isOnline = navigator.onLine }: { isOnline?: 
     communityId: activeWorkspace.id,
     uid: currentDevotee?.id || 'sys-admin',
     userName: currentDevotee?.name || currentDevotee?.fullName || 'Admin',
-    role: currentRole === 'MANAGER' ? 'MANAGER' : 'MEMBER',
+    role: (currentRole as string) === 'MANAGER' || ['SuperAdmin', 'Trustee', 'Accountant'].includes(currentRole) ? 'MANAGER' : 'MEMBER',
     currency: { symbol: activeWorkspace.currencySymbol || '₹', code: activeWorkspace.currency || 'INR' }
   };
 

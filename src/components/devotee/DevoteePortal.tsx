@@ -25,6 +25,9 @@ export const DevoteePortal: React.FC = () => {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [isDonationHistoryOpen, setIsDonationHistoryOpen] = useState(false);
   const [isTaxWidgetOpen, setIsTaxWidgetOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewFileName, setPreviewFileName] = useState('');
   
   // Data Fetching
   const donations = useScopedData<TreasuryTransaction>('treasury', { type: 'Income' }, { orderBy: { field: 'date', direction: 'desc' }});
@@ -335,6 +338,13 @@ export const DevoteePortal: React.FC = () => {
         donations={donations}
         workspace={activeWorkspace}
         devoteeName={currentDevotee?.spiritualName || currentDevotee?.fullName || currentUser?.name || 'Devotee'}
+      />
+
+      <PdfPreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        pdfUrl={previewPdfUrl}
+        fileName={previewFileName}
       />
     </div>
   );

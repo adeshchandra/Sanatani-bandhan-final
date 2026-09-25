@@ -76,7 +76,7 @@ export const useScopedData = <T>(
       return { _unauthorized: true };
     }
 
-    const role = currentUser.role;
+    const roleUpper = (currentUser.role || '').toUpperCase();
     const uid = currentUser.id;
 
     // Always filter by activeWorkspace.id to prevent cross-workspace data leakage
@@ -84,18 +84,18 @@ export const useScopedData = <T>(
 
     // 'audit_logs' collection: Only TRUSTEE/SUPER_ADMIN can access
     if (collectionName === 'audit_logs') {
-       if (role !== 'TRUSTEE' && role !== 'SUPER_ADMIN') {
+       if (roleUpper !== 'TRUSTEE' && roleUpper !== 'SUPER_ADMIN' && roleUpper !== 'SUPERADMIN') {
           return { ...baseFilter, _unauthorized: true };
        }
     }
 
     // ACCOUNTANT, TRUSTEE, SUPER_ADMIN: See all workspace data
-    if (role === 'SUPER_ADMIN' || role === 'TRUSTEE' || role === 'ACCOUNTANT') {
+    if (roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'TRUSTEE' || roleUpper === 'ACCOUNTANT') {
       return baseFilter;
     }
 
     // DEVOTEE: Only see data where devoteeId === currentUser.uid
-    if (role === 'DEVOTEE') {
+    if (roleUpper === 'DEVOTEE') {
       if (collectionName === 'devotees') {
          return { ...baseFilter, id: uid };
       }
@@ -108,8 +108,8 @@ export const useScopedData = <T>(
       return { ...baseFilter, devoteeId: uid };
     }
 
-    // PUROHIT: See data where assignedPurohit === currentUser.uid OR workspace data
-    if (role === 'PUROHIT') {
+    // PUROHIT / PRIEST: See data where assignedPurohit === currentUser.uid OR workspace data
+    if (roleUpper === 'PUROHIT' || roleUpper === 'PRIEST') {
       if (collectionName === 'pooja_bookings') {
          return { ...baseFilter, assignedPurohit: uid };
       }
