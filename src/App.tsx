@@ -29,6 +29,7 @@ import { useData } from './context/DataContext';
 import { WorkspaceType, WorkspaceConfig } from './types';
 import { AdminLayout } from './admin/AdminLayout';
 import { SuperAdminDashboard } from './admin/SuperAdminDashboard';
+import { GlobalAnalytics } from './admin/GlobalAnalytics';
 
 import { NotificationProvider } from './context/NotificationContext';
 const QRScanner = lazy(() => import('./components/admin/QRScanner').then(m => ({ default: m.QRScanner })));
@@ -590,6 +591,7 @@ const AppRouter: React.FC = () => {
       <Routes>
         <Route element={<AdminLayout />} path="/admin">
           <Route element={<SuperAdminDashboard />} index />
+          <Route element={<GlobalAnalytics />} path="analytics" />
         </Route>
         <Route element={<MainAppView />} path="*" />
       </Routes>

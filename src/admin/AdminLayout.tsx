@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Bell,
   Search,
+  Activity,
 } from 'lucide-react';
 
 interface NavItem {
@@ -22,6 +23,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+  { name: 'Global Analytics', path: '/admin/analytics', icon: Activity },
   { name: 'Tenants & Mandirs', path: '/admin/tenants', icon: Building2, badge: '12' },
   { name: 'Users & Roles', path: '/admin/users', icon: Users },
   { name: 'Platform Settings', path: '/admin/settings', icon: Settings },
