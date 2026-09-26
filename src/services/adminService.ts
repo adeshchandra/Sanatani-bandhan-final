@@ -1,4 +1,4 @@
-import { db } from './firebaseClient';
+import { db, auth } from './firebaseClient';
 import { collection, getDocs } from 'firebase/firestore';
 
 export interface TenantRecord {
@@ -46,3 +46,36 @@ export const getTenants = async (): Promise<TenantRecord[]> => {
 };
 
 export const fetchTenants = getTenants;
+
+/**
+ * Provisions a new Mandir tenant partition via Node.js Express backend
+ */
+export const provisionTenant = async (tenantData: any): Promise<any> => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) {
+    throw new Error('User not authenticated. Please log in as Super Admin.');
+  }
+
+  const token = await currentUser.getIdToken();
+  if (!token) {
+    throw new Error('Failed to retrieve authentication token.');
+  }
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const response = await fetch(`${backendUrl}/api/admin/tenants`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(tenantData),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    throw new Error(errorBody?.message || errorBody?.error || `Failed to provision tenant: Status ${response.status}`);
+  }
+
+  return await response.json();
+};
+

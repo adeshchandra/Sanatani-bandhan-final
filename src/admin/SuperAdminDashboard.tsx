@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Building2,
   Users,
@@ -19,39 +19,31 @@ import {
   Layers,
 } from 'lucide-react';
 import { getTenants, TenantRecord } from '../services/adminService';
+import { OnboardTenantModal } from './components/OnboardTenantModal';
 
 export const SuperAdminDashboard: React.FC = () => {
   const [tenants, setTenants] = useState<TenantRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<string>('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchAllTenants = useCallback(async () => {
+    setLoading(true);
+    try {
+      const remoteTenants = await getTenants();
+      setTenants(remoteTenants);
+    } catch (err) {
+      console.error('Failed to load tenants from Firestore:', err);
+      setTenants([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchAllTenants = async () => {
-      setLoading(true);
-      try {
-        const remoteTenants = await getTenants();
-        if (isMounted) {
-          setTenants(remoteTenants);
-        }
-      } catch (err) {
-        console.error('Failed to load tenants from Firestore:', err);
-        if (isMounted) {
-          setTenants([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
     fetchAllTenants();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [fetchAllTenants]);
 
   const filteredTenants = tenants.filter((tenant) => {
     const matchesSearch =
@@ -93,6 +85,7 @@ export const SuperAdminDashboard: React.FC = () => {
           </button>
           <button
             type="button"
+            onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm shadow-amber-600/25 transition-all cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -354,6 +347,13 @@ export const SuperAdminDashboard: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Onboard New Mandir Modal */}
+      <OnboardTenantModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => fetchAllTenants()}
+      />
     </div>
   );
 };
