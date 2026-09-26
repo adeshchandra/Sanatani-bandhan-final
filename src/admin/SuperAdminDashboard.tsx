@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Building2,
   Users,
@@ -18,100 +18,42 @@ import {
   Server,
   Layers,
 } from 'lucide-react';
-
-interface TenantRecord {
-  id: string;
-  name: string;
-  code: string;
-  location: string;
-  state: string;
-  tier: 'Enterprise' | 'Heritage' | 'Standard' | 'Starter';
-  custodian: string;
-  devoteeCount: string;
-  onboardedDate: string;
-  status: 'Active' | 'Pending Verification' | 'Trial Mode';
-}
-
-const MOCK_TENANTS: TenantRecord[] = [
-  {
-    id: 'ws-mandir',
-    name: 'Kashi Vishwanath Mandir Trust',
-    code: 'KV-VNS-01',
-    location: 'Varanasi',
-    state: 'Uttar Pradesh',
-    tier: 'Enterprise',
-    custodian: 'Pt. Chandrashekhar Shastri',
-    devoteeCount: '18,420',
-    onboardedDate: '12 Jan 2025',
-    status: 'Active',
-  },
-  {
-    id: 'ws-somnath',
-    name: 'Shree Somnath Jyotirlinga Trust',
-    code: 'SM-PRB-02',
-    location: 'Prabhas Patan',
-    state: 'Gujarat',
-    tier: 'Enterprise',
-    custodian: 'Sri Pravinbhai Trivedi',
-    devoteeCount: '12,850',
-    onboardedDate: '04 Feb 2025',
-    status: 'Active',
-  },
-  {
-    id: 'ws-meenakshi',
-    name: 'Arulmigu Meenakshi Sundareswarar Devasthanam',
-    code: 'MK-MDU-03',
-    location: 'Madurai',
-    state: 'Tamil Nadu',
-    tier: 'Heritage',
-    custodian: 'Thiru S. Ramanathan',
-    devoteeCount: '7,410',
-    onboardedDate: '18 Mar 2025',
-    status: 'Active',
-  },
-  {
-    id: 'ws-jagannath',
-    name: 'Shri Jagannath Seva Samiti',
-    code: 'JN-PRI-04',
-    location: 'Puri',
-    state: 'Odisha',
-    tier: 'Heritage',
-    custodian: 'Sri Daitapati Mohapatra',
-    devoteeCount: '4,200',
-    onboardedDate: '02 Apr 2025',
-    status: 'Pending Verification',
-  },
-  {
-    id: 'ws-ram-mandir',
-    name: 'Ayodhya Shri Ram Janmabhoomi Teerth Kshetra',
-    code: 'RJ-AYD-05',
-    location: 'Ayodhya',
-    state: 'Uttar Pradesh',
-    tier: 'Enterprise',
-    custodian: 'Swami Govind Dev Giri Ji',
-    devoteeCount: '21,300',
-    onboardedDate: '15 Apr 2025',
-    status: 'Active',
-  },
-  {
-    id: 'ws-kamakhya',
-    name: 'Maa Kamakhya Devalaya Management Committee',
-    code: 'KM-GHY-06',
-    location: 'Guwahati',
-    state: 'Assam',
-    tier: 'Standard',
-    custodian: 'Sri Kabindra Sarma Doloi',
-    devoteeCount: '2,950',
-    onboardedDate: '28 May 2025',
-    status: 'Trial Mode',
-  },
-];
+import { getTenants, TenantRecord } from '../services/adminService';
 
 export const SuperAdminDashboard: React.FC = () => {
+  const [tenants, setTenants] = useState<TenantRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<string>('all');
 
-  const filteredTenants = MOCK_TENANTS.filter((tenant) => {
+  useEffect(() => {
+    let isMounted = true;
+    const fetchAllTenants = async () => {
+      setLoading(true);
+      try {
+        const remoteTenants = await getTenants();
+        if (isMounted) {
+          setTenants(remoteTenants);
+        }
+      } catch (err) {
+        console.error('Failed to load tenants from Firestore:', err);
+        if (isMounted) {
+          setTenants([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchAllTenants();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filteredTenants = tenants.filter((tenant) => {
     const matchesSearch =
       tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tenant.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -172,9 +114,11 @@ export const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight">12</span>
+            <span className="text-3xl font-black text-slate-900 tracking-tight">
+              {loading ? '-' : tenants.length}
+            </span>
             <span className="ml-2 text-xs font-bold text-emerald-600 inline-flex items-center">
-              <TrendingUp className="w-3 h-3 mr-0.5" /> +2 this month
+              <TrendingUp className="w-3 h-3 mr-0.5" /> Live
             </span>
           </div>
           <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
@@ -303,7 +247,14 @@ export const SuperAdminDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
-              {filteredTenants.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <div className="w-7 h-7 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="font-semibold text-xs text-slate-500">Loading Tenants from Firestore...</p>
+                  </td>
+                </tr>
+              ) : filteredTenants.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-slate-400">
                     <Building2 className="w-8 h-8 mx-auto text-slate-300 mb-2" />

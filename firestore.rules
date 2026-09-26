@@ -8,6 +8,10 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid != null;
     }
 
+    function isSuperAdmin() {
+      return isLoggedIn() && exists(/databases/$(database)/documents/platform_admins/$(request.auth.uid));
+    }
+
     // 2. Tenant Isolation Function: ensures token.workspaceId matches requested tenantId
     function isSameTenant(tenantId) {
       return isLoggedIn() && request.auth.token.workspaceId == tenantId;
@@ -20,14 +24,17 @@ service cloud.firestore {
       allow create: if isLoggedIn() && request.auth.uid == userId;
     }
 
-    // 4. Treasury Collection: Multi-tenant isolated financial records
-    match /tenants/{tenantId}/treasury/{docId} {
-      allow read, write: if isLoggedIn() && isSameTenant(tenantId);
+    // 4. Multi-Tenant Partition Collection with Super Admin God Mode
+    match /tenants/{tenantId} {
+      allow read, write: if isSameTenant(tenantId) || isSuperAdmin();
+      
+      match /treasury/{docId} { allow read, write: if isSameTenant(tenantId) || isSuperAdmin(); }
+      match /devotees/{docId} { allow read, write: if isSameTenant(tenantId) || isSuperAdmin(); }
+      match /yatranet_alerts/{docId} { allow read, write: if isSameTenant(tenantId) || isSuperAdmin(); }
     }
 
-    // 5. People & Devotees Collection: Multi-tenant isolated devotee records
-    match /tenants/{tenantId}/devotees/{docId} {
-      allow read, write: if isLoggedIn() && isSameTenant(tenantId);
+    match /platform_admins/{adminId} {
+      allow read: if isLoggedIn() && request.auth.uid == adminId;
     }
   }
 }
