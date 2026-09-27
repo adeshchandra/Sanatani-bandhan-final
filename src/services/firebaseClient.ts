@@ -20,4 +20,17 @@ export const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
 
+// Proactively ensure anonymous authentication session for sandboxed & demo access
+if (typeof window !== 'undefined') {
+  auth.onAuthStateChanged((user) => {
+    if (!user) {
+      import('firebase/auth').then(({ signInAnonymously }) => {
+        signInAnonymously(auth).catch(() => {
+          // Graceful fallback in offline or sandboxed mode
+        });
+      });
+    }
+  });
+}
+
 export default app;

@@ -52,7 +52,8 @@ import { Layers, LayoutDashboard,
   Check,
   ShieldCheck,
   Network,
-  Boxes
+  Boxes,
+  ScanFace,
 } from 'lucide-react';
 import { useAuthWorkspace } from '../../context/AuthWorkspaceContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -74,6 +75,7 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'devotee-portal', name: 'My Devotee Portal', domain: 0, domainTitle: 'Personal', icon: UserCircle, badge: 'New' },
   // Domain 1: Core Command & CRM
   { id: 'dashboard', name: 'Command Center', domain: 1, domainTitle: 'Core Command & CRM', icon: LayoutDashboard },
+  { id: 'checkin', name: 'Gate Command & Check-In', domain: 1, domainTitle: 'Core Command & CRM', icon: ScanFace, badge: 'Biometric' },
   { id: 'devotees', name: 'Devotee & Member Directory', domain: 1, domainTitle: 'Core Command & CRM', icon: Users, badge: 'Dynamic' },
   { id: 'family', name: 'Household & Kul Parivar', domain: 1, domainTitle: 'Core Command & CRM', icon: Home },
   { id: 'vanshavali', name: 'Ancestral Lineage (Vanshavali)', domain: 1, domainTitle: 'Core Command & CRM', icon: GitFork },

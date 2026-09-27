@@ -20,7 +20,9 @@ import { QuickGuideProvider, useQuickGuide } from './context/QuickGuideContext';
 import { GlobalTelemetryModal } from './components/common/GlobalTelemetryModal';
 import { DharmicQueryAssistant } from './components/common/DharmicQueryAssistant';
 import { TawkToWidget } from './components/common/TawkToWidget';
-import { LandingPage } from './components/public/LandingPage';
+import { LandingPage as LegacyLandingPage } from './components/public/LandingPage';
+import { LandingPage } from './pages/LandingPage';
+import { SmartLoginRouter } from './components/public/SmartLoginRouter';
 import { PortalLogin } from './components/public/PortalLogin';
 import { useAuthWorkspace } from './context/AuthWorkspaceContext';
 import { isModuleAllowed } from './lib/workspaceRegistry';
@@ -30,6 +32,7 @@ import { WorkspaceType, WorkspaceConfig } from './types';
 import { AdminLayout } from './admin/AdminLayout';
 import { SuperAdminDashboard } from './admin/SuperAdminDashboard';
 import { GlobalAnalytics } from './admin/GlobalAnalytics';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 import { NotificationProvider } from './context/NotificationContext';
 const QRScanner = lazy(() => import('./components/admin/QRScanner').then(m => ({ default: m.QRScanner })));
@@ -39,6 +42,7 @@ const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome').
 
 // Domain 1: CRM & Lineage
 const DevoteeGrid = lazy(() => import('./components/domain1/DevoteeGrid').then(m => ({ default: m.DevoteeGrid })));
+const DarshanCheckInDesk = lazy(() => import('./components/domain1/DarshanCheckInDesk').then(m => ({ default: m.DarshanCheckInDesk })));
 const FamilyHouseholdDesk = lazy(() => import('./components/domain1/FamilyHouseholdDesk').then(m => ({ default: m.FamilyHouseholdDesk })));
 const VanshavaliDesk = lazy(() => import('./components/domain1/VanshavaliDesk').then(m => ({ default: m.VanshavaliDesk })));
 const GuestManagerDesk = lazy(() => import('./components/domain1/GuestManagerDesk').then(m => ({ default: m.GuestManagerDesk })));
@@ -178,6 +182,10 @@ const AppContent: React.FC = () => {
       case 'devotees':
       case 'devotee-grid':
         return <DevoteeGrid />;
+      case 'checkin':
+      case 'darshan-checkin':
+      case 'gate-command':
+        return <DarshanCheckInDesk />;
       case 'family':
       case 'household-census':
         return <FamilyHouseholdDesk />;
@@ -577,7 +585,7 @@ const MainAppView: React.FC = () => {
   };
 
   return (
-    <LandingPage 
+    <LegacyLandingPage 
       onLoginClick={() => setView('login')} 
       onSignupClick={() => setView('signup')} 
       onDemoStart={handleStartDemo}
@@ -587,15 +595,20 @@ const MainAppView: React.FC = () => {
 
 const AppRouter: React.FC = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AdminLayout />} path="/admin">
-          <Route element={<SuperAdminDashboard />} index />
-          <Route element={<GlobalAnalytics />} path="analytics" />
-        </Route>
-        <Route element={<MainAppView />} path="*" />
-      </Routes>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<SmartLoginRouter />} />
+          <Route element={<AdminLayout />} path="/admin">
+            <Route element={<SuperAdminDashboard />} index />
+            <Route element={<GlobalAnalytics />} path="analytics" />
+          </Route>
+          <Route element={<MainAppView />} path="*" />
+        </Routes>
+        <OfflineIndicator />
+      </BrowserRouter>
+    </LanguageProvider>
   );
 };
 

@@ -20,8 +20,13 @@ import {
 } from 'lucide-react';
 import { getTenants, TenantRecord } from '../services/adminService';
 import { OnboardTenantModal } from './components/OnboardTenantModal';
+import { useLanguage } from '../context/LanguageContext';
+import { ExecutiveLiveTicker } from './components/ExecutiveLiveTicker';
+import { PredictiveCrowdForecast } from './components/PredictiveCrowdForecast';
+import { FiduciarySolvencyTerminal } from './components/FiduciarySolvencyTerminal';
 
 export const SuperAdminDashboard: React.FC = () => {
+  const { getTaxonomy } = useLanguage();
   const [tenants, setTenants] = useState<TenantRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,109 +99,96 @@ export const SuperAdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards: 4 Global Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {/* Card 1: Total Temples / Tenants */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden">
+      {/* Row 1: Executive Live Telemetry Ticker */}
+      <ExecutiveLiveTicker />
+
+      {/* Row 2: Executive Core Telemetry KPI Band (Terminal Theme) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+        {/* Metric 1: Total Temples / Tenants */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden text-slate-100 hover:border-amber-500/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Total Temples / Tenants
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Active Mandir Tenants
             </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-black text-white font-mono tracking-tight">
               {loading ? '-' : tenants.length}
             </span>
-            <span className="ml-2 text-xs font-bold text-emerald-600 inline-flex items-center">
-              <TrendingUp className="w-3 h-3 mr-0.5" /> Live
+            <span className="text-xs font-bold text-emerald-400 inline-flex items-center">
+              <TrendingUp className="w-3 h-3 mr-0.5" /> 100% Online
             </span>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>Partitioned Databases</span>
-            <span className="font-semibold text-slate-700">100% Isolated</span>
+            <span className="font-semibold font-mono text-amber-400">Zero Leakage</span>
           </div>
         </div>
 
-        {/* Card 2: Total Devotees */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden">
+        {/* Metric 2: Total Participants / Devotees */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden text-slate-100 hover:border-indigo-500/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Total Devotees
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              {getTaxonomy('Participant')} Reach
             </span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight">45.2K</span>
-            <span className="ml-2 text-xs font-bold text-emerald-600 inline-flex items-center">
-              <TrendingUp className="w-3 h-3 mr-0.5" /> +14.8%
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-black text-white font-mono tracking-tight">45.2K</span>
+            <span className="text-xs font-bold text-emerald-400 inline-flex items-center">
+              <TrendingUp className="w-3 h-3 mr-0.5" /> +14.8% MoM
             </span>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>Unique QR Gate Passes</span>
-            <span className="font-semibold text-slate-700">41.8K Issued</span>
+            <span className="font-semibold font-mono text-indigo-300">41.8K Issued</span>
           </div>
         </div>
 
-        {/* Card 3: Global Platform Revenue */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden">
+        {/* Metric 3: Offering / Treasury Volume */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden text-slate-100 hover:border-emerald-500/40 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Global Platform Revenue
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              {getTaxonomy('FinancialOffering')} Gross Volume
             </span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
               <Landmark className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight">₹1.2M</span>
-            <span className="ml-2 text-xs font-bold text-emerald-600 inline-flex items-center">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-black text-white font-mono tracking-tight">₹1.2M</span>
+            <span className="text-xs font-bold text-emerald-400 inline-flex items-center">
               <ArrowUpRight className="w-3 h-3 mr-0.5" /> +18.2%
             </span>
           </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+          <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>Section 80G Certified</span>
-            <span className="font-semibold text-emerald-600">Form 10BE Ready</span>
-          </div>
-        </div>
-
-        {/* Card 4: Active Sevadars */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Active Sevadars
-            </span>
-            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight">840</span>
-            <span className="ml-2 text-xs font-bold text-indigo-600 inline-flex items-center">
-              92% Deployed
-            </span>
-          </div>
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Crowd Control Coverage</span>
-            <span className="font-semibold text-slate-700">5 Active Sectors</span>
+            <span className="font-semibold font-mono text-emerald-400">Form 10BE Synced</span>
           </div>
         </div>
       </div>
 
-      {/* Main Section: Recent Tenant Onboarding Table */}
+      {/* Row 3: Dual Intelligence Command Sector (Panchang AI + Fiduciary Solvency) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PredictiveCrowdForecast />
+        <FiduciarySolvencyTerminal />
+      </div>
+
+      {/* Row 4: Live Tenant Status Roster & RRT Intervention Desk */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
         {/* Table Filter & Search Bar */}
         <div className="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-bold text-slate-900">
-              Recent Tenant Onboarding
+              Live Tenant Status Roster & RRT Intervention Desk
             </h2>
             <p className="text-xs text-slate-500">
-              Mandir trusts and dharmic organizations registered across the cluster.
+              Mandir trusts and dharmic organizations registered across the cluster &bull; {getTaxonomy('SpiritualCustodian')} Directory & Emergency Interventions.
             </p>
           </div>
 
@@ -233,7 +225,7 @@ export const SuperAdminDashboard: React.FC = () => {
                 <th className="py-3.5 px-5">Temple Name & Code</th>
                 <th className="py-3.5 px-4">Location</th>
                 <th className="py-3.5 px-4">Plan Tier</th>
-                <th className="py-3.5 px-4">Devotees</th>
+                <th className="py-3.5 px-4">{getTaxonomy('Participant')}</th>
                 <th className="py-3.5 px-4">Onboarded</th>
                 <th className="py-3.5 px-4">Status</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
@@ -270,7 +262,9 @@ export const SuperAdminDashboard: React.FC = () => {
                           </div>
                           <div>
                             <p className="font-bold text-slate-900">{tenant.name}</p>
-                            <p className="text-[11px] font-mono text-slate-400">{tenant.code}</p>
+                            <p className="text-[11px] font-mono text-slate-400">
+                              {tenant.code} &bull; {getTaxonomy('SpiritualCustodian')}: {tenant.custodian || 'Pradhan Archaka'}
+                            </p>
                           </div>
                         </div>
                       </td>
