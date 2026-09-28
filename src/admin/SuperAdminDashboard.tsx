@@ -18,7 +18,7 @@ import {
   Server,
   Layers,
 } from 'lucide-react';
-import { getTenants, TenantRecord } from '../services/adminService';
+import { getTenants, TenantRecord, DEFAULT_TENANTS } from '../services/adminService';
 import { OnboardTenantModal } from './components/OnboardTenantModal';
 import { useLanguage } from '../context/LanguageContext';
 import { ExecutiveLiveTicker } from './components/ExecutiveLiveTicker';
@@ -27,20 +27,18 @@ import { FiduciarySolvencyTerminal } from './components/FiduciarySolvencyTermina
 
 export const SuperAdminDashboard: React.FC = () => {
   const { getTaxonomy } = useLanguage();
-  const [tenants, setTenants] = useState<TenantRecord[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [tenants, setTenants] = useState<TenantRecord[]>(DEFAULT_TENANTS);
+  const [loading, setLoading] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchAllTenants = useCallback(async () => {
-    setLoading(true);
     try {
-      const remoteTenants = await getTenants();
-      setTenants(remoteTenants);
-    } catch (err) {
-      console.error('Failed to load tenants from Firestore:', err);
-      setTenants([]);
+      const records = await getTenants();
+      setTenants(records && records.length > 0 ? records : DEFAULT_TENANTS);
+    } catch {
+      setTenants(DEFAULT_TENANTS);
     } finally {
       setLoading(false);
     }

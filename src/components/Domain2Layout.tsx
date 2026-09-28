@@ -9,11 +9,15 @@ import {
   Package,
   Flame,
   FileCode2,
+  EyeOff,
+  FileText,
 } from 'lucide-react';
 import { TallyExportDesk } from './domain2/TallyExportDesk';
 import { TreasuryLedgerDesk } from './domain2/TreasuryLedgerDesk';
 import { TaxReceiptDesk } from './domain2/TaxReceiptDesk';
 import { HundiCountingAuditDesk } from './domain2/HundiCountingAuditDesk';
+import { BlindHundiAuditDesk } from './domain2/BlindHundiAuditDesk';
+import { Dynamic80GReceiptStudio } from './domain2/Dynamic80GReceiptStudio';
 import { Form10BDComplianceDesk } from './domain2/Form10BDComplianceDesk';
 import { MandirCampaignsDesk } from './domain2/MandirCampaignsDesk';
 import { RatnaBhandarAssetDesk } from './domain2/RatnaBhandarAssetDesk';
@@ -27,6 +31,8 @@ export interface SubTab {
 }
 
 export const SUB_TABS: SubTab[] = [
+  { id: 'blind-audit', label: 'Blind Hundi Audit', icon: EyeOff },
+  { id: '80g-studio', label: 'Live 80G Studio', icon: FileText },
   { id: 'treasury', label: 'Treasury Ledger', icon: Landmark },
   { id: 'tally', label: 'Tally XML Export', icon: FileCode2 },
   { id: 'tax-receipt', label: '80G Tax Receipts', icon: Receipt },
@@ -39,7 +45,7 @@ export const SUB_TABS: SubTab[] = [
 ];
 
 export const Domain2Layout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('tally');
+  const [activeTab, setActiveTab] = useState<string>('blind-audit');
 
   return (
     <div className="space-y-6">
@@ -70,6 +76,10 @@ export const Domain2Layout: React.FC = () => {
       <div className="w-full">
         {(() => {
           switch (activeTab) {
+            case 'blind-audit':
+              return <BlindHundiAuditDesk />;
+            case '80g-studio':
+              return <Dynamic80GReceiptStudio />;
             case 'tally':
               return <TallyExportDesk />;
             case 'treasury':
@@ -89,7 +99,7 @@ export const Domain2Layout: React.FC = () => {
             case 'karma':
               return <KarmaLedgerDesk />;
             default:
-              return <TallyExportDesk />;
+              return <BlindHundiAuditDesk />;
           }
         })()}
       </div>

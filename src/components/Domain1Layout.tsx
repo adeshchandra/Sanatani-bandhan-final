@@ -8,9 +8,11 @@ import {
   UserCheck,
   FileSpreadsheet,
   Network,
+  Zap,
 } from 'lucide-react';
 import { DevoteeGrid } from './domain1/DevoteeGrid';
 import { DarshanCheckInDesk } from './domain1/DarshanCheckInDesk';
+import { TatkalKioskDesk } from './domain1/TatkalKioskDesk';
 import { FamilyHouseholdDesk } from './domain1/FamilyHouseholdDesk';
 import { VanshavaliDesk } from './domain1/VanshavaliDesk';
 import { GuestManagerDesk } from './domain1/GuestManagerDesk';
@@ -27,6 +29,7 @@ export interface SubTab {
 export const SUB_TABS: SubTab[] = [
   { id: 'devotees', label: 'Devotee Directory', icon: Users },
   { id: 'checkin', label: 'Gate Command & Check-In', icon: ScanFace },
+  { id: 'tatkal', label: 'Tatkal Rapid Kiosk', icon: Zap },
   { id: 'family', label: 'Household & Family', icon: Home },
   { id: 'vanshavali', label: 'Ancestral Lineage', icon: GitFork },
   { id: 'guests', label: 'Guest CRM', icon: UserPlus },
@@ -43,6 +46,9 @@ export const Domain1Layout: React.FC<{ initialTab?: string }> = ({ initialTab = 
       case 'checkin':
       case 'gate-command':
         return <DarshanCheckInDesk />;
+      case 'tatkal':
+      case 'tatkal-kiosk':
+        return <TatkalKioskDesk />;
       case 'devotees':
         return <DevoteeGrid />;
       case 'family':

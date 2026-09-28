@@ -7,8 +7,12 @@ import {
   HeartHandshake,
   BookOpen,
   GraduationCap,
+  UtensilsCrossed,
+  TrendingDown,
 } from 'lucide-react';
 import { SmartBhandarDesk } from './domain4/SmartBhandarDesk';
+import { BOMSimulationDesk } from './domain4/BOMSimulationDesk';
+import { PredictiveRunwayDesk } from './domain4/PredictiveRunwayDesk';
 import { AnnadanamKitchenDesk } from './domain4/AnnadanamKitchenDesk';
 import { GauSevaDesk } from './domain4/GauSevaDesk';
 import { DharamshalaDesk } from './domain4/DharamshalaDesk';
@@ -23,6 +27,8 @@ export interface SubTab {
 }
 
 export const SUB_TABS: SubTab[] = [
+  { id: 'bom-sim', label: 'Kinetic BOM Simulator', icon: UtensilsCrossed },
+  { id: 'runway', label: 'Predictive Stock Runway', icon: TrendingDown },
   { id: 'bhandar', label: 'Smart Bhandar (Inventory)', icon: ChefHat },
   { id: 'annadanam', label: 'Annadanam Kitchen', icon: Utensils },
   { id: 'goshala', label: 'Gau Seva (Goshala)', icon: Heart },
@@ -33,7 +39,7 @@ export const SUB_TABS: SubTab[] = [
 ];
 
 export const Domain4Layout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('bhandar');
+  const [activeTab, setActiveTab] = useState<string>('bom-sim');
 
   return (
     <div className="space-y-6">
@@ -64,6 +70,10 @@ export const Domain4Layout: React.FC = () => {
       <div className="w-full">
         {(() => {
           switch (activeTab) {
+            case 'bom-sim':
+              return <BOMSimulationDesk />;
+            case 'runway':
+              return <PredictiveRunwayDesk />;
             case 'bhandar':
               return <SmartBhandarDesk />;
             case 'annadanam':
@@ -79,7 +89,7 @@ export const Domain4Layout: React.FC = () => {
             case 'shiksha':
               return <VedicSevaShikshaDesk />;
             default:
-              return <SmartBhandarDesk />;
+              return <BOMSimulationDesk />;
           }
         })()}
       </div>
