@@ -59,6 +59,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSahayata,
   onOpenGuide,
   activeModule,
+  onSelectModule,
+  onNavigate,
 }) => {
   const handleQuickPay = onOpenQuickChanda || onOpenQuickPay || (() => {});
   const {
@@ -84,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
     switch (r) {
       case 'SuperAdmin':
       case 'SUPER_ADMIN':
-        return 'God Mode';
+        return 'Executive Mode';
       case 'Trustee':
       case 'TRUSTEE':
         return 'Trustee Mode';
@@ -243,6 +245,23 @@ export const Header: React.FC<HeaderProps> = ({
           )}
 
           <button
+            id="header-btn-switch-devotee-view"
+            onClick={() => {
+              if (onNavigate) {
+                onNavigate('devoteePortal');
+              } else {
+                window.location.href = '/devotee';
+              }
+              showToast('Switched to Sanatani Devotee Super App 🙏', 'success', 'B2C Super App');
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 hover:from-amber-500 hover:to-orange-500 text-amber-300 hover:text-slate-950 rounded-xl transition-all border border-amber-500/40 font-bold text-xs shadow-xs cursor-pointer group"
+            title="Switch to Devotee View (B2C Super App Portal)"
+          >
+            <Sparkles className="w-4 h-4 text-amber-400 group-hover:text-slate-950 transition-colors" />
+            <span className="font-bold">Switch to Devotee View</span>
+          </button>
+
+          <button
             id="header-btn-switch-personal"
             onClick={() => {
               setViewMode('MEMBER');
@@ -342,13 +361,33 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="h-px bg-temple-700 my-1 mx-2"></div>
               </div>
 
+              {/* B2C Portal Switch */}
+              <div className="px-1 py-1 mb-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRoleDropdown(false);
+                    if (onNavigate) {
+                      onNavigate('devoteePortal');
+                    } else {
+                      window.location.href = '/devotee';
+                    }
+                    showToast('Switched to Sanatani Devotee Super App 🙏', 'success', 'B2C Super App');
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500 hover:to-orange-500 text-amber-300 hover:text-slate-950 transition-all border border-amber-500/40 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>Switch to Devotee View</span>
+                </button>
+              </div>
+
               {/* Role Switcher */}
               <div className="px-3 py-2 border-b border-temple-700 mb-2">
                 <p className="text-[10px] font-bold text-temple-400 uppercase tracking-wider">
                   Role-Based Access
                 </p>
               </div>
-              {(['SuperAdmin', 'Trustee', 'Priest', 'Accountant', 'Sevadar', 'Devotee'] as UserRole[]).map((r, idx) => (
+              {(['Trustee', 'Priest', 'Accountant', 'Sevadar', 'Devotee'] as UserRole[]).map((r, idx) => (
                 <button
                   key={r}
                   onClick={() => { switchRole(r); setShowRoleDropdown(false); }}

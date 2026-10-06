@@ -107,8 +107,8 @@ export const TreasuryLedgerDesk: React.FC<TreasuryLedgerDeskProps> = ({ onOpenQu
       } else {
         setTreasury(INITIAL_TREASURY || []);
       }
-    } catch (err) {
-      console.error('Error fetching treasury transactions from Firestore:', err);
+    } catch (err: any) {
+      console.warn('Notice: Falling back to local treasury transactions ledger:', err?.message || err);
       setTreasury(INITIAL_TREASURY || []);
     } finally {
       setLoading(false);

@@ -30,7 +30,7 @@ const MOCK_AFFILIATIONS: TenantAffiliation[] = [
     id: 'DEMO_ws-mandir',
     name: 'Kashi Vishwanath Trust & Temple',
     location: 'Varanasi, Uttar Pradesh',
-    role: 'SuperAdmin',
+    role: 'Trustee',
     code: 'MND-KSH-108',
     sampradaya: 'Shaiva / Smartha',
     badgeColor: 'bg-purple-100 text-purple-800 border-purple-200',

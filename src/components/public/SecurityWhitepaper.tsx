@@ -40,7 +40,7 @@ export const SecurityWhitepaper: React.FC<{ onClose: () => void }> = ({ onClose 
 
           <h3>Identity & Access Management (IAM)</h3>
           <p>
-            We implement strict Role-Based Access Control (RBAC). Workspaces define precise roles (Superadmin, Head Priest, Treasurer, Sevadar). PIN-based contextual authentication is enforced for sensitive actions (e.g., modifying treasury records or deleting devotee profiles).
+            We implement strict Role-Based Access Control (RBAC). Workspaces define precise roles (Trustee, Head Priest, Treasurer, Sevadar). PIN-based contextual authentication is enforced for sensitive actions (e.g., modifying treasury records or deleting devotee profiles).
           </p>
 
           <h3>Infrastructure & Compliance</h3>

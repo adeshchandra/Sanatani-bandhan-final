@@ -182,6 +182,7 @@ export interface AuthWorkspaceContextType {
   checkPermission: (allowedRoles: (UserRole | string)[]) => boolean;
   loginWithPin: (pin: string, devoteeList: DevoteeMember[]) => boolean;
   loginAsRole: (role: UserRole, customName?: string) => void;
+  switchPersona: (role: UserRole, name: string, targetModule?: string) => void;
   logout: () => Promise<void>;
   saveCustomLogo: (base64: string) => void;
   updateWorkspaceDetails: (updates: Partial<WorkspaceConfig>) => void;
@@ -222,6 +223,14 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentDevotee, setCurrentDevotee] = useState<DevoteeMember | null>(() => {
     return initialData.sanatani_current_devotee || null;
   });
+  const [personaUser, setPersonaUser] = useState<{
+    id: string;
+    name: string;
+    fullName: string;
+    phone?: string;
+    email?: string;
+    role: UserRole;
+  } | null>(null);
 
   // Keep workspaceId and activeWorkspaceId synchronized
   useEffect(() => {
@@ -302,8 +311,8 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
             setCurrentRole(defaultRole);
             setIsAuthenticated(true);
           }
-        } catch (err) {
-          console.error('Error fetching user document from Firestore:', err);
+        } catch (err: any) {
+          console.warn('Notice: Firestore user document lookup fallback:', err?.message || err);
           setIsAuthenticated(true);
         } finally {
           setIsLoading(false);
@@ -442,7 +451,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         const normalizedAllowed = ROLE_MIGRATION_MAP[allowed] || allowed;
         if (normalizedAllowed === effectiveRole || allowed === effectiveRole) return true;
         // Trustee hierarchy grants operational leadership clearance
-        if (effectiveRole === 'Trustee' && ['Priest', 'Accountant', 'Sevadar', 'Devotee'].includes(normalizedAllowed)) {
+        if (effectiveRole === 'Trustee' && ['Priest', 'Accountant', 'Sevadar', 'Devotee', 'CSO'].includes(normalizedAllowed)) {
           return true;
         }
         return false;
@@ -518,7 +527,93 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
     } else {
       setCurrentDevotee(null);
     }
+    if (customName) {
+      setPersonaUser({
+        id: `user-${normalized.toLowerCase()}`,
+        name: customName,
+        fullName: customName,
+        phone: '+91 98765 43210',
+        email: `${normalized.toLowerCase()}@sanatanmandir.org`,
+        role: normalized,
+      });
+    } else {
+      setPersonaUser(null);
+    }
   };
+
+  const switchPersona = useCallback(
+    (newRole: UserRole, customName: string, targetModule?: string) => {
+      if (!activeWorkspaceId.startsWith('DEMO_')) {
+        setActiveWorkspaceId('DEMO_ws-mandir');
+        setWorkspaceId('DEMO_ws-mandir');
+      }
+      const normalized: UserRole = (ROLE_MIGRATION_MAP[newRole] || newRole) as UserRole;
+      setRole(normalized);
+      setCurrentRole(normalized);
+      setIsAuthenticated(true);
+      set('sanatani_user_role', normalized);
+
+      const personaObj = {
+        id: `persona-${normalized.toLowerCase()}`,
+        name: customName,
+        fullName: customName,
+        phone: '+91 98765 43210',
+        email: `${normalized.toLowerCase()}@sanatanmandir.org`,
+        role: normalized,
+      };
+      setPersonaUser(personaObj);
+
+      if (normalized === 'Devotee') {
+        setViewMode('MEMBER');
+        const devProfile: DevoteeMember = {
+          id: 'dev-arun-sharma',
+          workspaceId: activeWorkspaceId,
+          fullName: customName || 'Arun Sharma',
+          spiritualName: 'Arun Das',
+          phone: '+91 98765 43210',
+          email: 'arun.sharma@sanatan.org',
+          pin: '1008',
+          role: 'Devotee',
+          sevaIndex: 920,
+          sevaTier: 'Ratna',
+          gotra: 'Bharadwaja',
+          pravara: 'Angirasa, Barhaspatya, Bharadwaja',
+          varnaKul: 'Suryavanshi',
+          address: 'Kashi Vishwanath Corridor, Varanasi',
+          activeStatus: 'Active',
+          totalDonated: 151000,
+          volunteerHours: 340,
+          qrCodeRef: 'QR-SB-DEV-ARUN',
+          joinedDate: '2022-04-10',
+        };
+        setCurrentDevotee(devProfile);
+        set('sanatani_current_devotee', devProfile);
+      } else {
+        setViewMode('MANAGER');
+        setCurrentDevotee(null);
+      }
+
+      const destModule =
+        targetModule ||
+        (normalized === 'Devotee'
+          ? 'devoteePortal'
+          : normalized === 'Priest'
+          ? 'sanctum-hud'
+          : normalized === 'Accountant'
+          ? 'treasury-audit'
+          : normalized === 'CSO'
+          ? 'tactical-radar'
+          : 'dashboard');
+
+      // Dispatch global custom event for instant navigation
+      window.dispatchEvent(
+        new CustomEvent('sanatani:navigate', {
+          detail: { module: destModule, role: normalized, user: customName },
+        })
+      );
+    },
+    [activeWorkspaceId]
+  );
 
   const logout = async () => {
     try {
@@ -563,6 +658,12 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const currentUser = useMemo(() => {
+    if (personaUser && personaUser.role === (role || currentRole)) {
+      return {
+        ...personaUser,
+        role: role || currentRole,
+      };
+    }
     const displayName = currentDevotee?.fullName || user?.displayName || 'Acharya / Trustee Administrator';
     return {
       id: currentDevotee?.id || user?.uid || 'admin-root',
@@ -572,7 +673,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
       email: currentDevotee?.email || user?.email || 'admin@sanatanmandir.org',
       role: role || currentRole,
     };
-  }, [currentDevotee, user, role, currentRole]);
+  }, [personaUser, currentDevotee, user, role, currentRole]);
 
   return (
     <AuthWorkspaceContext.Provider
@@ -599,6 +700,7 @@ export const AuthWorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({
         checkPermission,
         loginWithPin,
         loginAsRole,
+        switchPersona,
         logout,
         saveCustomLogo,
         updateWorkspaceDetails,

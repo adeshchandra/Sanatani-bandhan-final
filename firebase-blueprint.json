@@ -91,6 +91,14 @@
     "donations": {
       "entity": "TreasuryDonation",
       "description": "Financial donations and chanda ledgers"
+    },
+    "/tenants/{tenantId}/treasury": {
+      "schema": "TreasuryDonation",
+      "description": "Tenant-isolated financial transactions and donations"
+    },
+    "/tenants/{tenantId}/devotees": {
+      "schema": "DevoteeRecord",
+      "description": "Tenant-isolated devotee directory records"
     }
   }
 }

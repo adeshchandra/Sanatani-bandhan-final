@@ -7,8 +7,11 @@ import {
   Vote,
   Layers,
   Sparkles,
+  Siren,
 } from 'lucide-react';
 import { UserRolesDesk } from './domain6/UserRolesDesk';
+import { TacticalPerimeterRadar } from './domain6/TacticalPerimeterRadar';
+import { TacticalSOSDispatcher } from './domain6/TacticalSOSDispatcher';
 import { MasterSettingsDesk } from './domain6/MasterSettingsDesk';
 import { AuditLogDesk } from './domain6/AuditLogDesk';
 import { CrisisCommandCenter } from './domain6/CrisisCommandCenter';
@@ -23,6 +26,8 @@ export interface SubTab {
 }
 
 export const SUB_TABS: SubTab[] = [
+  { id: 'perimeter-radar', label: 'Tactical Perimeter Radar', icon: ShieldAlert },
+  { id: 'sos-dispatch', label: 'Live SOS Dispatcher', icon: Siren },
   { id: 'rbac', label: 'Access Control (RBAC)', icon: Shield },
   { id: 'settings', label: 'Master Settings', icon: Settings },
   { id: 'audit', label: 'Audit Trail & Integrity', icon: ShieldCheck },
@@ -33,7 +38,7 @@ export const SUB_TABS: SubTab[] = [
 ];
 
 export const Domain6Layout: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('rbac');
+  const [activeTab, setActiveTab] = useState<string>('perimeter-radar');
 
   return (
     <div className="space-y-6">
@@ -49,7 +54,7 @@ export const Domain6Layout: React.FC = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-xs'
+                  ? 'bg-rose-600 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
@@ -64,6 +69,10 @@ export const Domain6Layout: React.FC = () => {
       <div className="w-full">
         {(() => {
           switch (activeTab) {
+            case 'perimeter-radar':
+              return <TacticalPerimeterRadar />;
+            case 'sos-dispatch':
+              return <TacticalSOSDispatcher />;
             case 'rbac':
               return <UserRolesDesk />;
             case 'settings':
@@ -79,7 +88,7 @@ export const Domain6Layout: React.FC = () => {
             case 'workspaces':
               return <WorkspaceSelectorDesk />;
             default:
-              return <UserRolesDesk />;
+              return <TacticalPerimeterRadar />;
           }
         })()}
       </div>

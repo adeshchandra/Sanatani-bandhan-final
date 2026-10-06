@@ -1188,7 +1188,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Helper to push to firestore
   const pushToFirestore = (colName: string, id: string, data: any) => {
-    setDoc(doc(db, colName, id), data, { merge: true }).catch(console.error);
+    setDoc(doc(db, colName, id), data, { merge: true }).catch((err: any) => {
+      console.warn(`[Firestore sync] ${colName} offline or restricted:`, err?.message || err);
+    });
   };
 
 
@@ -1525,7 +1527,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteDevotee = (id: string) => {
     setAllDevotees((prev) => prev.filter((d) => d.id !== id));
-    deleteDoc(doc(db, 'devotees', id)).catch(console.error);
+    deleteDoc(doc(db, 'devotees', id)).catch((err: any) => {
+      console.warn('[Firestore sync] delete devotee offline or restricted:', err?.message || err);
+    });
     showToast('Member removed from directory', 'info');
   };
 
@@ -1621,9 +1625,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addDoc(collection(db, 'treasury'), {
         ...newTx,
         timestamp: serverTimestamp()
-      }).catch(err => console.error("Firebase Treasury Write Error:", err));
-    } catch(e) {
-      console.error(e);
+      }).catch((err: any) => {
+        console.warn("Firebase Treasury Write Notice:", err?.message || err);
+      });
+    } catch(e: any) {
+      console.warn("Firebase Treasury local fallback notice:", e?.message || e);
     }
 
     if (tx.type === 'Income') {

@@ -81,8 +81,8 @@ export const DevoteeGrid: React.FC = () => {
       } else {
         setDevotees(INITIAL_DEVOTEES || []);
       }
-    } catch (err) {
-      console.error('Error fetching devotees:', err);
+    } catch (err: any) {
+      console.warn('Notice: Falling back to local devotee records. Firestore unavailable:', err?.message || err);
       setDevotees(INITIAL_DEVOTEES || []);
     } finally {
       setLoading(false);

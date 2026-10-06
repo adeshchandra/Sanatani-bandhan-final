@@ -80,11 +80,11 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
     if (
       godAccessKey.trim() === '1008' ||
       godAccessKey.trim().toLowerCase() === 'sonatanibandhan' ||
-      godAccessKey.trim().toLowerCase() === 'godmode'
+      godAccessKey.trim().toLowerCase() === 'systemoverride'
     ) {
       setIsUnlocked(true);
       switchRole('SuperAdmin');
-      showToast('Omnipresent God Mode Backend Activated. Full sovereign access granted.', 'success');
+      showToast('Sovereign System Override Activated. Full administrative access granted.', 'success');
       return;
     } 
     
@@ -116,7 +116,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
     setIsUpdatingPassword(true);
     try {
       await updatePassword(auth.currentUser, newPassword);
-      showToast('God Mode password updated successfully!', 'success');
+      showToast('System Override credentials updated successfully!', 'success');
       setNewPassword('');
     } catch (err: any) {
       console.error(err);
@@ -149,7 +149,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
       className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4"
     >
       <div className="bg-slate-900 text-slate-100 rounded-3xl shadow-2xl border border-saffron-500/40 w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        {/* Top Sacred God Mode Banner */}
+        {/* Top Sacred Sovereign Override Banner */}
         <div className="px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-saffron-950/70 border-b border-saffron-500/30 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-saffron-400 to-saffron-500 flex items-center justify-center text-slate-950 shadow-lg font-black text-xl">
@@ -158,10 +158,10 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-bold text-saffron-200 tracking-wide">
-                  sonatanibandhan.web.app/own/backend
+                  /system-override
                 </h2>
                 <span className="px-2 py-0.5 rounded-md bg-saffron-500/20 text-saffron-300 text-[10px] font-mono border border-saffron-500/40 uppercase font-bold">
-                  God Mode Sovereign Controller
+                  Sovereign Override Console
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -233,7 +233,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                 type="submit"
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-saffron-500 to-saffron-500 text-slate-950 font-black text-xs uppercase tracking-wider hover:brightness-110 shadow-lg transition-all cursor-pointer"
               >
-                Authenticate God Mode
+                Authenticate Sovereign Access
               </button>
             </form>
           </div>
@@ -435,7 +435,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
                   {isUpdatingPassword ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
-              <p className="text-[10px] text-slate-500 mt-2">Note: You must have logged into God Mode using an email/password (not a quick key) to change your password.</p>
+              <p className="text-[10px] text-slate-500 mt-2">Note: You must have logged in using platform owner credentials to change your password.</p>
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800">
@@ -469,7 +469,7 @@ export const GodModeBackend: React.FC<GodModeBackendProps> = ({
         <div className="px-6 py-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span>Root God Mode Active: Sovereign cross-workspace supervisory privileges enabled</span>
+            <span>Sovereign System Override Active: Cross-workspace supervisory privileges enabled</span>
           </div>
           <button
             type="button"

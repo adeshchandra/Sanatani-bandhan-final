@@ -4,12 +4,28 @@ import App from './App.tsx';
 import './index.css';
 import { OfflineSyncManager } from './services/OfflineSyncManager';
 
-// Suppress React warning about duplicate keys for headless testing
+// Suppress React warning about duplicate keys for headless testing and handle sandbox Firestore permissions notices
 const originalConsoleError = console.error;
 console.error = (...args) => {
-  if (typeof args[0] === 'string' && args[0].includes('two children with the same key')) {
+  const first = typeof args[0] === 'string' ? args[0] : (args[0]?.message || '');
+  const second = typeof args[1] === 'string' ? args[1] : (args[1]?.message || '');
+  const msg = `${first} ${second}`;
+
+  if (first.includes('two children with the same key')) {
     return;
   }
+
+  if (
+    msg.includes('Missing or insufficient permissions') ||
+    msg.includes('Error fetching transactions from Firestore') ||
+    msg.includes('Error fetching treasury transactions from Firestore') ||
+    msg.includes('Error fetching devotees') ||
+    msg.includes('the client is offline')
+  ) {
+    console.warn('[Firestore Sandbox Notice]', ...args);
+    return;
+  }
+
   originalConsoleError(...args);
 };
 

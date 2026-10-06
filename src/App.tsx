@@ -22,6 +22,7 @@ import { DharmicQueryAssistant } from './components/common/DharmicQueryAssistant
 import { TawkToWidget } from './components/common/TawkToWidget';
 import { LandingPage as LegacyLandingPage } from './components/public/LandingPage';
 import { LandingPage } from './pages/LandingPage';
+import { DevoteePortal } from './pages/DevoteePortal';
 import { SmartLoginRouter } from './components/public/SmartLoginRouter';
 import { PortalLogin } from './components/public/PortalLogin';
 import { useAuthWorkspace } from './context/AuthWorkspaceContext';
@@ -33,6 +34,7 @@ import { AdminLayout } from './admin/AdminLayout';
 import { SuperAdminDashboard } from './admin/SuperAdminDashboard';
 import { GlobalAnalytics } from './admin/GlobalAnalytics';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { SystemOverrideGuard } from './components/auth/SystemOverrideGuard';
 
 import { NotificationProvider } from './context/NotificationContext';
 const QRScanner = lazy(() => import('./components/admin/QRScanner').then(m => ({ default: m.QRScanner })));
@@ -97,12 +99,14 @@ const MasterSettingsDesk = lazy(() => import('./components/domain6/MasterSetting
 const FamilyRootsMatrimonyDesk = lazy(() => import('./components/domain6/FamilyRootsMatrimonyDesk').then(m => ({ default: m.FamilyRootsMatrimonyDesk })));
 const AppStoreDesk = lazy(() => import('./components/domain6/AppStoreDesk').then(m => ({ default: m.AppStoreDesk })));
 const CrisisCommandCenter = lazy(() => import('./components/domain6/CrisisCommandCenter').then(m => ({ default: m.CrisisCommandCenter })));
+const TacticalPerimeterRadar = lazy(() => import('./components/domain6/TacticalPerimeterRadar').then(m => ({ default: m.TacticalPerimeterRadar })));
 const UserRolesDesk = lazy(() => import('./components/domain6/UserRolesDesk').then(m => ({ default: m.UserRolesDesk })));
 const AuditLogDesk = lazy(() => import('./components/domain6/AuditLogDesk').then(m => ({ default: m.AuditLogDesk })));
 const GodModeBackend = lazy(() => import('./components/common/GodModeBackend').then(m => ({ default: m.GodModeBackend })));
+import { PersonaSwitcher } from './components/dev/PersonaSwitcher';
 
 // Public / Devotee Portal
-const DevoteePortal = lazy(() => import('./components/devotee/DevoteePortal').then(m => ({ default: m.DevoteePortal })));
+const LegacyDevoteeDesk = lazy(() => import('./components/devotee/DevoteePortal').then(m => ({ default: m.DevoteePortal })));
 const DevoteeAccountPortal = lazy(() => import('./components/domain5/DevoteeAccountPortal').then(m => ({ default: m.default })));
 const MemberAppShell = lazy(() => import('./components/devotee/MemberAppShell').then(m => ({ default: m.default })));
 
@@ -130,17 +134,25 @@ const AppContent: React.FC = () => {
   const { showToast } = useToast();
   const [activeModule, setActiveModule] = useState<string>('dashboard');
   React.useEffect(() => {
-    if ((currentRole === 'Devotee' || (currentRole as string) === 'DEVOTEE') && activeModule === 'dashboard') {
-      setActiveModule('devotee-portal');
+    if (currentRole === 'Devotee' || (currentRole as string) === 'DEVOTEE') {
+      const allowedDevoteeDesks = ['devoteePortal', 'devotee-super-app', 'devotee-portal', 'personal-portal', 'devotee-account'];
+      if (!allowedDevoteeDesks.includes(activeModule)) {
+        setActiveModule('devoteePortal');
+      }
     }
   }, [currentRole, activeModule]);
 
   React.useEffect(() => {
     const handleNavigate = (e: any) => {
-      if (e.detail) setActiveModule(e.detail);
+      const target = e.detail?.module || e.detail;
+      if (target) setActiveModule(target);
     };
     window.addEventListener('navigate_module', handleNavigate);
-    return () => window.removeEventListener('navigate_module', handleNavigate);
+    window.addEventListener('sanatani:navigate' as any, handleNavigate);
+    return () => {
+      window.removeEventListener('navigate_module', handleNavigate);
+      window.removeEventListener('sanatani:navigate' as any, handleNavigate);
+    };
   }, []);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
@@ -165,7 +177,18 @@ const AppContent: React.FC = () => {
   }
 
   const renderActiveDesk = () => {
+    // Strict Guard: Devotee cannot view any administrative desk (Domains 1-7)
+    if (currentRole === 'Devotee' || (currentRole as string) === 'DEVOTEE') {
+      if (!['devotee-portal', 'personal-portal', 'devotee-account'].includes(activeModule)) {
+        return <DevoteePortal onBackToERP={() => setActiveModule('dashboard')} />;
+      }
+      return <DevoteeAccountPortal />;
+    }
+
     switch (activeModule) {
+      case 'devoteePortal':
+      case 'devotee-super-app':
+        return <DevoteePortal onBackToERP={() => setActiveModule('dashboard')} />;
       case 'devotee-portal':
       case 'personal-portal':
       case 'devotee-account':
@@ -185,7 +208,7 @@ const AppContent: React.FC = () => {
       case 'checkin':
       case 'darshan-checkin':
       case 'gate-command':
-        return <DarshanCheckInDesk />;
+        return checkPermission(['CSO', 'TRUSTEE', 'SEVADAR', 'VOLUNTEER']) ? <DarshanCheckInDesk /> : <RestrictedAccess />;
       case 'family':
       case 'household-census':
         return <FamilyHouseholdDesk />;
@@ -218,6 +241,8 @@ const AppContent: React.FC = () => {
       case 'chanda-pos':
       case 'counter-pos':
         return <QuickChandaPOS />;
+      case 'treasury-audit':
+      case 'treasuryAudit':
       case 'treasury':
       case 'treasury-ledger':
         return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']) ? (
@@ -261,18 +286,19 @@ const AppContent: React.FC = () => {
         return checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']) ? <InventoryDesk /> : <RestrictedAccess />;
 
       // Domain 3
-      case 'poojaBooking':
-      case 'pooja-booking':
-        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PoojaBookingDesk /> : <RestrictedAccess />;
-      case 'mandirPuja':
-      case 'aarti-roster':
-        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <MandirPujaDesk /> : <RestrictedAccess />;
+      case 'sanctum-hud':
+      case 'sanctumHud':
       case 'purohitManagement':
       case 'purohit-management':
-        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitManagementDesk /> : <RestrictedAccess />;
       case 'purohitDesk':
       case 'purohit-desk':
-        return checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']) ? <PurohitManagementDesk /> : <RestrictedAccess />;
+        return checkPermission(['PUROHIT', 'PRIEST', 'Priest', 'MANAGER', 'TRUSTEE']) ? <PurohitManagementDesk /> : <RestrictedAccess />;
+      case 'poojaBooking':
+      case 'pooja-booking':
+        return checkPermission(['PUROHIT', 'PRIEST', 'Priest', 'MANAGER', 'TRUSTEE']) ? <PoojaBookingDesk /> : <RestrictedAccess />;
+      case 'mandirPuja':
+      case 'aarti-roster':
+        return checkPermission(['PUROHIT', 'PRIEST', 'Priest', 'MANAGER', 'TRUSTEE']) ? <MandirPujaDesk /> : <RestrictedAccess />;
       case 'purohitPortal':
       case 'purohit-portal':
       case 'purohitUnified':
@@ -362,6 +388,11 @@ const AppContent: React.FC = () => {
         return <YatraNetDesk />;
 
       // Domain 6
+      case 'tactical-radar':
+      case 'tactical-perimeter-radar':
+      case 'tacticalPerimeterRadar':
+      case 'perimeter-radar':
+        return checkPermission(['CSO', 'TRUSTEE', 'SuperAdmin']) ? <TacticalPerimeterRadar /> : <RestrictedAccess />;
       case 'workspace-hub':
         return checkPermission(['TRUSTEE']) ? <WorkspaceSelectorDesk /> : <RestrictedAccess />;
       case 'user-roles-rbac':
@@ -374,7 +405,7 @@ const AppContent: React.FC = () => {
       case 'sevadarRoster':
         return checkPermission(['TRUSTEE', 'MANAGER']) ? <SevadarRosterDesk /> : <RestrictedAccess />;
       case 'qrScanner':
-        return checkPermission(['TRUSTEE', 'MANAGER', 'VOLUNTEER']) ? <QRScanner /> : <RestrictedAccess />;
+        return checkPermission(['CSO', 'TRUSTEE', 'MANAGER', 'VOLUNTEER']) ? <QRScanner /> : <RestrictedAccess />;
       case 'appStore':
         return checkPermission(['TRUSTEE']) ? <AppStoreDesk /> : <RestrictedAccess />;
       case 'masterSettings':
@@ -383,7 +414,7 @@ const AppContent: React.FC = () => {
       case 'panchayatPolls':
         return checkPermission(['TRUSTEE', 'MANAGER']) ? <PanchayatPollingDesk /> : <RestrictedAccess />;
       case 'crisis-command':
-        return checkPermission(['TRUSTEE', 'MANAGER']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
+        return checkPermission(['CSO', 'TRUSTEE', 'MANAGER']) ? <CrisisCommandCenter /> : <RestrictedAccess />;
 
       case 'spiritualSettings':
       case 'platformBroadcast':
@@ -411,34 +442,38 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="h-screen w-full bg-slate-50 text-slate-900 flex flex-col font-sans overflow-hidden">
-      {/* Universal Header */}
-      <Header
-        activeModule={activeModule}
-        onNavigate={(mod) => setActiveModule(mod)}
-        onOpenSidebar={() => setIsSidebarOpen(true)}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebarCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        onOpenQuickChanda={() => setIsQuickChandaOpen(true)}
-        onOpenMySpace={() => setIsMySpaceOpen(true)}
-        onOpenTelemetry={() => setIsTelemetryOpen(true)}
-        onOpenAssistant={() => setIsAssistantOpen(true)}
-        onOpenSahayata={() => setIsSahayataOpen(true)}
-        onOpenGuide={() => openGuide(activeModule)}
-      />
+      {/* Universal Header (Hidden for Devotee) */}
+      {currentRole !== 'Devotee' && (
+        <Header
+          activeModule={activeModule}
+          onNavigate={(mod) => setActiveModule(mod)}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebarCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          onOpenQuickChanda={() => setIsQuickChandaOpen(true)}
+          onOpenMySpace={() => setIsMySpaceOpen(true)}
+          onOpenTelemetry={() => setIsTelemetryOpen(true)}
+          onOpenAssistant={() => setIsAssistantOpen(true)}
+          onOpenSahayata={() => setIsSahayataOpen(true)}
+          onOpenGuide={() => openGuide(activeModule)}
+        />
+      )}
 
       <div className="flex grow overflow-hidden">
-        {/* Universal 46-Module Sidebar */}
-        <Sidebar
-          activeModule={activeModule}
-          onSelectModule={(mod) => setActiveModule(mod)}
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
+        {/* Universal 46-Module Sidebar (Hidden for Devotee) */}
+        {currentRole !== 'Devotee' && (
+          <Sidebar
+            activeModule={activeModule}
+            onSelectModule={(mod) => setActiveModule(mod)}
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          />
+        )}
 
         {/* Main Content Area */}
-        <main className="grow p-6 flex flex-col gap-6 overflow-hidden">
+        <main className={`grow p-6 flex flex-col gap-6 overflow-hidden ${currentRole === 'Devotee' ? 'p-0 bg-stone-950' : ''}`}>
           <div className="flex flex-col grow overflow-y-auto custom-scrollbar">
             <Suspense fallback={
               <div className="flex flex-col items-center justify-center h-full text-center">
@@ -452,7 +487,9 @@ const AppContent: React.FC = () => {
         </main>
       </div>
 
-      <Footer onOpenTelemetry={() => setIsTelemetryOpen(true)} />
+      {currentRole !== 'Devotee' && (
+        <Footer onOpenTelemetry={() => setIsTelemetryOpen(true)} />
+      )}
 
       {/* Global Modals & Widgets */}
       <QuickChandaModal
@@ -570,7 +607,7 @@ const MainAppView: React.FC = () => {
     switchWorkspace(demoId);
     
     // Inject test user session
-    loginAsRole('SuperAdmin', 'Demo User');
+    loginAsRole('Trustee', 'Demo User');
     if (seedDemoData) {
       seedDemoData(demoId, type);
     }
@@ -600,13 +637,33 @@ const AppRouter: React.FC = () => {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<SmartLoginRouter />} />
-          <Route element={<AdminLayout />} path="/admin">
+          {/* Secret Obfuscated Platform Route: Accessed via URL typing only, strictly guarded */}
+          <Route
+            path="/system-override"
+            element={
+              <SystemOverrideGuard>
+                <SuperAdminDashboard />
+              </SystemOverrideGuard>
+            }
+          />
+          <Route
+            element={
+              <SystemOverrideGuard>
+                <AdminLayout />
+              </SystemOverrideGuard>
+            }
+            path="/admin"
+          >
             <Route element={<SuperAdminDashboard />} index />
             <Route element={<GlobalAnalytics />} path="analytics" />
           </Route>
+          <Route path="/devotee" element={<DevoteePortal onBackToERP={() => { window.location.href = '/'; }} />} />
+          <Route path="/devotee-portal" element={<DevoteePortal onBackToERP={() => { window.location.href = '/'; }} />} />
+          <Route path="/portal" element={<DevoteePortal onBackToERP={() => { window.location.href = '/'; }} />} />
           <Route element={<MainAppView />} path="*" />
         </Routes>
         <OfflineIndicator />
+        <PersonaSwitcher />
       </BrowserRouter>
     </LanguageProvider>
   );

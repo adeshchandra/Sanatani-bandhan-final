@@ -4,7 +4,7 @@ export type WorkspaceType =
   | 'Tirth' | 'Samaj' | 'AkshayaPatra' | 'KashiKshetra'
   | 'DharmadaTrust' | 'MahotsavSamiti' | 'PurohitSabha';
 
-export type UserRole = 'SuperAdmin' | 'Trustee' | 'Priest' | 'Accountant' | 'Sevadar' | 'Devotee';
+export type UserRole = 'SuperAdmin' | 'Trustee' | 'Priest' | 'Accountant' | 'Sevadar' | 'Devotee' | 'CSO';
 
 export type LegacyUserRole =
   | 'SUPER_ADMIN'
@@ -14,6 +14,7 @@ export type LegacyUserRole =
   | 'VOLUNTEER'
   | 'DEVOTEE'
   | 'MANAGER'
+  | 'CSO'
   | 'ANONYMOUS';
 
 export type SubscriptionTier = 'LITE' | 'STANDARD' | 'ENTERPRISE';
@@ -36,6 +37,10 @@ export const ROLE_MIGRATION_MAP: Record<string, UserRole> = {
   PUROHIT: 'Priest',
   Priest: 'Priest',
   priest: 'Priest',
+  cso: 'CSO',
+  CSO: 'CSO',
+  'chief security officer': 'CSO',
+  'Chief Security Officer': 'CSO',
   volunteer: 'Sevadar',
   VOLUNTEER: 'Sevadar',
   sevadar: 'Sevadar',
@@ -754,3 +759,7 @@ export interface ConsentRecord extends TenantScoped {
   withdrawnAt?: string;
   version: string;
 }
+
+// B2C & Ecosystem Types (Phase 9)
+export * from './types/b2c';
+

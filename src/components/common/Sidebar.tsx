@@ -87,6 +87,7 @@ export const MODULE_CATALOG: NavItem[] = [
   // Domain 2: Financials & Assets
   { id: 'quick-chanda-pos', name: 'Quick Chanda Counter POS', domain: 2, domainTitle: 'Financials & Assets', icon: Receipt, badge: 'High-Speed' },
   { id: 'treasury', name: 'Treasury & Expense Ledger', domain: 2, domainTitle: 'Financials & Assets', icon: Landmark, badge: 'Auto-Audit' },
+  { id: 'treasury-audit', name: 'Treasury & Audit Ledger', domain: 2, domainTitle: 'Financials & Assets', icon: Landmark, badge: 'Audit' },
   { id: 'hundi-audit', name: 'Hundi & Golak Dual Audit', domain: 2, domainTitle: 'Financials & Assets', icon: Lock, badge: '2-Key' },
   { id: 'ratna-bhandar', name: 'Ratna Bhandar & Bullion Vault', domain: 2, domainTitle: 'Financials & Assets', icon: Sparkles, badge: 'Dual-PIN' },
   { id: 'taxReceipts', name: 'Tax Certificates (80G/12A)', domain: 2, domainTitle: 'Financials & Assets', icon: Receipt },
@@ -97,6 +98,7 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'inventory', name: 'Store & Consumables (Bhandara)', domain: 2, domainTitle: 'Financials & Assets', icon: Package },
 
   // Domain 3: Vedic Rituals & Ephemeris
+  { id: 'sanctum-hud', name: 'Sanctum HUD & Daily Roster', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: Flame, badge: 'Sanctum' },
   { id: 'poojaBooking', name: 'Rituals & Sankalp Hub', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: Flame, badge: 'Purohit Sync' },
   { id: 'mandirPuja', name: 'Daily Aarti & Pujas', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: Clock },
   { id: 'purohitDesk', name: 'Purohit Diary & Dakshina', domain: 3, domainTitle: 'Vedic Rituals & Ephemeris', icon: BookOpen },
@@ -138,6 +140,7 @@ export const MODULE_CATALOG: NavItem[] = [
   { id: 'masterSettings', name: 'Organization Settings & Logos', domain: 6, domainTitle: 'Governance & Security', icon: Settings },
   { id: 'spiritualSettings', name: 'Sampradaya & Kuladevata Config', domain: 6, domainTitle: 'Governance & Security', icon: Compass },
   { id: 'crisis-command', name: 'Crisis Command Center', domain: 6, domainTitle: 'Governance & Security', icon: ShieldAlert, badge: 'SOS' },
+  { id: 'tactical-radar', name: 'Tactical Perimeter Radar', domain: 6, domainTitle: 'Governance & Security', icon: Radio, badge: 'Radar' },
 
   // Domain 7: Individual Life & Connect
   { id: 'sadhana-karma', name: 'Sadhana & Japa Counters', domain: 7, domainTitle: 'Sanatani Life & Connect', icon: Flame },
@@ -201,6 +204,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setCollapsedDomains(prev => ({ ...prev, [domainNum]: !prev[domainNum] }));
   };
 
+  // Strict RBAC: Devotees must not render the B2B sidebar at all
+  if (currentRole === 'Devotee' || (currentRole as string) === 'DEVOTEE') {
+    return null;
+  }
+
   const handleSwitchToPersonal = () => {
     setViewMode('MEMBER');
     showToast('Switched to Personal Devotee View 🙏', 'success', 'Mode Changed');
@@ -214,28 +222,64 @@ export const Sidebar: React.FC<SidebarProps> = ({
       const allowedForWorkspace = isModuleAllowed(activeWorkspace, m.id);
       if (!allowedForWorkspace) return false;
       
-      // 2. Check RBAC permissions
-      let hasRole = true;
-      if (['bulkImport', 'federation'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
-      else if (['treasury', 'taxReceipts', 'form10bd'].includes(m.id)) hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
-      else if (['campaigns', 'assets'].includes(m.id)) hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
-      else if (m.id === 'inventory') hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']);
-      else if (['poojaBooking', 'mandirPuja', 'purohitDesk', 'purohitMarket', 'pitruShradh'].includes(m.id)) {
-        hasRole = checkPermission(['PUROHIT', 'MANAGER', 'TRUSTEE']);
-      }
-      else if (['sandeshBroadcast'].includes(m.id)) {
-        hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
-      }
-      else if (['workspace-hub', 'masterSettings', 'appStore', 'spiritualSettings', 'panchayatPolls'].includes(m.id)) {
-        hasRole = checkPermission(['TRUSTEE']);
-      }
-      else if (['user-roles-rbac', 'trusteeGovernance', 'sevadarRoster', 'sevadar-roster', 'auditLog', 'legalVault', 'crisis-command', 'socialWall'].includes(m.id)) {
-        hasRole = checkPermission(['TRUSTEE', 'MANAGER', 'SEVADAR', 'VOLUNTEER']);
-      }
-      else if (['devotee-portal', 'devotees', 'family', 'vanshavali', 'guests', 'karmaLedger', 'rakthaSeva', 'goshala', 'annadanam', 'ashramKutir', 'dharamshala', 'gurukul', 'gurukulAcademy', 'vidyalaya', 'satsang', 'sanghaDrills', 'sevaTrust', 'granthLibrary', 'matrimony', 'utsavPanjika', 'shlokaFeed', 'dharmicAssistant', 'dharmaMarketing', 'sadhana-karma', 'sanatani-vivah', 'yatraNet'].includes(m.id)) {
-        // These are open to all logged-in users in the organization view (devotee, volunteer, purohit, accountant, manager, trustee, superadmin)
-        // No explicit restriction means `hasRole` stays true, but we list them for explicit 'perfect' RBAC mapping documentation.
+      // 2. Strict RBAC permissions enforcement
+      let hasRole = false;
+
+      if (currentRole === 'Priest') {
+        // If Priest: hide links to Domain 1, 2, and 6
+        if (m.domain === 1 || m.domain === 2 || m.domain === 6) {
+          return false;
+        }
+        const priestAllowed = [
+          'sanctum-hud', 'poojaBooking', 'mandirPuja', 'purohitDesk', 'purohitMarket',
+          'pitruShradh', 'panchang', 'yatranet-gis', 'shlokaFeed', 'satsang',
+          'granthLibrary', 'utsavPanjika', 'dharmicAssistant', 'sadhana-karma',
+          'rakthaSeva', 'goshala', 'annadanam', 'smartBhandar', 'ashramKutir', 'dharamshala',
+          'gurukul', 'gurukulAcademy', 'vidyalaya'
+        ];
+        hasRole = priestAllowed.includes(m.id) || m.domain === 3;
+      } else if (currentRole === 'Accountant') {
+        // If Accountant: hide links to Domain 1, 3, and 6
+        if (m.domain === 1 || m.domain === 3 || m.domain === 6) {
+          return false;
+        }
+        const accountantAllowed = [
+          'quick-chanda-pos', 'treasury', 'treasury-audit', 'hundi-audit', 'ratna-bhandar',
+          'taxReceipts', 'form10bd', 'campaigns', 'karmaLedger', 'assets', 'inventory'
+        ];
+        hasRole = accountantAllowed.includes(m.id) || m.domain === 2;
+      } else if (currentRole === 'CSO') {
+        // CSO authorized for tactical radar, gate command checkin, crisis command, qr scanner; blocked from treasury & rituals
+        const csoAllowed = [
+          'tactical-radar', 'checkin', 'crisis-command', 'qrScanner', 'yatranet-gis',
+          'sevadar-roster', 'devotee-portal'
+        ];
+        hasRole = csoAllowed.includes(m.id);
+      } else if (currentRole === 'SuperAdmin') {
         hasRole = true;
+      } else {
+        // Fallback for Trustee / Sevadar / Volunteer
+        if (['checkin', 'gate-command', 'darshan-checkin'].includes(m.id)) {
+          hasRole = checkPermission(['CSO', 'TRUSTEE', 'SEVADAR', 'VOLUNTEER']);
+        } else if (['bulkImport', 'federation'].includes(m.id)) {
+          hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+        } else if (['treasury', 'treasury-audit', 'taxReceipts', 'form10bd', 'hundi-audit', 'ratna-bhandar'].includes(m.id)) {
+          hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+        } else if (['campaigns', 'assets'].includes(m.id)) {
+          hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE']);
+        } else if (m.id === 'inventory') {
+          hasRole = checkPermission(['ACCOUNTANT', 'MANAGER', 'TRUSTEE', 'VOLUNTEER']);
+        } else if (['sanctum-hud', 'poojaBooking', 'mandirPuja', 'purohitDesk', 'purohitMarket', 'pitruShradh'].includes(m.id)) {
+          hasRole = checkPermission(['PUROHIT', 'PRIEST', 'MANAGER', 'TRUSTEE']);
+        } else if (['sandeshBroadcast'].includes(m.id)) {
+          hasRole = checkPermission(['MANAGER', 'TRUSTEE']);
+        } else if (['workspace-hub', 'masterSettings', 'appStore', 'spiritualSettings', 'panchayatPolls'].includes(m.id)) {
+          hasRole = checkPermission(['TRUSTEE']);
+        } else if (['tactical-radar', 'user-roles-rbac', 'trusteeGovernance', 'sevadarRoster', 'sevadar-roster', 'auditLog', 'legalVault', 'crisis-command', 'socialWall'].includes(m.id)) {
+          hasRole = checkPermission(['CSO', 'TRUSTEE', 'MANAGER', 'SEVADAR', 'VOLUNTEER']);
+        } else {
+          hasRole = true;
+        }
       }
       
       if (!hasRole) return false;
@@ -270,16 +314,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return groups;
   }, [filteredModules]);
 
-  const domainFilterPills = [
-    { label: 'All (46)', domain: null },
-    { label: 'CRM', domain: 1 },
-    { label: 'Finance', domain: 2 },
-    { label: 'Rituals', domain: 3 },
-    { label: 'Desks', domain: 4 },
-    { label: 'Outreach', domain: 5 },
-    { label: 'Gov', domain: 6 },
-    { label: 'Life', domain: 7 },
-  ];
+  const domainFilterPills = useMemo(() => {
+    const allPills = [
+      { label: 'All', domain: null },
+      { label: 'CRM', domain: 1 },
+      { label: 'Finance', domain: 2 },
+      { label: 'Rituals', domain: 3 },
+      { label: 'Desks', domain: 4 },
+      { label: 'Outreach', domain: 5 },
+      { label: 'Gov', domain: 6 },
+      { label: 'Life', domain: 7 },
+    ];
+    return allPills.filter((p) => {
+      if (p.domain === null) return true;
+      if (currentRole === 'Priest' && (p.domain === 1 || p.domain === 2 || p.domain === 6)) return false;
+      if (currentRole === 'Accountant' && (p.domain === 1 || p.domain === 3 || p.domain === 6)) return false;
+      return true;
+    });
+  }, [currentRole]);
 
   return (
     <>

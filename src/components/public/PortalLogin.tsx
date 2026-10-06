@@ -177,7 +177,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
       const verified = await promptBiometric('System Login');
       if (verified) {
         // Instantly bypass PIN/password validation and authenticate into default workspace
-        loginAsRole('SuperAdmin', 'Temple Administrator');
+        loginAsRole('Trustee', 'Temple Administrator');
         showToast('Biometric FaceID / TouchID Authentication Verified!', 'success');
         onSuccess();
       }
@@ -261,7 +261,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
       const userCredential = await signInWithEmailAndPassword(auth, emailToUse, cred);
       
       // On successful Firebase Auth, push the user to the authenticated dashboard
-      loginAsRole('SuperAdmin', userCredential.user.displayName || userCredential.user.email || 'Temple Administrator');
+      loginAsRole('Trustee', userCredential.user.displayName || userCredential.user.email || 'Temple Administrator');
       showToast("Secure Login Successful", "success");
       onSuccess();
     } catch (err: any) {
@@ -326,7 +326,7 @@ export const PortalLogin: React.FC<PortalLoginProps> = ({ initialMode = 'login',
 
       addWorkspace(newWorkspace);
       switchWorkspace(newWorkspace.id);
-      loginAsRole('SuperAdmin', adminName);
+      loginAsRole('Trustee', adminName);
       
       showToast("Workspace Provisioned Successfully", "success");
       onSuccess();

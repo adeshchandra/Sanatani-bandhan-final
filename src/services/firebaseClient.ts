@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import config from '../../firebase-applet-config.json';
 
 // Initialize Firebase configuration with standard Vite environment variables and fallback
@@ -18,7 +18,7 @@ export const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig
 
 // Initialize and export the auth (FirebaseAuth) and db (Firestore) instances
 export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
+export { db };
 
 // Proactively ensure anonymous authentication session for sandboxed & demo access
 if (typeof window !== 'undefined') {

@@ -14,6 +14,7 @@ export interface DeskMetadata {
 const ROLE_RANK: Record<UserRole, number> = {
   SuperAdmin: 100,
   Trustee: 80,
+  CSO: 70,
   Accountant: 60,
   Priest: 50,
   Sevadar: 30,
@@ -343,12 +344,12 @@ export const DESK_REGISTRY: DeskMetadata[] = [
   },
   {
     id: 'GodModeBackend',
-    name: 'Platform God Mode Desk',
+    name: 'Sovereign Emergency Console',
     iconName: 'Zap',
     requiredRole: ['SuperAdmin'],
     requiredTier: 'ENTERPRISE',
     category: 'Governance',
-    description: 'Super-admin emergency state inspector and cross-tenant diagnostic console.'
+    description: 'Sovereign emergency state inspector and diagnostic console.'
   }
 ];
 

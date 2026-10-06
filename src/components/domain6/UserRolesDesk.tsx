@@ -28,7 +28,7 @@ const INITIAL_STAFF: StaffMember[] = [
     id: 'usr-1',
     name: 'Acharya Vidyasagar Shastri',
     email: 'vidyasagar.shastri@mandir.internal',
-    role: 'SuperAdmin',
+    role: 'Trustee',
     department: 'Apex Dharmic Trust Council',
     status: 'Active',
   },
@@ -246,7 +246,6 @@ export const UserRolesDesk: React.FC = () => {
                   onChange={(e) => setEditedRole(e.target.value as Role)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all cursor-pointer"
                 >
-                  <option value="SuperAdmin">SuperAdmin (Full Platform Clearance)</option>
                   <option value="Trustee">Trustee (Fiduciary & Oversight)</option>
                   <option value="Accountant">Accountant (Treasury & Audit Only)</option>
                   <option value="Priest">Priest (Rituals & Devotee Desk)</option>
